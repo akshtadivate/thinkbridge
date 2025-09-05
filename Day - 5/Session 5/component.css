@@ -1,0 +1,39 @@
+/* --- Buttons with hover/focus transition --- */
+.button {
+  background-color: #3498db;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  margin: 10px;
+}
+
+.button:hover,
+.button:focus {
+  background-color: #2980b9;
+  transform: scale(1.05);
+}
+
+/* --- Responsive image --- */
+.responsive-img {
+  width: 700px;
+  height: auto;
+  display: block;
+  margin: 20px 0;
+  border-radius: 10px;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
