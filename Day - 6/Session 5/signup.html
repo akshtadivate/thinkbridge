@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="signupform-styles.css" />
+  </head>
+  <body>
+    <main>
+      <br />
+      <br />
+      <br />
+      <form action="" aria-labelledby="formTitle" novalidate>
+        <header>
+          <h2 id="formTitle">Sign Up</h2>
+        </header>
+
+        <label for="name">Name: <span aria-hidden="true">*</span></label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          required
+          aria-required="true"
+          aria-describedby="nameHelp"
+          required
+        />
+        <small id="nameHelp">Enter your full name</small>
+
+        <label for="email">Email: <span aria-hidden="true">*</span></label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          aria-required="true"
+          aria-describedby="emailHelp"
+          required
+        />
+        <small id="emailHelp">Enter a valid email like name@example.com</small>
+
+        <label for="phone"
+          >Phone Number: <span aria-hidden="true">*</span></label
+        >
+        <input
+          type="tel"
+          id="phone"
+          name="phone"
+          pattern="[0-9]{10}"
+          aria-required="true"
+          aria-describedby="phoneHelp"
+          required
+        />
+        <small id="phoneHelp">Format: 1234567890</small>
+
+        <label for="addr">Address: <span aria-hidden="true">*</span></label>
+        <textarea
+          id="addr"
+          name="addr"
+          aria-required="true"
+          aria-describedby="addrHelp"
+          required
+        ></textarea>
+        <small id="addrHelp">Include street, city, and ZIP code</small>
+
+        <label for="password"
+          >Password: <span aria-hidden="true">*</span></label
+        >
+        <input
+          type="password"
+          id="password"
+          name="password"
+          aria-required="true"
+          aria-describedby="passwordRules"
+          required
+        />
+
+        <fieldset id="passwordRules" aria-live="polite">
+          <legend>Password must contain:</legend>
+          <label
+            ><input
+              type="checkbox"
+              id="rule-length"
+              aria-disabled="true"
+            /><small>Minimum 8 characters</small>
+          </label>
+          <label
+            ><input
+              type="checkbox"
+              id="rule-uppercase"
+              aria-disabled="true"
+              required
+            /><small> At least 1 uppercase letter</small></label
+          >
+          <label
+            ><input
+              type="checkbox"
+              id="rule-number"
+              aria-disabled="true"
+            /><small>At least 1 number</small>
+          </label>
+          <label
+            ><input
+              type="checkbox"
+              id="rule-special"
+              aria-disabled="true"
+              required
+            />
+            <small>At least 1 special character (!@#$%)</small>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Gender <span aria-hidden="true">*</span></legend>
+          <label
+            ><input
+              type="radio"
+              name="gender"
+              value="male"
+              required
+              aria-required="true"
+            />
+            Male</label
+          >
+          <label
+            ><input type="radio" name="gender" value="female" /> Female</label
+          >
+        </fieldset>
+
+        <label for="dob"
+          >Date of Birth: <span aria-hidden="true">*</span></label
+        >
+        <input
+          type="date"
+          id="dob"
+          name="dob"
+          required
+          aria-required="true"
+          aria-describedby="dobHelp"
+        />
+        <small id="dobHelp">Format: YYYY-MM-DD</small>
+
+        <div
+          id="errorSummary"
+          role="alert"
+          aria-live="assertive"
+          class="visually-hidden"
+        ></div>
+
+        <button type="submit" aria-label="Submit the signup form">
+          Submit
+        </button>
+      </form>
+    </main>
+
+    <script>
+      const signupForm = document.querySelector("form");
+
+      signupForm.addEventListener("submit", function (e) {
+        e.preventDefault(); // prevent form from actual submission/reload
+
+        // Alert message
+        alert("Sign Up form submitted successfully!");
+
+        // Reset the form after submission
+        signupForm.reset();
+
+        //  Reset password checkboxes
+        document.getElementById("rule-length").checked = false;
+        document.getElementById("rule-uppercase").checked = false;
+        document.getElementById("rule-number").checked = false;
+        document.getElementById("rule-special").checked = false;
+      });
+
+      // Password live validation
+      const passwordInput = document.getElementById("password");
+
+      const rules = {
+        length: document.getElementById("rule-length"),
+        uppercase: document.getElementById("rule-uppercase"),
+        number: document.getElementById("rule-number"),
+        special: document.getElementById("rule-special"),
+      };
+
+      passwordInput.addEventListener("input", () => {
+        const value = passwordInput.value;
+
+        rules.length.checked = value.length >= 8;
+        rules.uppercase.checked = /[A-Z]/.test(value);
+        rules.number.checked = /[0-9]/.test(value);
+        rules.special.checked = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+      });
+    </script>
+  </body>
+</html>

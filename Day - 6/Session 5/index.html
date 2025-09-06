@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML, CSS & JavaScript Keywords</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!--  Header with Nav -->
+    <header>
+      <nav>
+        <div class="menu-toggle" id="menuToggle">&#9776;</div>
+
+        <div class="nav-left"> 
+        <ul class="nav-menu">
+          <li><a href="#html-info">HTML</a></li>
+          <li><a href="#css-info">CSS</a></li>
+          <li><a href="#js-info">JavaScript</a></li>
+          <li><a href="#contact">Contact</a></li>
+          <!-- <li><a href="signup.html" class="signup-btn">Sign Up</a> -->
+          </li> 
+        </ul>
+        </div>
+              
+  <div class="nav-right">
+    <a href="signup.html" class="signup-btn" target="_blank">Sign Up</a>
+  </div>
+      </nav>
+
+
+
+      <input type="text" id="search" placeholder="Search keywords..." />
+    </header>
+
+    <main>
+      <h1>Learn with me HTML, CSS, and JavaScript Keywords</h1>
+
+      <p>
+        A simple and delightful guide to the most commonly used keywords in web
+        development. Use this page as a quick reference.
+      </p>
+      <br />
+
+      <!--  HTML Section -->
+      <section id="html-info">
+        <h2>HTML</h2>
+        <p>
+          HTML (HyperText Markup Language) is the standard language used to
+          create the structure of a web page. It defines the content and
+          structure of web content. It is often assisted by technologies such as
+          Cascading Style Sheets and scripting languages such as JavaScript. Web
+          browsers receive HTML documents from a web server or from local
+          storage and render the documents into multimedia web pages. HTML
+          describes the structure of a web page semantically and originally
+          included cues for its appearance.
+        </p>
+        <br />
+
+        <section id="fundamentals">
+          <h3>HTML Fundamentals</h3>
+          <p>
+            HTML provides the <b>structure</b> of a web page. It uses elements
+            like headings, paragraphs, links, and images to describe content.
+          </p>
+          <br />
+          <article>
+            <h4>Why HTML Matters</h4>
+            <p>
+              HTML is the foundation of every website. Semantic tags like
+              <strong>&lt;article&gt;</strong> and
+              <strong>&lt;section&gt;</strong> improve readability for both
+              humans and search engines.
+            </p>
+          </article>
+          <p>
+            Below are examples of common HTML elements that form the building
+            blocks of a web page.
+          </p>
+          <br />
+          <div>
+            This is a <strong>&lt;div&gt;</strong> container, often used for
+            grouping elements.
+          </div>
+
+          <p>
+            This is a <strong>&lt;p&gt;</strong> tag. Paragraphs hold blocks of
+            text.
+          </p>
+          <br />
+
+          <img src="flower1.jpg" alt="Flower Example" width="200" />
+          <p>
+            The above image is added using the <strong>&lt;img&gt;</strong> tag.
+          </p>
+
+          <button type="button">Click Me</button>
+          <p>
+            This button was created using the <strong>&lt;button&gt;</strong>
+            tag.
+          </p>
+          <br />
+          <p>Below is the Table example:</p>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Tag</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>&lt;ul&gt;</td>
+                <td>Unordered List</td>
+              </tr>
+              <tr>
+                <td>&lt;button&gt;</td>
+                <td>Clickable Button</td>
+              </tr>
+              <tr>
+                <td>&lt;input&gt;</td>
+                <td>Form Input Field</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <article>
+          <h3>Common HTML Tags</h3>
+          <ul>
+            <li><b>&lt;h1&gt; to &lt;h6&gt;</b>: Define headings.</li>
+            <li><b>&lt;p&gt;</b>: Defines a paragraph of text.</li>
+            <li><b>&lt;a&gt;</b>: Creates a hyperlink.</li>
+            <li><b>&lt;img&gt;</b>: Embeds an image.</li>
+            <li><b>&lt;table&gt;</b>: Represents tabular data.</li>
+            <li><b>&lt;form&gt;</b>: Collects user input.</li>
+          </ul>
+        </article>
+
+        <article>
+          <h3>Example</h3>
+          <div class="example-box">
+            <h4>This is a Heading</h4>
+            <p>This is a paragraph</p>
+            <br />
+            <img src="flower.jpg" alt="Flower" width="200" />
+          </div>
+        </article>
+
+        <section id="html-section">
+          <h2>Other HTML Keywords</h2>
+          <p>Click on a keyword to see its description below:</p>
+          <ul id="html-list"></ul>
+        </section>
+
+        <button
+          class="explore-btn"
+          data-url="https://www.youtube.com/watch?v=ATpBuofe2Ro"
+        >
+          Explore more HTML
+        </button>
+      </section>
+
+      <!--  CSS Section -->
+      <section id="css-info">
+        <h2>CSS</h2>
+        <p>
+          CSS (Cascading Style Sheets) is used to style and design the HTML
+          elements of a web page. CSS is designed to enable the separation of
+          content and presentation, including layout, colors, and fonts. This
+          separation can improve content accessibility, since the content can be
+          written without concern for its presentation; provide more flexibility
+          and control in the specification of presentation characteristics;
+          enable multiple web pages to share formatting by specifying the
+          relevant CSS in a separate .css file, which reduces complexity and
+          repetition in the structural content; and enable the .css file to be
+          cached to improve the page load speed between the pages that share the
+          file and its formatting.
+        </p>
+        <br />
+
+        <article>
+          <h3>Common CSS Properties</h3>
+          <ul>
+            <li><b>color</b>: Sets the text color.</li>
+            <li><b>background-color</b>: Sets the background color.</li>
+            <li><b>margin</b>: Sets space outside an element.</li>
+            <li><b>padding</b>: Sets space inside an element.</li>
+            <li><b>border</b>: Adds a border around an element.</li>
+            <li><b>display</b>: Controls how elements are displayed.</li>
+          </ul>
+        </article>
+
+        <article>
+          <h3>Example</h3>
+          <div class="css-example">
+            This box is styled with CSS → light blue background, dark blue text,
+            and border.
+          </div>
+        </article>
+
+        <section id="css-section">
+          <h2>Other CSS Keywords</h2>
+          <p>Click on a keyword to see its description below:</p>
+          <ul id="css-list"></ul>
+        </section>
+
+        <button class="explore-btn" data-url="https://www.w3schools.com/css/">
+          Explore more CSS
+        </button>
+      </section>
+
+      <!--  JavaScript Section -->
+      <section id="js-info">
+        <h2>JavaScript</h2>
+        <p>
+          JavaScript makes web pages dynamic and interactive. It allows you to
+          respond to user actions, validate forms, create animations, fetch data
+          from APIs, and build applications.
+        </p>
+        <br />
+        <article>
+          <h3>Common JavaScript Keywords</h3>
+          <ul>
+            <li><b>let</b>: Declares a block-scoped variable.</li>
+            <li><b>const</b>: Declares a constant value.</li>
+            <li><b>function</b>: Defines a reusable block of code.</li>
+            <li><b>if</b>, <b>else</b>: Conditional statements.</li>
+            <li><b>for</b>, <b>while</b>: Loops for iteration.</li>
+            <li><b>return</b>: Returns a value from a function.</li>
+          </ul>
+        </article>
+
+        <article>
+          <h3>Example</h3>
+          <button id="js-btn">Click me for JavaScript Example</button>
+          <p id="js-output"></p>
+        </article>
+
+        <section id="js-section">
+          <h2>Other JavaScript Keywords</h2>
+          <p>Click on a keyword to see its description below:</p>
+          <ul id="javascript-list"></ul>
+        </section>
+
+        <button
+          class="explore-btn"
+          data-url="https://www.youtube.com/watch?v=rfObCuGLSek"
+        >
+          Explore more JavaScript
+        </button>
+      </section>
+    </main>
+
+    <!--  Contact Form -->
+    <section id="contact">
+      <form action="/submit" method="POST">
+        <h3>Contact Us</h3>
+        <p>
+          Have questions or suggestions about these keywords? Send us a quick
+          message!
+        </p>
+        <br />
+        <label for="name">Name: </label>
+        <input type="text" id="name" placeholder="Enter your name" required />
+        <br /><br />
+        <label for="message">Message:</label>
+        <textarea
+          id="message"
+          rows="3"
+          cols="25"
+          placeholder="Enter the message"
+          required
+        ></textarea>
+        <br /><br />
+        <label for="section">Choose a Topic:</label>
+        <select id="section">
+          <option>Select</option>
+          <option>HTML</option>
+          <option>CSS</option>
+          <option>JavaScript</option>
+        </select>
+        <br /><br />
+        <input type="submit" value="Submit" />
+      </form>
+    </section>
+
+    <!--  Footer -->
+    <footer>
+      <p>@ThinkSchool Day 6 Project Lab - HTML, CSS & JavaScript Keywords</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
