@@ -1,0 +1,151 @@
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #f0f4f8, #d9e4ec);
+  display: box;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+
+form {
+  background: #fff;
+  padding: 3rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  margin: auto;
+  max-width: 600px;
+  width: 100%;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-top: 1rem;
+  margin-bottom: 0.3rem;
+  color: #222;
+}
+
+input[type="text"],
+input[type="tel"], 
+input[type="email"],
+input[type="password"],
+input[type="date"],
+textarea,
+select {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  background-color: #fafafa;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #0078d7;
+  outline: 3px solid rgba(0, 120, 215, 0.3);
+  box-shadow: 0 0 6px rgba(0, 120, 215, 0.4);
+}
+
+small {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+fieldset {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-top: 1.5rem;
+}
+
+legend {
+  font-weight: bold;
+  padding: 0 0.5rem;
+  color: #333;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  margin-right: 0.5rem;
+}
+
+button {
+  margin-top: 1.5rem;
+  width: 100%;
+  background: #0053ba;
+  color: #fff;
+  padding: 0.9rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.1s;
+}
+
+button:hover {
+  background: #004999;
+}
+
+button:focus {
+  outline: 3px solid #ffbf47;
+  outline-offset: 3px;
+}
+button:active {
+  transform: scale(0.98);
+}
+
+.visually-hidden {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+#errorSummary {
+  margin-top: 1rem;
+  color: #b00020;
+  font-weight: bold;
+}
+
+#errorSummary ul {
+  padding-left: 1.2rem;
+  margin: 0.5rem 0 0 0;
+}
+
+/* Password rules checklist styling */
+#passwordRules label {
+  font-weight: normal;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+
+#passwordRules input[type="checkbox"] {
+  transform: scale(1.2);
+  appearance: none;
+  cursor: not-allowed;
+}
+
+
+#passwordRules input[type="checkbox"]:checked {
+
+  transform: scale(1.2);
+  pointer-events: none;
+  cursor: default;
+  
+}
+
