@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Farm Planning Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #047857;
+            --color-secondary: #8C5E3C;
+            --color-accent: #B38600;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --border-radius-sm: 8px;
+            --border-radius-md: 16px;
+            --border-radius-lg: 24px;
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <a href="#pageContent" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-white px-3 py-1 rounded shadow-lg z-50">Skip to main content</a>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover"
+        class="absolute top-16 right-6 bg-white border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar"
+                class="w-8 h-8 bg-primary text-white rounded-xl flex items-center justify-center text-sm font-medium">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-medium text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton"
+                class="w-full flex items-center text-sm gap-2 px-3 py-2 text-left text-error hover:bg-red-50 focus:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-error rounded-md transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Mobile sidebar overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 hidden md:hidden"></div>
+
+        <!-- Sidebar -->
+        
+
+
+
+
+
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)] bg-background" id="pageContent" role="main">
+            
+<section class="max-w-4xl mx-auto">
+  <!-- Header Section -->
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+  <!-- Progress Indicator -->
+  <div class="mb-8">
+    <div class="flex justify-center items-center space-x-2">
+      <div id="step1-indicator" class="w-3 h-3 rounded-full bg-primary"></div>
+      <div class="w-8 h-0.5 bg-gray-200"></div>
+      <div id="step2-indicator" class="w-3 h-3 rounded-full bg-gray-200"></div>
+      <div class="w-8 h-0.5 bg-gray-200"></div>
+      <div id="step3-indicator" class="w-3 h-3 rounded-full bg-gray-200"></div>
+    </div>
+    <div class="text-center mt-2">
+      <span id="progress-text" class="text-sm text-gray-500">Step 1 of 3</span>
+    </div>
+  </div>
+
+  <!-- Onboarding Steps -->
+  <div class="space-y-6">
+    <!-- Step 1: Add Field -->
+    <div id="step1" class="bg-white rounded-lg border-2 border-gray-100 p-6 transition-all">
+      <div class="flex items-start space-x-4">
+        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+          <i data-lucide="map" class="w-6 h-6 text-primary"></i>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-2">
+            Add Your First Field
+          </h3>
+          <p class="text-sm leading-[1.375rem] font-normal text-gray-600 mb-4">
+            Create a field to organize your farming areas. This helps you keep track of different plots of land.
+          </p>
+          <div class="text-xs text-gray-500 mb-4">
+            <span class="font-medium">Example:</span> "North Plot" or "முதல் நிலம்" - your main farming area
+          </div>
+          <button id="add-field-btn" 
+                  class="bg-primary text-white px-6 py-3 rounded text-sm font-medium hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+            <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>
+            Add Field
+          </button>
+          <div id="step1-success" class="hidden mt-3 text-sm text-green-600 flex items-center">
+            <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>
+            Field added successfully!
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Add Area -->
+    <div id="step2" class="bg-gray-50 rounded-lg border-2 border-gray-100 p-6 opacity-50 transition-all">
+      <div class="flex items-start space-x-4">
+        <div class="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+          <i data-lucide="layout-grid" class="w-6 h-6 text-secondary"></i>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-2">
+            Create an Area within Your Field
+          </h3>
+          <p class="text-sm leading-[1.375rem] font-normal text-gray-600 mb-4">
+            Divide your field into smaller areas like beds, rows, or blocks for better organization.
+          </p>
+          <div class="text-xs text-gray-500 mb-4">
+            <span class="font-medium">Example:</span> "Tomato Bed A" or "தக்காளி பேட் ஏ" - a specific growing area
+          </div>
+          <button id="add-area-btn" 
+                  disabled
+                  class="bg-secondary text-white px-6 py-3 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>
+            Add Area
+          </button>
+          <div id="step2-success" class="hidden mt-3 text-sm text-green-600 flex items-center">
+            <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>
+            Area added successfully!
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Add Crop -->
+    <div id="step3" class="bg-gray-50 rounded-lg border-2 border-gray-100 p-6 opacity-50 transition-all">
+      <div class="flex items-start space-x-4">
+        <div class="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center flex-shrink-0">
+          <i data-lucide="sprout" class="w-6 h-6 text-accent"></i>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-2">
+            Plant Your First Crop
+          </h3>
+          <p class="text-sm leading-[1.375rem] font-normal text-gray-600 mb-4">
+            Add a crop to your area from our library or create a custom one. This is what you'll track tasks for.
+          </p>
+          <div class="text-xs text-gray-500 mb-4">
+            <span class="font-medium">Example:</span> Choose "Tomato" or "தக்காளி" from the crop library
+          </div>
+          <button id="add-crop-btn" 
+                  disabled
+                  class="bg-accent text-white px-6 py-3 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            <i data-lucide="plus" class="w-4 h-4 inline mr-2"></i>
+            Add Crop
+          </button>
+          <div id="step3-success" class="hidden mt-3 text-sm text-green-600 flex items-center">
+            <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>
+            Crop added successfully!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tour Section -->
+  <div id="tour-section" class="hidden mt-8 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-lg p-6">
+    <div class="text-center">
+      <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-2">
+        Quick Tour (Optional)
+      </h3>
+      <p class="text-sm leading-[1.375rem] font-normal text-gray-600 mb-6">
+        Take a 2-minute tour to learn the basics of managing your daily farming tasks
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <button id="start-tour-btn"
+                class="bg-primary text-white px-6 py-3 rounded text-sm font-medium hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+          <i data-lucide="play-circle" class="w-4 h-4 inline mr-2"></i>
+          Start Quick Tour
+        </button>
+        <button id="skip-tour-btn"
+                class="bg-white text-primary border border-primary px-6 py-3 rounded text-sm font-medium hover:bg-primary/5 focus:bg-primary/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+          Skip & Continue
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Complete Section -->
+  <div id="complete-section" class="hidden mt-8 text-center">
+    <div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+      <i data-lucide="check-circle" class="w-8 h-8 text-green-600"></i>
+    </div>
+    <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-2">
+      All Set! Ready to Farm Smart
+    </h3>
+    <p class="text-sm leading-[1.375rem] font-normal text-gray-600 mb-6 max-w-md mx-auto">
+      You've successfully set up your first field, area, and crop. Now you can start tracking your daily farming tasks.
+    </p>
+    <button id="finish-btn"
+            class="bg-primary text-white px-8 py-4 rounded-lg text-sm font-medium hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+      <i data-lucide="arrow-right" class="w-4 h-4 inline mr-2"></i>
+      Go to Today's Work
+    </button>
+  </div>
+</section>
+
+<!-- Field Creation Modal -->
+<div id="field-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-lg max-w-md w-full">
+    <div class="p-6">
+      <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-4">
+        Add Field
+      </h3>
+      <form id="field-form">
+        <div class="space-y-4">
+          <div>
+            <label for="field-name" class="block text-sm font-medium text-gray-700 mb-1">
+              Field Name *
+            </label>
+            <input type="text" id="field-name" name="name" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                   placeholder="e.g., North Plot">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="field-size" class="block text-sm font-medium text-gray-700 mb-1">
+                Size (optional)
+              </label>
+              <input type="number" id="field-size" name="size" step="0.1"
+                     class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                     placeholder="1200.5">
+            </div>
+            <div>
+              <label for="field-unit" class="block text-sm font-medium text-gray-700 mb-1">
+                Unit
+              </label>
+              <select id="field-unit" name="sizeUnit"
+                      class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+                <option value="m2">m²</option>
+                <option value="acres">acres</option>
+                <option value="hectares">hectares</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label for="field-notes" class="block text-sm font-medium text-gray-700 mb-1">
+              Notes (optional)
+            </label>
+            <textarea id="field-notes" name="notes" rows="2"
+                      class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                      placeholder="Any additional notes about this field"></textarea>
+          </div>
+        </div>
+        <div class="flex gap-3 mt-6">
+          <button type="button" id="cancel-field-btn"
+                  class="flex-1 px-4 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 transition-colors">
+            Cancel
+          </button>
+          <button type="submit"
+                  class="flex-1 px-4 py-2 bg-primary text-white rounded text-sm font-medium hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+            Add Field
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Area Creation Modal -->
+<div id="area-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-lg max-w-md w-full">
+    <div class="p-6">
+      <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-4">
+        Add Area
+      </h3>
+      <form id="area-form">
+        <div class="space-y-4">
+          <div>
+            <label for="area-field" class="block text-sm font-medium text-gray-700 mb-1">
+              Select Field *
+            </label>
+            <select id="area-field" name="fieldId" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+              <option value="">Choose a field...</option>
+            </select>
+          </div>
+          <div>
+            <label for="area-name" class="block text-sm font-medium text-gray-700 mb-1">
+              Area Name *
+            </label>
+            <input type="text" id="area-name" name="name" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                   placeholder="e.g., Tomato Bed A">
+          </div>
+          <div>
+            <label for="area-type" class="block text-sm font-medium text-gray-700 mb-1">
+              Area Type
+            </label>
+            <select id="area-type" name="typeId"
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+              <option value="">Choose type...</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="area-size" class="block text-sm font-medium text-gray-700 mb-1">
+                Size (optional)
+              </label>
+              <input type="number" id="area-size" name="size" step="0.1"
+                     class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                     placeholder="60">
+            </div>
+            <div>
+              <label for="area-unit" class="block text-sm font-medium text-gray-700 mb-1">
+                Unit
+              </label>
+              <select id="area-unit" name="sizeUnit"
+                      class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+                <option value="m2">m²</option>
+                <option value="acres">acres</option>
+                <option value="hectares">hectares</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="flex gap-3 mt-6">
+          <button type="button" id="cancel-area-btn"
+                  class="flex-1 px-4 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 transition-colors">
+            Cancel
+          </button>
+          <button type="submit"
+                  class="flex-1 px-4 py-2 bg-secondary text-white rounded text-sm font-medium hover:bg-secondary/90 focus:bg-secondary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary transition-colors">
+            Add Area
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Crop Creation Modal -->
+<div id="crop-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-lg max-w-lg w-full max-h-[90vh] overflow-y-auto">
+    <div class="p-6">
+      <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-4">
+        Add Crop
+      </h3>
+      <form id="crop-form">
+        <div class="space-y-4">
+          <div>
+            <label for="crop-area" class="block text-sm font-medium text-gray-700 mb-1">
+              Select Area *
+            </label>
+            <select id="crop-area" name="areaId" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+              <option value="">Choose an area...</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Crop Source *
+            </label>
+            <div class="flex gap-4">
+              <label class="flex items-center">
+                <input type="radio" name="cropSource" value="library" checked
+                       class="mr-2 text-primary focus:ring-primary">
+                <span class="text-sm">From Library</span>
+              </label>
+              <label class="flex items-center">
+                <input type="radio" name="cropSource" value="custom"
+                       class="mr-2 text-primary focus:ring-primary">
+                <span class="text-sm">Custom Crop</span>
+              </label>
+            </div>
+          </div>
+          <div id="library-crop-selection">
+            <label for="crop-library" class="block text-sm font-medium text-gray-700 mb-1">
+              Choose from Library *
+            </label>
+            <select id="crop-library" name="libraryCropId"
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+              <option value="">Select a crop...</option>
+            </select>
+          </div>
+          <div id="custom-crop-fields" class="hidden">
+            <label for="crop-custom-name" class="block text-sm font-medium text-gray-700 mb-1">
+              Crop Name *
+            </label>
+            <input type="text" id="crop-custom-name" name="customName"
+                   class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                   placeholder="e.g., My Special Tomato">
+          </div>
+          <div>
+            <label for="crop-instance-name" class="block text-sm font-medium text-gray-700 mb-1">
+              Instance Name *
+            </label>
+            <input type="text" id="crop-instance-name" name="name" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                   placeholder="e.g., Tomato - Bed A (Jan 2025)">
+          </div>
+          <div>
+            <label for="crop-start-date" class="block text-sm font-medium text-gray-700 mb-1">
+              Start Date *
+            </label>
+            <input type="date" id="crop-start-date" name="startDate" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+          </div>
+          <div>
+            <label for="crop-notes" class="block text-sm font-medium text-gray-700 mb-1">
+              Notes (optional)
+            </label>
+            <textarea id="crop-notes" name="notes" rows="2"
+                      class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                      placeholder="Any notes about this crop instance"></textarea>
+          </div>
+        </div>
+        <div class="flex gap-3 mt-6">
+          <button type="button" id="cancel-crop-btn"
+                  class="flex-1 px-4 py-2 border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 transition-colors">
+            Cancel
+          </button>
+          <button type="submit"
+                  class="flex-1 px-4 py-2 bg-accent text-white rounded text-sm font-medium hover:bg-accent/90 focus:bg-accent/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent transition-colors">
+            Add Crop
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Tour Overlay -->
+<div id="tour-overlay" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50">
+  <div id="tour-spotlight" class="absolute border-4 border-primary rounded-lg transition-all duration-300"></div>
+  <div id="tour-tooltip" class="absolute bg-white rounded-lg shadow-lg p-4 max-w-sm z-60">
+    <div class="flex justify-between items-start mb-2">
+      <h4 id="tour-title" class="font-semibold text-gray-900"></h4>
+      <button id="tour-close" class="text-gray-400 hover:text-gray-600">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+    <p id="tour-description" class="text-sm text-gray-600 mb-4"></p>
+    <div class="flex justify-between items-center">
+      <span id="tour-progress" class="text-xs text-gray-500"></span>
+      <div class="flex gap-2">
+        <button id="tour-skip" class="text-xs text-gray-500 hover:text-gray-700">
+          Skip Tour
+        </button>
+        <button id="tour-next" class="px-3 py-1 bg-primary text-white rounded text-xs font-medium hover:bg-primary/90">
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+            
+        </main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'localDB:';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            btn.addEventListener('click', () => {
+                const isOpen = !sidebar.classList.contains('hidden');
+                
+                if (isOpen) {
+                    // Close
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    // Open
+                    sidebar.classList.remove('hidden');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav link
+                    const firstLink = sidebar.querySelector('a');
+                    if (firstLink) firstLink.focus();
+                }
+            });
+            
+            // Close on overlay click
+            overlay.addEventListener('click', () => {
+                sidebar.classList.add('hidden');
+                overlay.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.focus();
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('hidden') && window.innerWidth < 768) {
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    // Default to first farmer user from dummy data
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-001');
+                    currentUserId = 'u-001';
+                }
+                
+                // Get user from users collection
+                try {
+                    const usersData = localStorage.getItem(APP_PREFIX + 'users');
+                    if (usersData) {
+                        const users = JSON.parse(usersData);
+                        const user = users.find(u => u.id === currentUserId);
+                        return user || null;
+                    }
+                } catch (e) {
+                    console.warn('Error loading user data:', e);
+                }
+                return null;
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName   = document.getElementById('userName');
+            const popoverAvatar = document.getElementById('popoverUserAvatar');
+            const popoverName = document.getElementById('popoverUserName');
+            const popoverEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverAvatar) popoverAvatar.textContent = initials;
+            if (popoverName) popoverName.textContent = displayName;
+            if (popoverEmail) popoverEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popover.classList.toggle('hidden');
+                popoverVisible = !popoverVisible;
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                
+                if (popoverVisible) {
+                    // Focus first focusable element in popover
+                    const firstFocusable = popover.querySelector('button');
+                    if (firstFocusable) firstFocusable.focus();
+                }
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) {
+                    UserUtils.signOut();
+                }
+            });
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX)) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `farm_assistant_data_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            // Show success toast
+            showToast('✅ App data exported successfully', 'success');
+        });
+        
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+        
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX)) {
+                            localStorage.setItem(key, value);
+                            importedCount++;
+                        }
+                    });
+                    
+                    if (importedCount > 0) {
+                        showToast(`✅ App data imported successfully (${importedCount} items). Please refresh the page.`, 'success');
+                    } else {
+                        showToast('⚠️ No valid app data found in file.', 'warning');
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    showToast('❌ Failed to import: Invalid JSON format.', 'error');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Simple toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-white text-sm max-w-sm transition-all duration-300 ${
+                type === 'success' ? 'bg-green-600' :
+                type === 'error' ? 'bg-red-600' :
+                type === 'warning' ? 'bg-orange-600' :
+                'bg-blue-600'
+            }`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        // Simple hash router (no entity IDs; UI-state params only)
+        const Router = (() => {
+            const pageContent = document.getElementById('pageContent');
+            const sideNav = document.getElementById('sideNav');
+
+            function parseHash(){
+                const h = location.hash || '';
+                const m = h.match(/page=([^&]+)/);
+                const page = m ? m[1] : null;
+                // Collect UI-state params only (view, tab, filter, mode, section)
+                const params = {};
+                (h.split('&').slice(1)).forEach(kv => {
+                    const [k,v] = kv.split('=');
+                    if (['view','tab','filter','mode','section'].includes(k)) {
+                        params[k] = decodeURIComponent(v||'');
+                    }
+                });
+                return { page, params };
+            }
+
+            async function loadPage(pageBase){
+                if (!pageBase) {
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+                            <div class="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="leaf" class="w-8 h-8 text-primary"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h2 class="text-display-md font-semibold text-gray-900">Welcome to Farm Assistant</h2>
+                                <p class="text-gray-600 max-w-md">Select a page from the sidebar to get started with managing your farming tasks and tracking your crops.</p>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+                
+                // Show loading state
+                pageContent.innerHTML = `
+                    <div class="flex items-center justify-center min-h-[200px]">
+                        <div class="flex items-center space-x-3 text-gray-600">
+                            <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                            <span>Loading...</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Ensure .html suffix
+                const url = pageBase.endsWith('.html') ? pageBase : `${pageBase}.html`;
+                
+                try {
+                    const res = await fetch(url, { cache: 'no-store' });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const html = await res.text();
+                    pageContent.innerHTML = html;
+                    lucide.createIcons();
+                    
+                    // Allow page to hook UI-state params if it exposes a global
+                    if (window.PageInit?.onParams) {
+                        window.PageInit.onParams(parseHash().params);
+                    }
+                } catch (e) {
+                    console.error('Failed to load page:', url, e);
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[200px] text-center space-y-4">
+                            <div class="w-12 h-12 bg-error/10 rounded-lg flex items-center justify-center">
+                                <i data-lucide="alert-circle" class="w-6 h-6 text-error"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h3 class="font-semibold text-gray-900">Failed to load page</h3>
+                                <p class="text-gray-600 text-sm">The page "${url}" could not be loaded.</p>
+                                <button onclick="Router.onRoute()" class="text-primary hover:text-primary/80 text-sm font-medium">Try again</button>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                }
+            }
+
+            function setActive(pageBase){
+                if (!sideNav) return;
+                
+                const links = sideNav.querySelectorAll('a[href]');
+                links.forEach(a => {
+                    const href = a.getAttribute('href') || '';
+                    const target = href.replace(/^#\/?page=/, '').replace(/\.html$/, '');
+                    const current = (pageBase || '').replace(/\.html$/, '');
+                    
+                    if (target && target === current) {
+                        a.classList.add('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.remove('text-gray-700');
+                    } else {
+                        a.classList.remove('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.add('text-gray-700');
+                    }
+                });
+            }
+
+            async function onRoute(){
+                const { page } = parseHash();
+                await loadPage(page);
+                setActive(page);
+            }
+
+            return { onRoute };
+        })();
+
+        // Make Router.onRoute globally accessible for error retry
+        window.Router = Router;
+
+        window.addEventListener('hashchange', Router.onRoute);
+        Router.onRoute();
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                try {
+                    window.AppActions[action](el);
+                } catch (err) {
+                    console.error('AppAction error:', action, err);
+                    showToast(`❌ Action "${action}" failed: ${err.message}`, 'error');
+                }
+            } else {
+                el.setAttribute('disabled', 'true');
+                el.setAttribute('title', 'Unavailable');
+                el.classList.add('opacity-50', 'cursor-not-allowed');
+                console.warn('AppAction not available:', action);
+            }
+        });
+
+        // Generate navigation items programmatically from page list
+        // Note: In a real implementation, this would be generated from the actual page list data
+        // For now, we have the single "Today's Work" page based on the provided page data
+    </script>
+
+    
+<script id="page-logic" type="module">
+  import { 
+    getFieldsForUser, 
+    createField, 
+    getAreasForUser, 
+    getAreaTypesAll, 
+    createArea, 
+    getCropInstancesForUser, 
+    getLibraryCropsAll, 
+    createCropInstance,
+    getUserSettings,
+    updateUserSettings
+  } from './onboarding-logic.js';
+
+  // Onboarding state management
+  let onboardingState = {
+    currentStep: 1,
+    completedSteps: [],
+    createdFieldId: null,
+    createdAreaId: null,
+    createdCropId: null,
+    tourActive: false,
+    tourStep: 0
+  };
+
+  // Tour steps configuration
+  const tourSteps = [
+    {
+      target: '.example-today-task', // This would be shown on the actual Today page
+      title: 'Your Daily Tasks',
+      description: 'Here you\'ll see all tasks due today. Tap to mark them as complete.',
+      position: 'bottom'
+    },
+    {
+      target: '.example-done-button',
+      title: 'Complete Tasks',
+      description: 'Use this button to mark tasks as done and log your progress.',
+      position: 'top'
+    },
+    {
+      target: '.example-photo-button',
+      title: 'Add Photos',
+      description: 'Take photos to document your farming activities and track crop progress.',
+      position: 'left'
+    }
+  ];
+
+  // Initialize onboarding
+  function funInitializeOnboarding() {
+    // Set today's date as default for crop start date
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('crop-start-date').value = today;
+
+    // Load area types for area creation
+    funLoadAreaTypes();
+    
+    // Load library crops for crop creation
+    funLoadLibraryCrops();
+
+    // Check if user has existing data
+    funCheckExistingUserData();
+  }
+
+  // Check if user already has data and adjust onboarding accordingly
+  async function funCheckExistingUserData() {
+    try {
+      const currentUser = funGetCurrentUser();
+      if (!currentUser) return;
+
+      // Get existing data for user
+      // Method: getFieldsForUser - retrieves all fields belonging to the user
+      // Returns: Array of field objects from 'fields' collection where userId matches
+      // Collection: fields
+      const fields = await getFieldsForUser(currentUser.uid);
+      
+      // Method: getAreasForUser - retrieves all areas belonging to the user
+      // Returns: Array of area objects from 'areas' collection where userId matches
+      // Collection: areas
+      const areas = await getAreasForUser(currentUser.uid);
+      
+      // Method: getCropInstancesForUser - retrieves all crop instances belonging to the user
+      // Returns: Array of crop instance objects from 'cropInstances' collection where userId matches
+      // Collection: cropInstances
+      const crops = await getCropInstancesForUser(currentUser.uid);
+
+      // Update onboarding state based on existing data
+      if (fields.length > 0) {
+        onboardingState.completedSteps.push(1);
+        onboardingState.createdFieldId = fields[0].id;
+        funMarkStepComplete(1);
+        funEnableStep(2);
+      }
+      
+      if (areas.length > 0) {
+        onboardingState.completedSteps.push(2);
+        onboardingState.createdAreaId = areas[0].id;
+        funMarkStepComplete(2);
+        funEnableStep(3);
+      }
+      
+      if (crops.length > 0) {
+        onboardingState.completedSteps.push(3);
+        onboardingState.createdCropId = crops[0].id;
+        funMarkStepComplete(3);
+        funShowTourSection();
+      }
+
+      // Update current step
+      if (crops.length > 0) {
+        onboardingState.currentStep = 4; // All steps complete
+      } else if (areas.length > 0) {
+        onboardingState.currentStep = 3;
+      } else if (fields.length > 0) {
+        onboardingState.currentStep = 2;
+      }
+
+      funUpdateProgressIndicator();
+    } catch (error) {
+      console.error('Error checking existing user data:', error);
+    }
+  }
+
+  // Load area types for dropdown
+  async function funLoadAreaTypes() {
+    try {
+      // Method: getAreaTypesAll - retrieves all available area types
+      // Returns: Array of area type objects from 'areaTypes' collection
+      // Collection: areaTypes
+      const areaTypes = await getAreaTypesAll();
+      
+      const select = document.getElementById('area-type');
+      select.innerHTML = '<option value="">Choose type...</option>';
+      
+      areaTypes.forEach(type => {
+        const option = document.createElement('option');
+        option.value = type.id;
+        option.textContent = type.name;
+        select.appendChild(option);
+      });
+    } catch (error) {
+      console.error('Error loading area types:', error);
+    }
+  }
+
+  // Load library crops for dropdown
+  async function funLoadLibraryCrops() {
+    try {
+      // Method: getLibraryCropsAll - retrieves all available crops from the library
+      // Returns: Array of library crop objects from 'libraryCrops' collection
+      // Collection: libraryCrops
+      const libraryCrops = await getLibraryCropsAll();
+      
+      const select = document.getElementById('crop-library');
+      select.innerHTML = '<option value="">Select a crop...</option>';
+      
+      libraryCrops.forEach(crop => {
+        const option = document.createElement('option');
+        option.value = crop.id;
+        option.textContent = `${crop.nameEn} (${crop.nameTa})`;
+        select.appendChild(option);
+      });
+    } catch (error) {
+      console.error('Error loading library crops:', error);
+    }
+  }
+
+  // Get current user (utility function)
+  function funGetCurrentUser() {
+    try {
+      const currentUserId = localStorage.getItem('localDB:currentUserId');
+      if (!currentUserId) return null;
+
+      const usersData = localStorage.getItem('localDB:users');
+      if (!usersData) return null;
+
+      const users = JSON.parse(usersData);
+      return users.find(u => u.id === currentUserId);
+    } catch (error) {
+      console.error('Error getting current user:', error);
+      return null;
+    }
+  }
+
+  // Generate unique ID
+  function funGenerateId(prefix = 'id') {
+    return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  // Update progress indicator
+  function funUpdateProgressIndicator() {
+    const indicators = ['step1-indicator', 'step2-indicator', 'step3-indicator'];
+    const progressText = document.getElementById('progress-text');
+    
+    indicators.forEach((id, index) => {
+      const indicator = document.getElementById(id);
+      if (onboardingState.completedSteps.includes(index + 1)) {
+        indicator.className = 'w-3 h-3 rounded-full bg-green-500';
+      } else if (index + 1 === onboardingState.currentStep) {
+        indicator.className = 'w-3 h-3 rounded-full bg-primary';
+      } else {
+        indicator.className = 'w-3 h-3 rounded-full bg-gray-200';
+      }
+    });
+
+    if (onboardingState.currentStep <= 3) {
+      progressText.textContent = `Step ${onboardingState.currentStep} of 3`;
+    } else {
+      progressText.textContent = 'Complete!';
+    }
+  }
+
+  // Mark step as complete
+  function funMarkStepComplete(stepNumber) {
+    const step = document.getElementById(`step${stepNumber}`);
+    const success = document.getElementById(`step${stepNumber}-success`);
+    const button = step.querySelector('button');
+    
+    step.classList.remove('border-gray-100');
+    step.classList.add('border-green-200', 'bg-green-50');
+    success.classList.remove('hidden');
+    button.style.display = 'none';
+  }
+
+  // Enable next step
+  function funEnableStep(stepNumber) {
+    const step = document.getElementById(`step${stepNumber}`);
+    const button = step.querySelector('button');
+    
+    step.classList.remove('opacity-50', 'bg-gray-50');
+    step.classList.add('bg-white', 'border-gray-100');
+    button.disabled = false;
+    button.classList.remove('disabled:opacity-50', 'disabled:cursor-not-allowed');
+  }
+
+  // Show tour section
+  function funShowTourSection() {
+    document.getElementById('tour-section').classList.remove('hidden');
+  }
+
+  // Show completion section
+  function funShowCompletionSection() {
+    document.getElementById('complete-section').classList.remove('hidden');
+  }
+
+  // Event Handlers
+
+  // Step 1: Add Field
+  document.getElementById('add-field-btn').addEventListener('click', () => {
+    document.getElementById('field-modal').classList.remove('hidden');
+    document.getElementById('field-name').focus();
+  });
+
+  document.getElementById('cancel-field-btn').addEventListener('click', () => {
+    document.getElementById('field-modal').classList.add('hidden');
+    document.getElementById('field-form').reset();
+  });
+
+  document.getElementById('field-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    try {
+      const formData = new FormData(e.target);
+      const currentUser = funGetCurrentUser();
+      if (!currentUser) throw new Error('No current user found');
+
+      const fieldData = {
+        id: funGenerateId('f'),
+        userId: currentUser.uid,
+        name: formData.get('name'),
+        size: formData.get('size') ? parseFloat(formData.get('size')) : null,
+        sizeUnit: formData.get('sizeUnit') || 'm2',
+        notes: formData.get('notes') || '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      // Method: createField - creates a new field record in the database
+      // Params: fieldData object with field properties
+      // Returns: created field object
+      // Collection: fields
+      const createdField = await createField(fieldData);
+
+      onboardingState.completedSteps.push(1);
+      onboardingState.createdFieldId = createdField.id;
+      onboardingState.currentStep = 2;
+
+      document.getElementById('field-modal').classList.add('hidden');
+      document.getElementById('field-form').reset();
+
+      funMarkStepComplete(1);
+      funEnableStep(2);
+      funUpdateProgressIndicator();
+
+      // Update area field dropdown
+      funUpdateAreaFieldDropdown();
+
+    } catch (error) {
+      console.error('Error creating field:', error);
+      alert('Failed to create field. Please try again.');
+    }
+  });
+
+  // Step 2: Add Area
+  document.getElementById('add-area-btn').addEventListener('click', async () => {
+    await funUpdateAreaFieldDropdown();
+    document.getElementById('area-modal').classList.remove('hidden');
+    document.getElementById('area-field').focus();
+  });
+
+  document.getElementById('cancel-area-btn').addEventListener('click', () => {
+    document.getElementById('area-modal').classList.add('hidden');
+    document.getElementById('area-form').reset();
+  });
+
+  document.getElementById('area-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    try {
+      const formData = new FormData(e.target);
+      const currentUser = funGetCurrentUser();
+      if (!currentUser) throw new Error('No current user found');
+
+      const areaData = {
+        id: funGenerateId('a'),
+        fieldId: formData.get('fieldId'),
+        userId: currentUser.uid,
+        name: formData.get('name'),
+        typeId: formData.get('typeId') || null,
+        size: formData.get('size') ? parseFloat(formData.get('size')) : null,
+        sizeUnit: formData.get('sizeUnit') || 'm2',
+        notes: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      // Method: createArea - creates a new area record in the database
+      // Params: areaData object with area properties
+      // Returns: created area object
+      // Collection: areas
+      const createdArea = await createArea(areaData);
+
+      onboardingState.completedSteps.push(2);
+      onboardingState.createdAreaId = createdArea.id;
+      onboardingState.currentStep = 3;
+
+      document.getElementById('area-modal').classList.add('hidden');
+      document.getElementById('area-form').reset();
+
+      funMarkStepComplete(2);
+      funEnableStep(3);
+      funUpdateProgressIndicator();
+
+      // Update crop area dropdown
+      funUpdateCropAreaDropdown();
+
+    } catch (error) {
+      console.error('Error creating area:', error);
+      alert('Failed to create area. Please try again.');
+    }
+  });
+
+  // Step 3: Add Crop
+  document.getElementById('add-crop-btn').addEventListener('click', async () => {
+    await funUpdateCropAreaDropdown();
+    document.getElementById('crop-modal').classList.remove('hidden');
+    document.getElementById('crop-area').focus();
+  });
+
+  document.getElementById('cancel-crop-btn').addEventListener('click', () => {
+    document.getElementById('crop-modal').classList.add('hidden');
+    document.getElementById('crop-form').reset();
+  });
+
+  // Handle crop source radio buttons
+  document.querySelectorAll('input[name="cropSource"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      const librarySection = document.getElementById('library-crop-selection');
+      const customSection = document.getElementById('custom-crop-fields');
+      
+      if (e.target.value === 'library') {
+        librarySection.classList.remove('hidden');
+        customSection.classList.add('hidden');
+        document.getElementById('crop-library').required = true;
+        document.getElementById('crop-custom-name').required = false;
+      } else {
+        librarySection.classList.add('hidden');
+        customSection.classList.remove('hidden');
+        document.getElementById('crop-library').required = false;
+        document.getElementById('crop-custom-name').required = true;
+      }
+    });
+  });
+
+  document.getElementById('crop-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    try {
+      const formData = new FormData(e.target);
+      const currentUser = funGetCurrentUser();
+      if (!currentUser) throw new Error('No current user found');
+
+      const isCustom = formData.get('cropSource') === 'custom';
+
+      const cropData = {
+        id: funGenerateId('ci'),
+        userId: currentUser.uid,
+        areaId: formData.get('areaId'),
+        libraryCropId: isCustom ? null : formData.get('libraryCropId'),
+        custom: isCustom,
+        name: formData.get('name'),
+        startDate: formData.get('startDate'),
+        appliedTemplateVersion: '1.0',
+        overrides: [],
+        daysToMaturity: null,
+        stage: null,
+        notes: formData.get('notes') || '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      // Method: createCropInstance - creates a new crop instance record in the database
+      // Params: cropData object with crop instance properties
+      // Returns: created crop instance object
+      // Collection: cropInstances
+      const createdCrop = await createCropInstance(cropData);
+
+      onboardingState.completedSteps.push(3);
+      onboardingState.createdCropId = createdCrop.id;
+      onboardingState.currentStep = 4;
+
+      document.getElementById('crop-modal').classList.add('hidden');
+      document.getElementById('crop-form').reset();
+
+      funMarkStepComplete(3);
+      funUpdateProgressIndicator();
+      funShowTourSection();
+
+    } catch (error) {
+      console.error('Error creating crop:', error);
+      alert('Failed to create crop. Please try again.');
+    }
+  });
+
+  // Update field dropdown for area creation
+  async function funUpdateAreaFieldDropdown() {
+    try {
+      const currentUser = funGetCurrentUser();
+      if (!currentUser) return;
+
+      // Method: getFieldsForUser - retrieves all fields belonging to the user
+      // Returns: Array of field objects from 'fields' collection where userId matches
+      // Collection: fields
+      const fields = await getFieldsForUser(currentUser.uid);
+      
+      const select = document.getElementById('area-field');
+      select.innerHTML = '<option value="">Choose a field...</option>';
+      
+      fields.forEach(field => {
+        const option = document.createElement('option');
+        option.value = field.id;
+        option.textContent = field.name;
+        if (field.id === onboardingState.createdFieldId) {
+          option.selected = true;
+        }
+        select.appendChild(option);
+      });
+    } catch (error) {
+      console.error('Error updating field dropdown:', error);
+    }
+  }
+
+  // Update area dropdown for crop creation
+  async function funUpdateCropAreaDropdown() {
+    try {
+      const currentUser = funGetCurrentUser();
+      if (!currentUser) return;
+
+      // Method: getAreasForUser - retrieves all areas belonging to the user
+      // Returns: Array of area objects from 'areas' collection where userId matches  
+      // Collection: areas
+      const areas = await getAreasForUser(currentUser.uid);
+      
+      const select = document.getElementById('crop-area');
+      select.innerHTML = '<option value="">Choose an area...</option>';
+      
+      areas.forEach(area => {
+        const option = document.createElement('option');
+        option.value = area.id;
+        option.textContent = area.name;
+        if (area.id === onboardingState.createdAreaId) {
+          option.selected = true;
+        }
+        select.appendChild(option);
+      });
+    } catch (error) {
+      console.error('Error updating area dropdown:', error);
+    }
+  }
+
+  // Tour functionality
+  document.getElementById('start-tour-btn').addEventListener('click', () => {
+    funStartTour();
+  });
+
+  document.getElementById('skip-tour-btn').addEventListener('click', () => {
+    funFinishOnboarding();
+  });
+
+  function funStartTour() {
+    // For demo purposes, show a simple tour completion message
+    // In a real implementation, this would navigate to the Today page and highlight elements
+    alert('Tour would start here! In the full implementation, this would take you to the Today page and highlight key features.');
+    funFinishOnboarding();
+  }
+
+  // Finish button
+  document.getElementById('finish-btn').addEventListener('click', () => {
+    funFinishOnboarding();
+  });
+
+  async function funFinishOnboarding() {
+    try {
+      const currentUser = funGetCurrentUser();
+      if (currentUser) {
+        // Method: getUserSettings - retrieves user settings
+        // Params: userId (user identifier)
+        // Returns: settings object from 'settings' collection where userId matches
+        // Collection: settings
+        const settings = await getUserSettings(currentUser.uid);
+        
+        if (settings) {
+          // Method: updateUserSettings - updates user settings record
+          // Params: userId and updates object with settings to update
+          // Returns: updated settings object
+          // Collection: settings
+          await updateUserSettings(currentUser.uid, {
+            seenOnboarding: true,
+            updatedAt: new Date().toISOString()
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error updating settings:', error);
+    }
+
+    // Navigate to Today's Work
+    window.location.hash = '#/page=todays_work&refresh=true';
+  }
+
+  // Close modals on outside click
+  document.addEventListener('click', (e) => {
+    const modals = ['field-modal', 'area-modal', 'crop-modal'];
+    modals.forEach(modalId => {
+      const modal = document.getElementById(modalId);
+      if (e.target === modal) {
+        modal.classList.add('hidden');
+        modal.querySelector('form').reset();
+      }
+    });
+  });
+
+  // Close modals on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const modals = ['field-modal', 'area-modal', 'crop-modal'];
+      modals.forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (!modal.classList.contains('hidden')) {
+          modal.classList.add('hidden');
+          modal.querySelector('form').reset();
+        }
+      });
+    }
+  });
+
+  // Initialize onboarding when page loads
+  document.addEventListener('DOMContentLoaded', funInitializeOnboarding);
+
+  // Initialize immediately if DOM is already loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', funInitializeOnboarding);
+  } else {
+    funInitializeOnboarding();
+  }
+</script>
+
+</body>
+
+</html>

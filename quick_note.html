@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Farm Planning Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #047857;
+            --color-secondary: #8C5E3C;
+            --color-accent: #B38600;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --border-radius-sm: 8px;
+            --border-radius-md: 16px;
+            --border-radius-lg: 24px;
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <a href="#pageContent" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-white px-3 py-1 rounded shadow-lg z-50">Skip to main content</a>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover"
+        class="absolute top-16 right-6 bg-white border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar"
+                class="w-8 h-8 bg-primary text-white rounded-xl flex items-center justify-center text-sm font-medium">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-medium text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton"
+                class="w-full flex items-center text-sm gap-2 px-3 py-2 text-left text-error hover:bg-red-50 focus:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-error rounded-md transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Mobile sidebar overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 hidden md:hidden"></div>
+
+        <!-- Sidebar -->
+        
+
+
+
+
+
+
+
+
+        
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)] bg-background" id="pageContent" role="main">
+            
+<section class="max-w-lg mx-auto">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-[1.75rem] leading-[2.25rem] font-bold text-gray-900 mb-2">Quick Note</h1>
+    <p class="text-sm leading-[1.375rem] text-gray-600">Add quick notes and weather events to track field conditions</p>
+  </div>
+
+  <!-- Note Form -->
+  <form id="quickNoteForm" class="space-y-6">
+    <!-- Note Type Picker -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-3">Note Type</label>
+      <div class="grid grid-cols-2 gap-3">
+        <button type="button" id="generalTypeBtn" 
+          class="p-4 rounded-lg border-2 border-gray-200 bg-white flex flex-col items-center gap-2 hover:border-primary focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+          <i data-lucide="file-text" class="w-6 h-6 text-gray-600"></i>
+          <span class="text-sm font-medium">General</span>
+        </button>
+        <button type="button" id="weatherTypeBtn"
+          class="p-4 rounded-lg border-2 border-gray-200 bg-white flex flex-col items-center gap-2 hover:border-primary focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+          <i data-lucide="cloud-rain" class="w-6 h-6 text-gray-600"></i>
+          <span class="text-sm font-medium">Weather</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Date Input -->
+    <div>
+      <label for="noteDate" class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+      <input type="date" id="noteDate" name="noteDate" required
+        class="w-full p-4 text-sm border border-gray-200 rounded-lg focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+    </div>
+
+    <!-- Weather Details (hidden by default) -->
+    <div id="weatherDetails" class="hidden space-y-4">
+      <!-- Weather Subtype -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-3">Weather Type</label>
+        <div class="space-y-2">
+          <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <input type="radio" name="weatherType" value="rain" class="mr-3 text-primary focus:ring-primary">
+            <div class="flex items-center gap-2 flex-1">
+              <i data-lucide="cloud-rain" class="w-5 h-5 text-blue-500"></i>
+              <span class="text-sm">Light Rain</span>
+            </div>
+          </label>
+          <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <input type="radio" name="weatherType" value="heavyRain" class="mr-3 text-primary focus:ring-primary">
+            <div class="flex items-center gap-2 flex-1">
+              <i data-lucide="cloud-rain" class="w-5 h-5 text-blue-700"></i>
+              <span class="text-sm">Heavy Rain</span>
+            </div>
+          </label>
+          <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <input type="radio" name="weatherType" value="drought" class="mr-3 text-primary focus:ring-primary">
+            <div class="flex items-center gap-2 flex-1">
+              <i data-lucide="sun" class="w-5 h-5 text-orange-500"></i>
+              <span class="text-sm">Dry/Drought</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Amount Input -->
+      <div>
+        <label for="weatherAmount" class="block text-sm font-medium text-gray-700 mb-2">
+          Amount (mm) <span class="text-gray-400 text-xs">optional</span>
+        </label>
+        <input type="number" id="weatherAmount" name="weatherAmount" step="0.1" min="0" max="500"
+          placeholder="e.g., 4.5"
+          class="w-full p-4 text-sm border border-gray-200 rounded-lg focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+      </div>
+    </div>
+
+    <!-- Note Content -->
+    <div>
+      <label for="noteContent" class="block text-sm font-medium text-gray-700 mb-2">Note</label>
+      <textarea id="noteContent" name="noteContent" rows="3" required
+        placeholder="Write your note here..."
+        class="w-full p-4 text-sm border border-gray-200 rounded-lg resize-none focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"></textarea>
+    </div>
+
+    <!-- Area/Crop Link -->
+    <div>
+      <label for="areaSelect" class="block text-sm font-medium text-gray-700 mb-2">
+        Link to Area/Crop <span class="text-gray-400 text-xs">optional</span>
+      </label>
+      <select id="areaSelect" name="areaSelect"
+        class="w-full p-4 text-sm border border-gray-200 rounded-lg focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+        <option value="">Select an area or crop...</option>
+        <!-- Options populated by JS -->
+      </select>
+    </div>
+
+    <!-- Rain Skip Alert (hidden by default) -->
+    <div id="rainSkipAlert" class="hidden p-4 bg-blue-50 border border-blue-200 rounded-lg">
+      <div class="flex items-start gap-3">
+        <i data-lucide="droplet" class="w-5 h-5 text-blue-600 mt-0.5"></i>
+        <div class="flex-1">
+          <h4 class="text-sm font-medium text-blue-900 mb-1">Rain detected</h4>
+          <p id="rainSkipText" class="text-sm text-blue-700 mb-3"></p>
+          <div class="flex gap-2">
+            <button type="button" id="confirmSkipBtn"
+              class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
+              Yes, Skip Watering
+            </button>
+            <button type="button" id="declineSkipBtn"
+              class="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400">
+              No, Keep Tasks
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save Button -->
+    <button type="submit" id="saveNoteBtn"
+      class="w-full p-4 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+      Save Note
+    </button>
+  </form>
+</section>
+
+<!-- Skip Confirmation Modal -->
+<div id="skipConfirmModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+  <div class="bg-white rounded-xl shadow-lg max-w-md w-full p-6">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+        <i data-lucide="droplet" class="w-5 h-5 text-blue-600"></i>
+      </div>
+      <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Skip Watering Tasks?</h3>
+    </div>
+    
+    <div id="skipDetails" class="text-sm text-gray-600 mb-6">
+      <!-- Details populated by JS -->
+    </div>
+    
+    <div class="flex gap-3">
+      <button id="modalConfirmBtn"
+        class="flex-1 p-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 transition-colors">
+        Yes, Skip All
+      </button>
+      <button id="modalCancelBtn"
+        class="flex-1 p-3 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 transition-colors">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
+            
+
+
+
+
+
+
+
+
+
+
+        </main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'localDB:';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            btn.addEventListener('click', () => {
+                const isOpen = !sidebar.classList.contains('hidden');
+                
+                if (isOpen) {
+                    // Close
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    // Open
+                    sidebar.classList.remove('hidden');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav link
+                    const firstLink = sidebar.querySelector('a');
+                    if (firstLink) firstLink.focus();
+                }
+            });
+            
+            // Close on overlay click
+            overlay.addEventListener('click', () => {
+                sidebar.classList.add('hidden');
+                overlay.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.focus();
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('hidden') && window.innerWidth < 768) {
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    // Default to first farmer user from dummy data
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-001');
+                    currentUserId = 'u-001';
+                }
+                
+                // Get user from users collection
+                try {
+                    const usersData = localStorage.getItem(APP_PREFIX + 'users');
+                    if (usersData) {
+                        const users = JSON.parse(usersData);
+                        const user = users.find(u => u.id === currentUserId);
+                        return user || null;
+                    }
+                } catch (e) {
+                    console.warn('Error loading user data:', e);
+                }
+                return null;
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName   = document.getElementById('userName');
+            const popoverAvatar = document.getElementById('popoverUserAvatar');
+            const popoverName = document.getElementById('popoverUserName');
+            const popoverEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverAvatar) popoverAvatar.textContent = initials;
+            if (popoverName) popoverName.textContent = displayName;
+            if (popoverEmail) popoverEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popover.classList.toggle('hidden');
+                popoverVisible = !popoverVisible;
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                
+                if (popoverVisible) {
+                    // Focus first focusable element in popover
+                    const firstFocusable = popover.querySelector('button');
+                    if (firstFocusable) firstFocusable.focus();
+                }
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) {
+                    UserUtils.signOut();
+                }
+            });
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX)) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `farm_assistant_data_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            // Show success toast
+            showToast('✅ App data exported successfully', 'success');
+        });
+        
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+        
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX)) {
+                            localStorage.setItem(key, value);
+                            importedCount++;
+                        }
+                    });
+                    
+                    if (importedCount > 0) {
+                        showToast(`✅ App data imported successfully (${importedCount} items). Please refresh the page.`, 'success');
+                    } else {
+                        showToast('⚠️ No valid app data found in file.', 'warning');
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    showToast('❌ Failed to import: Invalid JSON format.', 'error');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Simple toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-white text-sm max-w-sm transition-all duration-300 ${
+                type === 'success' ? 'bg-green-600' :
+                type === 'error' ? 'bg-red-600' :
+                type === 'warning' ? 'bg-orange-600' :
+                'bg-blue-600'
+            }`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        // Simple hash router (no entity IDs; UI-state params only)
+        const Router = (() => {
+            const pageContent = document.getElementById('pageContent');
+            const sideNav = document.getElementById('sideNav');
+
+            function parseHash(){
+                const h = location.hash || '';
+                const m = h.match(/page=([^&]+)/);
+                const page = m ? m[1] : null;
+                // Collect UI-state params only (view, tab, filter, mode, section)
+                const params = {};
+                (h.split('&').slice(1)).forEach(kv => {
+                    const [k,v] = kv.split('=');
+                    if (['view','tab','filter','mode','section'].includes(k)) {
+                        params[k] = decodeURIComponent(v||'');
+                    }
+                });
+                return { page, params };
+            }
+
+            async function loadPage(pageBase){
+                if (!pageBase) {
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+                            <div class="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="leaf" class="w-8 h-8 text-primary"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h2 class="text-display-md font-semibold text-gray-900">Welcome to Farm Assistant</h2>
+                                <p class="text-gray-600 max-w-md">Select a page from the sidebar to get started with managing your farming tasks and tracking your crops.</p>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+                
+                // Show loading state
+                pageContent.innerHTML = `
+                    <div class="flex items-center justify-center min-h-[200px]">
+                        <div class="flex items-center space-x-3 text-gray-600">
+                            <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                            <span>Loading...</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Ensure .html suffix
+                const url = pageBase.endsWith('.html') ? pageBase : `${pageBase}.html`;
+                
+                try {
+                    const res = await fetch(url, { cache: 'no-store' });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const html = await res.text();
+                    pageContent.innerHTML = html;
+                    lucide.createIcons();
+                    
+                    // Allow page to hook UI-state params if it exposes a global
+                    if (window.PageInit?.onParams) {
+                        window.PageInit.onParams(parseHash().params);
+                    }
+                } catch (e) {
+                    console.error('Failed to load page:', url, e);
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[200px] text-center space-y-4">
+                            <div class="w-12 h-12 bg-error/10 rounded-lg flex items-center justify-center">
+                                <i data-lucide="alert-circle" class="w-6 h-6 text-error"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h3 class="font-semibold text-gray-900">Failed to load page</h3>
+                                <p class="text-gray-600 text-sm">The page "${url}" could not be loaded.</p>
+                                <button onclick="Router.onRoute()" class="text-primary hover:text-primary/80 text-sm font-medium">Try again</button>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                }
+            }
+
+            function setActive(pageBase){
+                if (!sideNav) return;
+                
+                const links = sideNav.querySelectorAll('a[href]');
+                links.forEach(a => {
+                    const href = a.getAttribute('href') || '';
+                    const target = href.replace(/^#\/?page=/, '').replace(/\.html$/, '');
+                    const current = (pageBase || '').replace(/\.html$/, '');
+                    
+                    if (target && target === current) {
+                        a.classList.add('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.remove('text-gray-700');
+                    } else {
+                        a.classList.remove('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.add('text-gray-700');
+                    }
+                });
+            }
+
+            async function onRoute(){
+                const { page } = parseHash();
+                await loadPage(page);
+                setActive(page);
+            }
+
+            return { onRoute };
+        })();
+
+        // Make Router.onRoute globally accessible for error retry
+        window.Router = Router;
+
+        window.addEventListener('hashchange', Router.onRoute);
+        Router.onRoute();
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                try {
+                    window.AppActions[action](el);
+                } catch (err) {
+                    console.error('AppAction error:', action, err);
+                    showToast(`❌ Action "${action}" failed: ${err.message}`, 'error');
+                }
+            } else {
+                el.setAttribute('disabled', 'true');
+                el.setAttribute('title', 'Unavailable');
+                el.classList.add('opacity-50', 'cursor-not-allowed');
+                console.warn('AppAction not available:', action);
+            }
+        });
+
+        // Generate navigation items programmatically from page list
+        // Note: In a real implementation, this would be generated from the actual page list data
+        // For now, we have the single "Today's Work" page based on the provided page data
+    </script>
+
+    
+<script id="page-logic" type="module">
+import { 
+  getAreasForUser, 
+  getCropInstancesForUser, 
+  createNote, 
+  createWeatherEvent, 
+  getWateringTasksDueOnDate,
+  skipTasksForRain 
+} from './quick_note-logic.js';
+
+// Current user ID - should be fetched from auth/session
+const CURRENT_USER_ID = 'user-uid-1'; // TODO: Get from auth service
+
+// Form state
+let currentNoteType = 'general';
+let skipDecision = null; // null, 'confirm', 'decline'
+let wateringTasksForSkip = [];
+let prefillAreaId = null;
+
+// Initialize page
+function funInitializePage() {
+  // Set default date to today
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('noteDate').value = today;
+  
+  // Handle URL params for prefill
+  const urlParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+  prefillAreaId = urlParams.get('prefillAreaId');
+  
+  // Initialize form handlers
+  funSetupFormHandlers();
+  funLoadAreaOptions();
+  funUpdateNoteTypeUI();
+}
+
+// Setup all form event handlers
+function funSetupFormHandlers() {
+  // Note type buttons
+  document.getElementById('generalTypeBtn').addEventListener('click', () => {
+    currentNoteType = 'general';
+    funUpdateNoteTypeUI();
+  });
+  
+  document.getElementById('weatherTypeBtn').addEventListener('click', () => {
+    currentNoteType = 'weather';
+    funUpdateNoteTypeUI();
+    funCheckWeatherImpact(); // Check for existing watering tasks
+  });
+  
+  // Weather type radio changes
+  document.querySelectorAll('input[name="weatherType"]').forEach(radio => {
+    radio.addEventListener('change', funCheckWeatherImpact);
+  });
+  
+  // Date change
+  document.getElementById('noteDate').addEventListener('change', funCheckWeatherImpact);
+  
+  // Rain skip buttons
+  document.getElementById('confirmSkipBtn').addEventListener('click', () => {
+    skipDecision = 'confirm';
+    document.getElementById('rainSkipAlert').classList.add('hidden');
+  });
+  
+  document.getElementById('declineSkipBtn').addEventListener('click', () => {
+    skipDecision = 'decline';
+    document.getElementById('rainSkipAlert').classList.add('hidden');
+  });
+  
+  // Form submission
+  document.getElementById('quickNoteForm').addEventListener('submit', funHandleFormSubmit);
+  
+  // Modal handlers
+  document.getElementById('modalConfirmBtn').addEventListener('click', funConfirmSkipModal);
+  document.getElementById('modalCancelBtn').addEventListener('click', funCloseModal);
+}
+
+// Update UI based on selected note type
+function funUpdateNoteTypeUI() {
+  const generalBtn = document.getElementById('generalTypeBtn');
+  const weatherBtn = document.getElementById('weatherTypeBtn');
+  const weatherDetails = document.getElementById('weatherDetails');
+  
+  // Reset button styles
+  [generalBtn, weatherBtn].forEach(btn => {
+    btn.classList.remove('border-primary', 'bg-primary/5');
+    btn.classList.add('border-gray-200', 'bg-white');
+  });
+  
+  if (currentNoteType === 'general') {
+    generalBtn.classList.remove('border-gray-200', 'bg-white');
+    generalBtn.classList.add('border-primary', 'bg-primary/5');
+    weatherDetails.classList.add('hidden');
+  } else {
+    weatherBtn.classList.remove('border-gray-200', 'bg-white');
+    weatherBtn.classList.add('border-primary', 'bg-primary/5');
+    weatherDetails.classList.remove('hidden');
+  }
+  
+  // Hide rain skip alert when switching types
+  document.getElementById('rainSkipAlert').classList.add('hidden');
+  skipDecision = null;
+}
+
+// Load area and crop options for linking
+async function funLoadAreaOptions() {
+  try {
+    // Method call to quick_note-logic.js to get areas for current user
+    // Expected return: Array of {id, name, fieldName} from areas collection where userId = currentUserId
+    // Also get crop instances for this user  
+    // Expected return: Array of {id, name, areaName} from cropInstances collection where userId = currentUserId
+    const areas = await getAreasForUser(CURRENT_USER_ID);
+    const cropInstances = await getCropInstancesForUser(CURRENT_USER_ID);
+    
+    const select = document.getElementById('areaSelect');
+    select.innerHTML = '<option value="">Select an area or crop...</option>';
+    
+    // Add area options
+    if (areas.length > 0) {
+      const areaGroup = document.createElement('optgroup');
+      areaGroup.label = 'Areas';
+      areas.forEach(area => {
+        const option = document.createElement('option');
+        option.value = `area:${area.id}`;
+        option.textContent = `${area.name} (${area.fieldName})`;
+        areaGroup.appendChild(option);
+      });
+      select.appendChild(areaGroup);
+    }
+    
+    // Add crop options
+    if (cropInstances.length > 0) {
+      const cropGroup = document.createElement('optgroup');
+      cropGroup.label = 'Crops';
+      cropInstances.forEach(crop => {
+        const option = document.createElement('option');
+        option.value = `crop:${crop.id}`;
+        option.textContent = `${crop.name} (${crop.areaName})`;
+        cropGroup.appendChild(option);
+      });
+      select.appendChild(cropGroup);
+    }
+    
+    // Prefill if provided
+    if (prefillAreaId) {
+      select.value = `area:${prefillAreaId}`;
+    }
+    
+  } catch (error) {
+    console.error('Error loading area options:', error);
+  }
+}
+
+// Check if weather selection impacts watering tasks
+async function funCheckWeatherImpact() {
+  if (currentNoteType !== 'weather') return;
+  
+  const selectedWeatherType = document.querySelector('input[name="weatherType"]:checked')?.value;
+  const selectedDate = document.getElementById('noteDate').value;
+  
+  if (!selectedWeatherType || !selectedDate || !['rain', 'heavyRain'].includes(selectedWeatherType)) {
+    document.getElementById('rainSkipAlert').classList.add('hidden');
+    return;
+  }
+  
+  try {
+    // Method call to quick_note-logic.js to get watering tasks due on the selected date
+    // Expected return: Array of {taskId, cropName, areaName} from taskOccurrences 
+    // where taskType = 'watering' and dueDate = selectedDate and status in ['due', 'overdue']
+    // Join with cropInstances and areas to get display names
+    const wateringTasks = await getWateringTasksDueOnDate(selectedDate, CURRENT_USER_ID);
+    
+    if (wateringTasks.length > 0) {
+      wateringTasksForSkip = wateringTasks;
+      const alertText = document.getElementById('rainSkipText');
+      alertText.textContent = `Found ${wateringTasks.length} watering task${wateringTasks.length === 1 ? '' : 's'} due today. Skip them due to rain?`;
+      document.getElementById('rainSkipAlert').classList.remove('hidden');
+    } else {
+      document.getElementById('rainSkipAlert').classList.add('hidden');
+    }
+  } catch (error) {
+    console.error('Error checking watering tasks:', error);
+  }
+}
+
+// Handle form submission
+async function funHandleFormSubmit(e) {
+  e.preventDefault();
+  
+  const submitBtn = document.getElementById('saveNoteBtn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Saving...';
+  
+  try {
+    const formData = new FormData(e.target);
+    const noteDate = formData.get('noteDate');
+    const noteContent = formData.get('noteContent');
+    const areaSelect = formData.get('areaSelect');
+    
+    let areaId = null;
+    let cropInstanceId = null;
+    
+    if (areaSelect) {
+      const [type, id] = areaSelect.split(':');
+      if (type === 'area') areaId = id;
+      if (type === 'crop') cropInstanceId = id;
+    }
+    
+    // Create weather event if weather type
+    let weatherEventId = null;
+    if (currentNoteType === 'weather') {
+      const weatherType = formData.get('weatherType');
+      const weatherAmount = formData.get('weatherAmount');
+      
+      if (weatherType) {
+        // Method call to quick_note-logic.js to create weather event
+        // Expected params: {userId, weatherEventType, severity, amount, date, notes}
+        // Expected return: {id} - the created weather event ID
+        const weatherEvent = await createWeatherEvent({
+          userId: CURRENT_USER_ID,
+          weatherEventType: weatherType,
+          severity: weatherType === 'heavyRain' ? 'heavy' : (weatherType === 'rain' ? 'light' : 'moderate'),
+          amount: weatherAmount ? parseFloat(weatherAmount) : null,
+          date: noteDate,
+          notes: `Weather recorded via Quick Note: ${noteContent}`
+        });
+        weatherEventId = weatherEvent.id;
+      }
+    }
+    
+    // Create note
+    // Method call to quick_note-logic.js to create note
+    // Expected params: {userId, type, weatherEventId?, cropInstanceId?, areaId?, date, content}
+    // Expected return: {id} - the created note ID
+    await createNote({
+      userId: CURRENT_USER_ID,
+      type: currentNoteType,
+      weatherEventId: weatherEventId,
+      cropInstanceId: cropInstanceId,
+      areaId: areaId,
+      date: noteDate,
+      content: noteContent
+    });
+    
+    // Handle rain skip logic
+    if (currentNoteType === 'weather' && 
+        ['rain', 'heavyRain'].includes(formData.get('weatherType')) && 
+        wateringTasksForSkip.length > 0) {
+      
+      if (skipDecision === 'confirm') {
+        await funApplyRainSkips(noteDate);
+        funNavigateToToday();
+      } else if (skipDecision === 'decline') {
+        funNavigateToToday();
+      } else {
+        // Show modal to confirm
+        funShowSkipModal();
+      }
+    } else {
+      funNavigateToToday();
+    }
+    
+  } catch (error) {
+    console.error('Error saving note:', error);
+    funShowToast('❌ Failed to save note. Please try again.', 'error');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Save Note';
+  }
+}
+
+// Show skip confirmation modal
+function funShowSkipModal() {
+  const modal = document.getElementById('skipConfirmModal');
+  const details = document.getElementById('skipDetails');
+  
+  const taskList = wateringTasksForSkip.map(task => 
+    `• ${task.cropName} (${task.areaName})`
+  ).join('\n');
+  
+  details.innerHTML = `
+    <p class="mb-3">Skip watering for ${wateringTasksForSkip.length} task${wateringTasksForSkip.length === 1 ? '' : 's'}:</p>
+    <div class="bg-gray-50 rounded p-3 font-mono text-sm whitespace-pre-line">${taskList}</div>
+  `;
+  
+  modal.classList.remove('hidden');
+  
+  // Focus confirm button
+  document.getElementById('modalConfirmBtn').focus();
+}
+
+// Close modal
+function funCloseModal() {
+  document.getElementById('skipConfirmModal').classList.add('hidden');
+  funNavigateToToday();
+}
+
+// Confirm skip in modal
+async function funConfirmSkipModal() {
+  const noteDate = document.getElementById('noteDate').value;
+  
+  try {
+    await funApplyRainSkips(noteDate);
+    funCloseModal();
+  } catch (error) {
+    console.error('Error applying skips:', error);
+    funShowToast('❌ Could not apply skip to tasks. Note saved.', 'error');
+    funCloseModal();
+  }
+}
+
+// Apply rain skips to watering tasks
+async function funApplyRainSkips(date) {
+  // Method call to quick_note-logic.js to skip watering tasks due to rain
+  // Expected params: {date, userId, taskIds: Array, skipReason: 'rain'}
+  // Expected return: {skippedCount} - number of tasks successfully skipped
+  // This method should update taskOccurrences status to 'skipped' and create log entries
+  const taskIds = wateringTasksForSkip.map(task => task.taskId);
+  
+  const result = await skipTasksForRain({
+    date: date,
+    userId: CURRENT_USER_ID,
+    taskIds: taskIds,
+    skipReason: 'rain'
+  });
+  
+  funShowToast(`✅ Skipped ${result.skippedCount} watering task${result.skippedCount === 1 ? '' : 's'}`, 'success');
+}
+
+// Navigate to today's work page
+function funNavigateToToday() {
+  window.location.hash = '#/page=todays_work&refresh=true';
+}
+
+// Show toast notification
+function funShowToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-white text-sm max-w-sm transition-all duration-300 ${
+    type === 'success' ? 'bg-green-600' :
+    type === 'error' ? 'bg-red-600' :
+    type === 'warning' ? 'bg-orange-600' :
+    'bg-blue-600'
+  }`;
+  toast.textContent = message;
+  
+  document.body.appendChild(toast);
+  
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100%)';
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300);
+  }, 5000);
+}
+
+// Initialize page when DOM is ready
+funInitializePage();
+
+</script>
+
+</body>
+
+</html>

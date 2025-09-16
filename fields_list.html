@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Farm Planning Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #047857;
+            --color-secondary: #8C5E3C;
+            --color-accent: #B38600;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --border-radius-sm: 8px;
+            --border-radius-md: 16px;
+            --border-radius-lg: 24px;
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <a href="#pageContent" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-white px-3 py-1 rounded shadow-lg z-50">Skip to main content</a>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover"
+        class="absolute top-16 right-6 bg-white border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar"
+                class="w-8 h-8 bg-primary text-white rounded-xl flex items-center justify-center text-sm font-medium">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-medium text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton"
+                class="w-full flex items-center text-sm gap-2 px-3 py-2 text-left text-error hover:bg-red-50 focus:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-error rounded-md transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Mobile sidebar overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 hidden md:hidden"></div>
+
+        <!-- Sidebar -->
+      
+
+
+
+
+
+
+
+
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)] bg-background" id="pageContent" role="main">
+            
+<!-- Fields List Page -->
+<div class="space-y-6">
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-[1.75rem] leading-[2.25rem] font-bold text-gray-900">My Fields</h1>
+      <p class="text-sm leading-[1.375rem] text-gray-600 mt-1">Manage your fields, areas, and crop instances</p>
+    </div>
+    <button 
+      id="addFieldBtn"
+      class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+    >
+      <i data-lucide="plus" class="w-4 h-4"></i>
+      <span class="font-medium">Add Field</span>
+    </button>
+  </div>
+
+  <!-- Fields List Container -->
+  <div id="fieldsContainer" class="space-y-4">
+    <!-- Loading state -->
+    <div id="loadingState" class="flex items-center justify-center py-12">
+      <div class="flex items-center space-x-3 text-gray-600">
+        <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <span>Loading fields...</span>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="emptyState" class="hidden">
+      <div class="bg-white rounded-xl border-2 border-dashed border-gray-200 p-8 text-center">
+        <div class="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+          <i data-lucide="map" class="w-8 h-8 text-primary"></i>
+        </div>
+        <div class="space-y-3">
+          <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Add your first Field</h3>
+          <p class="text-sm leading-[1.375rem] text-gray-600 max-w-md mx-auto">
+            Fields are your big plots. You can split them into Areas to track corners, beds, or rows more precisely.
+          </p>
+          <div class="mt-6">
+            <button 
+              id="addFirstFieldBtn"
+              class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors font-medium"
+            >
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              Add Field
+            </button>
+          </div>
+        </div>
+        <!-- Example Field Card (for guidance) -->
+        <div class="mt-8 max-w-sm mx-auto">
+          <div class="bg-gray-50 rounded-lg border border-gray-200 p-4 text-left">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <h4 class="font-semibold text-gray-900">North Plot</h4>
+                <p class="text-sm text-gray-600">1,200 m²</p>
+              </div>
+              <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">Example</span>
+            </div>
+            <div class="grid grid-cols-3 gap-3 text-center text-sm">
+              <div>
+                <div class="font-medium text-gray-900">2</div>
+                <div class="text-gray-600">Areas</div>
+              </div>
+              <div>
+                <div class="font-medium text-gray-900">3</div>
+                <div class="text-gray-600">Crops</div>
+              </div>
+              <div>
+                <div class="font-medium text-accent">1</div>
+                <div class="text-gray-600">Overdue</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fields list will be populated here -->
+    <div id="fieldsList" class="space-y-4"></div>
+  </div>
+</div>
+
+<!-- Field Form Drawer -->
+<div id="fieldDrawer" class="fixed inset-y-0 right-0 z-50 w-full sm:w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 hidden">
+  <div class="flex flex-col h-full">
+    <!-- Drawer Header -->
+    <div class="flex items-center justify-between p-4 border-b border-gray-200">
+      <h2 id="fieldDrawerTitle" class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Add Field</h2>
+      <button 
+        id="closeFieldDrawer"
+        class="p-2 text-gray-400 hover:text-gray-600 focus:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
+        aria-label="Close drawer"
+      >
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- Drawer Content -->
+    <form id="fieldForm" class="flex-1 overflow-y-auto p-4 space-y-4">
+      <div>
+        <label for="fieldName" class="block text-sm font-medium text-gray-700 mb-1">
+          Field Name <span class="text-error">*</span>
+        </label>
+        <input 
+          type="text" 
+          id="fieldName" 
+          name="name"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+          placeholder="e.g., North Plot"
+        />
+        <div id="fieldNameError" class="hidden text-sm text-error mt-1"></div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label for="fieldSize" class="block text-sm font-medium text-gray-700 mb-1">Size</label>
+          <input 
+            type="number" 
+            id="fieldSize" 
+            name="size"
+            step="0.01"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+            placeholder="1200"
+          />
+        </div>
+        <div>
+          <label for="fieldSizeUnit" class="block text-sm font-medium text-gray-700 mb-1">Unit</label>
+          <select 
+            id="fieldSizeUnit" 
+            name="sizeUnit"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+          >
+            <option value="m2">m²</option>
+            <option value="acres">acres</option>
+            <option value="hectares">hectares</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label for="fieldNotes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+        <textarea 
+          id="fieldNotes" 
+          name="notes"
+          rows="3"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+          placeholder="Optional notes about this field..."
+        ></textarea>
+      </div>
+
+      <div id="existingAreasInfo" class="hidden bg-gray-50 rounded-lg p-3">
+        <div class="text-sm font-medium text-gray-700 mb-1">Current Areas</div>
+        <div id="areasCount" class="text-sm text-gray-600"></div>
+      </div>
+    </form>
+
+    <!-- Drawer Footer -->
+    <div class="p-4 border-t border-gray-200 bg-gray-50">
+      <div class="flex gap-3">
+        <button 
+          type="button"
+          id="cancelFieldForm"
+          class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+        >
+          Cancel
+        </button>
+        <button 
+          type="submit"
+          form="fieldForm"
+          id="saveFieldBtn"
+          class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors font-medium"
+        >
+          Save Field
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Area Form Drawer -->
+<div id="areaDrawer" class="fixed inset-y-0 right-0 z-50 w-full sm:w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 hidden">
+  <div class="flex flex-col h-full">
+    <!-- Drawer Header -->
+    <div class="flex items-center justify-between p-4 border-b border-gray-200">
+      <div>
+        <h2 id="areaDrawerTitle" class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Add Area</h2>
+        <p id="areaParentField" class="text-sm text-gray-600 mt-1"></p>
+      </div>
+      <button 
+        id="closeAreaDrawer"
+        class="p-2 text-gray-400 hover:text-gray-600 focus:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
+        aria-label="Close drawer"
+      >
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- Drawer Content -->
+    <form id="areaForm" class="flex-1 overflow-y-auto p-4 space-y-4">
+      <input type="hidden" id="areaFieldId" name="fieldId" />
+
+      <div>
+        <label for="areaName" class="block text-sm font-medium text-gray-700 mb-1">
+          Area Name <span class="text-error">*</span>
+        </label>
+        <input 
+          type="text" 
+          id="areaName" 
+          name="name"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+          placeholder="e.g., Tomato Bed A"
+        />
+        <div id="areaNameError" class="hidden text-sm text-error mt-1"></div>
+      </div>
+
+      <div>
+        <label for="areaType" class="block text-sm font-medium text-gray-700 mb-1">Area Type</label>
+        <select 
+          id="areaType" 
+          name="typeId"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+        >
+          <option value="">Select type (optional)</option>
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label for="areaSize" class="block text-sm font-medium text-gray-700 mb-1">Size</label>
+          <input 
+            type="number" 
+            id="areaSize" 
+            name="size"
+            step="0.01"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+            placeholder="60"
+          />
+        </div>
+        <div>
+          <label for="areaSizeUnit" class="block text-sm font-medium text-gray-700 mb-1">Unit</label>
+          <select 
+            id="areaSizeUnit" 
+            name="sizeUnit"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+          >
+            <option value="m2">m²</option>
+            <option value="acres">acres</option>
+            <option value="hectares">hectares</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label for="areaNotes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+        <textarea 
+          id="areaNotes" 
+          name="notes"
+          rows="3"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+          placeholder="Optional notes about this area..."
+        ></textarea>
+      </div>
+    </form>
+
+    <!-- Drawer Footer -->
+    <div class="p-4 border-t border-gray-200 bg-gray-50">
+      <div class="flex gap-3">
+        <button 
+          type="button"
+          id="cancelAreaForm"
+          class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+        >
+          Cancel
+        </button>
+        <button 
+          type="submit"
+          form="areaForm"
+          id="saveAreaBtn"
+          class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors font-medium"
+        >
+          Save Area
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+<div id="deleteModal" class="fixed inset-0 z-50 hidden">
+  <!-- Backdrop -->
+  <div id="deleteModalBackdrop" class="absolute inset-0 bg-gray-900 bg-opacity-50"></div>
+  
+  <!-- Modal -->
+  <div class="absolute inset-0 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-lg max-w-md w-full p-6">
+      <div class="flex items-start gap-4 mb-4">
+        <div class="w-12 h-12 bg-error/10 rounded-lg flex items-center justify-center flex-shrink-0">
+          <i data-lucide="alert-triangle" class="w-6 h-6 text-error"></i>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-1">Confirm Deletion</h3>
+          <div id="deleteModalContent" class="text-sm text-gray-600"></div>
+        </div>
+      </div>
+      
+      <div class="mb-4">
+        <label class="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" id="deleteConfirmCheck" class="mt-1 rounded border-gray-300 text-primary focus:ring-primary" />
+          <span class="text-sm text-gray-700">I understand this action will permanently delete this item and all related data</span>
+        </label>
+      </div>
+      
+      <div class="flex gap-3">
+        <button 
+          type="button"
+          id="cancelDelete"
+          class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+        >
+          Cancel
+        </button>
+        <button 
+          type="button"
+          id="confirmDelete"
+          disabled
+          class="flex-1 px-4 py-2 bg-error text-white rounded-lg hover:bg-error/90 focus:bg-error/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-error transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Drawer Backdrop -->
+<div id="drawerBackdrop" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 hidden"></div>
+
+    
+
+
+
+
+        </main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'localDB:';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            btn.addEventListener('click', () => {
+                const isOpen = !sidebar.classList.contains('hidden');
+                
+                if (isOpen) {
+                    // Close
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    // Open
+                    sidebar.classList.remove('hidden');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav link
+                    const firstLink = sidebar.querySelector('a');
+                    if (firstLink) firstLink.focus();
+                }
+            });
+            
+            // Close on overlay click
+            overlay.addEventListener('click', () => {
+                sidebar.classList.add('hidden');
+                overlay.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.focus();
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('hidden') && window.innerWidth < 768) {
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    // Default to first farmer user from dummy data
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-001');
+                    currentUserId = 'u-001';
+                }
+                
+                // Get user from users collection
+                try {
+                    const usersData = localStorage.getItem(APP_PREFIX + 'users');
+                    if (usersData) {
+                        const users = JSON.parse(usersData);
+                        const user = users.find(u => u.id === currentUserId);
+                        return user || null;
+                    }
+                } catch (e) {
+                    console.warn('Error loading user data:', e);
+                }
+                return null;
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName   = document.getElementById('userName');
+            const popoverAvatar = document.getElementById('popoverUserAvatar');
+            const popoverName = document.getElementById('popoverUserName');
+            const popoverEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverAvatar) popoverAvatar.textContent = initials;
+            if (popoverName) popoverName.textContent = displayName;
+            if (popoverEmail) popoverEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popover.classList.toggle('hidden');
+                popoverVisible = !popoverVisible;
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                
+                if (popoverVisible) {
+                    // Focus first focusable element in popover
+                    const firstFocusable = popover.querySelector('button');
+                    if (firstFocusable) firstFocusable.focus();
+                }
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) {
+                    UserUtils.signOut();
+                }
+            });
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX)) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `farm_assistant_data_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            // Show success toast
+            showToast('✅ App data exported successfully', 'success');
+        });
+        
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+        
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX)) {
+                            localStorage.setItem(key, value);
+                            importedCount++;
+                        }
+                    });
+                    
+                    if (importedCount > 0) {
+                        showToast(`✅ App data imported successfully (${importedCount} items). Please refresh the page.`, 'success');
+                    } else {
+                        showToast('⚠️ No valid app data found in file.', 'warning');
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    showToast('❌ Failed to import: Invalid JSON format.', 'error');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Simple toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-white text-sm max-w-sm transition-all duration-300 ${
+                type === 'success' ? 'bg-green-600' :
+                type === 'error' ? 'bg-red-600' :
+                type === 'warning' ? 'bg-orange-600' :
+                'bg-blue-600'
+            }`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        // Simple hash router (no entity IDs; UI-state params only)
+        const Router = (() => {
+            const pageContent = document.getElementById('pageContent');
+            const sideNav = document.getElementById('sideNav');
+
+            function parseHash(){
+                const h = location.hash || '';
+                const m = h.match(/page=([^&]+)/);
+                const page = m ? m[1] : null;
+                // Collect UI-state params only (view, tab, filter, mode, section)
+                const params = {};
+                (h.split('&').slice(1)).forEach(kv => {
+                    const [k,v] = kv.split('=');
+                    if (['view','tab','filter','mode','section'].includes(k)) {
+                        params[k] = decodeURIComponent(v||'');
+                    }
+                });
+                return { page, params };
+            }
+
+            async function loadPage(pageBase){
+                if (!pageBase) {
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+                            <div class="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="leaf" class="w-8 h-8 text-primary"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h2 class="text-display-md font-semibold text-gray-900">Welcome to Farm Assistant</h2>
+                                <p class="text-gray-600 max-w-md">Select a page from the sidebar to get started with managing your farming tasks and tracking your crops.</p>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+                
+                // Show loading state
+                pageContent.innerHTML = `
+                    <div class="flex items-center justify-center min-h-[200px]">
+                        <div class="flex items-center space-x-3 text-gray-600">
+                            <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                            <span>Loading...</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Ensure .html suffix
+                const url = pageBase.endsWith('.html') ? pageBase : `${pageBase}.html`;
+                
+                try {
+                    const res = await fetch(url, { cache: 'no-store' });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const html = await res.text();
+                    pageContent.innerHTML = html;
+                    lucide.createIcons();
+                    
+                    // Allow page to hook UI-state params if it exposes a global
+                    if (window.PageInit?.onParams) {
+                        window.PageInit.onParams(parseHash().params);
+                    }
+                } catch (e) {
+                    console.error('Failed to load page:', url, e);
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[200px] text-center space-y-4">
+                            <div class="w-12 h-12 bg-error/10 rounded-lg flex items-center justify-center">
+                                <i data-lucide="alert-circle" class="w-6 h-6 text-error"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h3 class="font-semibold text-gray-900">Failed to load page</h3>
+                                <p class="text-gray-600 text-sm">The page "${url}" could not be loaded.</p>
+                                <button onclick="Router.onRoute()" class="text-primary hover:text-primary/80 text-sm font-medium">Try again</button>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                }
+            }
+
+            function setActive(pageBase){
+                if (!sideNav) return;
+                
+                const links = sideNav.querySelectorAll('a[href]');
+                links.forEach(a => {
+                    const href = a.getAttribute('href') || '';
+                    const target = href.replace(/^#\/?page=/, '').replace(/\.html$/, '');
+                    const current = (pageBase || '').replace(/\.html$/, '');
+                    
+                    if (target && target === current) {
+                        a.classList.add('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.remove('text-gray-700');
+                    } else {
+                        a.classList.remove('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.add('text-gray-700');
+                    }
+                });
+            }
+
+            async function onRoute(){
+                const { page } = parseHash();
+                await loadPage(page);
+                setActive(page);
+            }
+
+            return { onRoute };
+        })();
+
+        // Make Router.onRoute globally accessible for error retry
+        window.Router = Router;
+
+        window.addEventListener('hashchange', Router.onRoute);
+        Router.onRoute();
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                try {
+                    window.AppActions[action](el);
+                } catch (err) {
+                    console.error('AppAction error:', action, err);
+                    showToast(`❌ Action "${action}" failed: ${err.message}`, 'error');
+                }
+            } else {
+                el.setAttribute('disabled', 'true');
+                el.setAttribute('title', 'Unavailable');
+                el.classList.add('opacity-50', 'cursor-not-allowed');
+                console.warn('AppAction not available:', action);
+            }
+        });
+
+        // Generate navigation items programmatically from page list
+        // Note: In a real implementation, this would be generated from the actual page list data
+        // For now, we have the single "Today's Work" page based on the provided page data
+    </script>
+
+    
+<script id="page-logic" type="module">
+import { 
+  getFieldsWithStats, 
+  createField, 
+  updateField, 
+  deleteField,
+  getAreaTypes,
+  createArea,
+  updateArea,
+  deleteArea,
+  getCurrentUserId 
+} from './fields_list-logic.js';
+
+// Global state
+let currentFields = [];
+let currentUser = null;
+let editingField = null;
+let editingArea = null;
+let deleteTarget = null;
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', async function() {
+  await funInitializePage();
+});
+
+// Initialize the page data and UI
+async function funInitializePage() {
+  try {
+    // Get current user ID
+    // Expected data: string user ID from getCurrentUserId()
+    // Uses: users collection to get current user context
+    currentUser = await getCurrentUserId();
+    
+    if (!currentUser) {
+      funShowError('Unable to determine current user');
+      return;
+    }
+
+    // Load fields with statistics
+    await funLoadFields();
+    
+    // Setup event listeners
+    funSetupEventListeners();
+    
+    // Load area types for the dropdown
+    await funLoadAreaTypes();
+    
+  } catch (error) {
+    console.error('Page initialization error:', error);
+    funShowError('Failed to initialize page');
+  }
+}
+
+// Load fields with their statistics
+async function funLoadFields() {
+  try {
+    const loadingState = document.getElementById('loadingState');
+    const emptyState = document.getElementById('emptyState');
+    const fieldsList = document.getElementById('fieldsList');
+    
+    // Show loading state
+    loadingState.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+    fieldsList.innerHTML = '';
+    
+    // Get fields with statistics from fields_list-logic.js
+    // Expected return: Array of field objects with statistics
+    // Return type: [
+    //   {
+    //     id: string,
+    //     name: string,
+    //     size: number,
+    //     sizeUnit: string,
+    //     notes: string,
+    //     areas: Array<{id, name, typeId, size, sizeUnit, cropInstancesCount, overdueTasksCount}>,
+    //     totalAreas: number,
+    //     totalCropInstances: number,
+    //     totalOverdueTasks: number
+    //   }
+    // ]
+    // Uses: fields, areas, cropInstances, taskOccurrences collections
+    // Data flow: Gets all fields for current user, counts areas per field, counts crop instances per area, counts overdue tasks per area
+    currentFields = await getFieldsWithStats(currentUser);
+    
+    // Hide loading state
+    loadingState.classList.add('hidden');
+    
+    if (currentFields.length === 0) {
+      emptyState.classList.remove('hidden');
+    } else {
+      funRenderFields();
+    }
+    
+  } catch (error) {
+    console.error('Failed to load fields:', error);
+    document.getElementById('loadingState').classList.add('hidden');
+    funShowError('Failed to load fields');
+  }
+}
+
+// Render the fields list
+function funRenderFields() {
+  const fieldsList = document.getElementById('fieldsList');
+  
+  const fieldsHTML = currentFields.map(field => `
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow" data-field-id="${field.id}">
+      <!-- Field Header -->
+      <div class="p-4 cursor-pointer" data-action="toggle-field" data-field-id="${field.id}">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex-1">
+            <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">${funEscapeHtml(field.name)}</h3>
+            ${field.size ? `<p class="text-sm text-gray-600">${field.size} ${field.sizeUnit || 'm²'}</p>` : ''}
+            ${field.notes ? `<p class="text-sm text-gray-600 mt-1">${funEscapeHtml(field.notes)}</p>` : ''}
+          </div>
+          <div class="flex items-center gap-2">
+            <button 
+              class="p-2 text-gray-400 hover:text-gray-600 focus:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
+              data-action="edit-field"
+              data-field-id="${field.id}"
+              aria-label="Edit field"
+              title="Edit field"
+            >
+              <i data-lucide="edit-2" class="w-4 h-4"></i>
+            </button>
+            <button 
+              class="p-2 text-gray-400 hover:text-error focus:text-error focus:outline-none focus-visible:ring-2 focus-visible:ring-error rounded-lg"
+              data-action="delete-field"
+              data-field-id="${field.id}"
+              aria-label="Delete field"
+              title="Delete field"
+            >
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+            <button 
+              class="p-2 text-gray-400 hover:text-gray-600 focus:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transform transition-transform field-expand-icon"
+              aria-label="Expand field"
+            >
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Field Statistics -->
+        <div class="grid grid-cols-3 gap-4 text-center">
+          <div>
+            <div class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">${field.totalAreas}</div>
+            <div class="text-sm text-gray-600">Areas</div>
+          </div>
+          <div>
+            <div class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">${field.totalCropInstances}</div>
+            <div class="text-sm text-gray-600">Crops</div>
+          </div>
+          <div>
+            <div class="text-[1.25rem] leading-[1.75rem] font-semibold ${field.totalOverdueTasks > 0 ? 'text-accent' : 'text-gray-900'}">${field.totalOverdueTasks}</div>
+            <div class="text-sm text-gray-600">Overdue</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Expandable Areas Section -->
+      <div class="field-areas hidden border-t border-gray-100 bg-gray-50">
+        <div class="p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="font-medium text-gray-900">Areas (${field.areas.length})</h4>
+            <button 
+              class="inline-flex items-center gap-1 text-sm text-primary hover:text-primary/80 focus:text-primary/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-2 py-1"
+              data-action="add-area"
+              data-field-id="${field.id}"
+            >
+              <i data-lucide="plus" class="w-3 h-3"></i>
+              Add Area
+            </button>
+          </div>
+          
+          ${field.areas.length > 0 ? `
+            <div class="space-y-2">
+              ${field.areas.map(area => `
+                <div class="bg-white rounded-lg border border-gray-200 p-3">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2">
+                        <h5 class="font-medium text-gray-900">${funEscapeHtml(area.name)}</h5>
+                        ${area.typeId ? `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">${funGetAreaTypeName(area.typeId)}</span>` : ''}
+                      </div>
+                      ${area.size ? `<p class="text-sm text-gray-600">${area.size} ${area.sizeUnit || 'm²'}</p>` : ''}
+                      ${area.notes ? `<p class="text-sm text-gray-600 mt-1">${funEscapeHtml(area.notes)}</p>` : ''}
+                      <div class="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                        <span>${area.cropInstancesCount} crops</span>
+                        ${area.overdueTasksCount > 0 ? `<span class="text-accent font-medium">${area.overdueTasksCount} overdue</span>` : ''}
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                      <button 
+                        class="p-1 text-gray-400 hover:text-gray-600 focus:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                        data-action="edit-area"
+                        data-area-id="${area.id}"
+                        data-field-id="${field.id}"
+                        aria-label="Edit area"
+                        title="Edit area"
+                      >
+                        <i data-lucide="edit-2" class="w-3 h-3"></i>
+                      </button>
+                      <button 
+                        class="p-1 text-gray-400 hover:text-error focus:text-error focus:outline-none focus-visible:ring-2 focus-visible:ring-error rounded"
+                        data-action="delete-area"
+                        data-area-id="${area.id}"
+                        data-field-id="${field.id}"
+                        aria-label="Delete area"
+                        title="Delete area"
+                      >
+                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                      </button>
+                      <button 
+                        class="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 focus:text-primary/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded px-2 py-1 ml-1"
+                        data-action="add-crop"
+                        data-area-id="${area.id}"
+                        data-field-id="${field.id}"
+                      >
+                        <i data-lucide="plus" class="w-3 h-3"></i>
+                        Add Crop
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          ` : `
+            <div class="text-center py-6 text-gray-500">
+              <i data-lucide="map-pin" class="w-8 h-8 mx-auto mb-2 text-gray-300"></i>
+              <p class="text-sm">No areas yet</p>
+              <p class="text-xs text-gray-400 mt-1">Add an area to start planting crops</p>
+            </div>
+          `}
+        </div>
+      </div>
+    </div>
+  `).join('');
+  
+  fieldsList.innerHTML = fieldsHTML;
+  
+  // Re-initialize lucide icons
+  lucide.createIcons();
+}
+
+// Setup event listeners
+function funSetupEventListeners() {
+  // Add field buttons
+  document.getElementById('addFieldBtn').addEventListener('click', () => funOpenFieldDrawer());
+  document.getElementById('addFirstFieldBtn').addEventListener('click', () => funOpenFieldDrawer());
+  
+  // Field drawer events
+  document.getElementById('closeFieldDrawer').addEventListener('click', funCloseFieldDrawer);
+  document.getElementById('cancelFieldForm').addEventListener('click', funCloseFieldDrawer);
+  document.getElementById('fieldForm').addEventListener('submit', funHandleFieldSubmit);
+  
+  // Area drawer events
+  document.getElementById('closeAreaDrawer').addEventListener('click', funCloseAreaDrawer);
+  document.getElementById('cancelAreaForm').addEventListener('click', funCloseAreaDrawer);
+  document.getElementById('areaForm').addEventListener('submit', funHandleAreaSubmit);
+  
+  // Delete modal events
+  document.getElementById('deleteModalBackdrop').addEventListener('click', funCloseDeleteModal);
+  document.getElementById('cancelDelete').addEventListener('click', funCloseDeleteModal);
+  document.getElementById('confirmDelete').addEventListener('click', funHandleConfirmDelete);
+  document.getElementById('deleteConfirmCheck').addEventListener('change', function() {
+    document.getElementById('confirmDelete').disabled = !this.checked;
+  });
+  
+  // Drawer backdrop
+  document.getElementById('drawerBackdrop').addEventListener('click', function() {
+    funCloseFieldDrawer();
+    funCloseAreaDrawer();
+  });
+  
+  // Delegated event listeners for dynamic content
+  document.addEventListener('click', function(e) {
+    const action = e.target.closest('[data-action]')?.getAttribute('data-action');
+    if (!action) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const element = e.target.closest('[data-action]');
+    
+    switch (action) {
+      case 'toggle-field':
+        funToggleField(element.getAttribute('data-field-id'));
+        break;
+      case 'edit-field':
+        funEditField(element.getAttribute('data-field-id'));
+        break;
+      case 'delete-field':
+        funDeleteField(element.getAttribute('data-field-id'));
+        break;
+      case 'add-area':
+        funAddArea(element.getAttribute('data-field-id'));
+        break;
+      case 'edit-area':
+        funEditArea(element.getAttribute('data-area-id'), element.getAttribute('data-field-id'));
+        break;
+      case 'delete-area':
+        funDeleteArea(element.getAttribute('data-area-id'));
+        break;
+      case 'add-crop':
+        funAddCrop(element.getAttribute('data-area-id'));
+        break;
+    }
+  });
+  
+  // Form validation
+  document.getElementById('fieldName').addEventListener('input', function() {
+    funValidateFieldName(this.value);
+  });
+  
+  document.getElementById('areaName').addEventListener('input', function() {
+    funValidateAreaName(this.value);
+  });
+}
+
+// Load area types for dropdown
+async function funLoadAreaTypes() {
+  try {
+    // Get area types from fields_list-logic.js
+    // Expected return: Array of area type objects
+    // Return type: [{ id: string, name: string, description: string }]
+    // Uses: areaTypes collection
+    const areaTypes = await getAreaTypes();
+    
+    const areaTypeSelect = document.getElementById('areaType');
+    const defaultOption = areaTypeSelect.querySelector('option[value=""]');
+    
+    // Clear existing options except the default
+    areaTypeSelect.innerHTML = '';
+    areaTypeSelect.appendChild(defaultOption);
+    
+    // Add area type options
+    areaTypes.forEach(type => {
+      const option = document.createElement('option');
+      option.value = type.id;
+      option.textContent = type.name;
+      areaTypeSelect.appendChild(option);
+    });
+    
+  } catch (error) {
+    console.error('Failed to load area types:', error);
+  }
+}
+
+// Field operations
+function funOpenFieldDrawer(fieldId = null) {
+  editingField = fieldId;
+  const drawer = document.getElementById('fieldDrawer');
+  const backdrop = document.getElementById('drawerBackdrop');
+  const title = document.getElementById('fieldDrawerTitle');
+  const form = document.getElementById('fieldForm');
+  const existingAreasInfo = document.getElementById('existingAreasInfo');
+  const areasCount = document.getElementById('areasCount');
+  
+  // Reset form
+  form.reset();
+  funClearFieldErrors();
+  
+  if (fieldId) {
+    // Edit mode
+    const field = currentFields.find(f => f.id === fieldId);
+    if (!field) return;
+    
+    title.textContent = 'Edit Field';
+    document.getElementById('fieldName').value = field.name;
+    document.getElementById('fieldSize').value = field.size || '';
+    document.getElementById('fieldSizeUnit').value = field.sizeUnit || 'm2';
+    document.getElementById('fieldNotes').value = field.notes || '';
+    
+    // Show existing areas info
+    existingAreasInfo.classList.remove('hidden');
+    areasCount.textContent = `${field.totalAreas} area${field.totalAreas !== 1 ? 's' : ''}`;
+  } else {
+    // Add mode
+    title.textContent = 'Add Field';
+    existingAreasInfo.classList.add('hidden');
+  }
+  
+  // Show drawer
+  backdrop.classList.remove('hidden');
+  drawer.classList.remove('hidden');
+  requestAnimationFrame(() => {
+    drawer.classList.remove('translate-x-full');
+    document.getElementById('fieldName').focus();
+  });
+}
+
+function funCloseFieldDrawer() {
+  const drawer = document.getElementById('fieldDrawer');
+  const backdrop = document.getElementById('drawerBackdrop');
+  
+  drawer.classList.add('translate-x-full');
+  setTimeout(() => {
+    drawer.classList.add('hidden');
+    backdrop.classList.add('hidden');
+    editingField = null;
+  }, 300);
+}
+
+async function funHandleFieldSubmit(e) {
+  e.preventDefault();
+  
+  const formData = new FormData(e.target);
+  const fieldData = {
+    name: formData.get('name').trim(),
+    size: formData.get('size') ? parseFloat(formData.get('size')) : null,
+    sizeUnit: formData.get('sizeUnit'),
+    notes: formData.get('notes').trim()
+  };
+  
+  // Validate
+  if (!funValidateFieldName(fieldData.name)) {
+    return;
+  }
+  
+  try {
+    const saveBtn = document.getElementById('saveFieldBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+    
+    if (editingField) {
+      // Update field using fields_list-logic.js
+      // Expected params: (fieldId: string, fieldData: object)
+      // Uses: fields collection
+      // Data flow: Updates the field record with new data
+      await updateField(editingField, fieldData);
+      funShowSuccess('Field updated successfully');
+    } else {
+      // Create field using fields_list-logic.js
+      // Expected params: (fieldData: object with userId added)
+      // Uses: fields collection  
+      // Data flow: Creates new field record with generated ID
+      await createField({ ...fieldData, userId: currentUser });
+      funShowSuccess('Field created successfully');
+    }
+    
+    // Refresh fields list
+    await funLoadFields();
+    funCloseFieldDrawer();
+    
+  } catch (error) {
+    console.error('Failed to save field:', error);
+    funShowError('Failed to save field');
+  } finally {
+    const saveBtn = document.getElementById('saveFieldBtn');
+    saveBtn.disabled = false;
+    saveBtn.textContent = editingField ? 'Update Field' : 'Save Field';
+  }
+}
+
+function funEditField(fieldId) {
+  funOpenFieldDrawer(fieldId);
+}
+
+function funDeleteField(fieldId) {
+  const field = currentFields.find(f => f.id === fieldId);
+  if (!field) return;
+  
+  deleteTarget = { type: 'field', id: fieldId };
+  
+  const content = document.getElementById('deleteModalContent');
+  content.innerHTML = `
+    <p class="mb-2">You are about to delete the field <strong>"${funEscapeHtml(field.name)}"</strong>.</p>
+    <p class="mb-2">This will also delete:</p>
+    <ul class="list-disc list-inside text-sm space-y-1">
+      <li>${field.totalAreas} area${field.totalAreas !== 1 ? 's' : ''}</li>
+      <li>${field.totalCropInstances} crop instance${field.totalCropInstances !== 1 ? 's' : ''}</li>
+      <li>All related task occurrences and logs</li>
+    </ul>
+  `;
+  
+  document.getElementById('deleteConfirmCheck').checked = false;
+  document.getElementById('confirmDelete').disabled = true;
+  document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+// Area operations
+function funAddArea(fieldId) {
+  funOpenAreaDrawer(null, fieldId);
+}
+
+function funOpenAreaDrawer(areaId = null, fieldId = null) {
+  editingArea = areaId;
+  const field = fieldId ? currentFields.find(f => f.id === fieldId) : null;
+  
+  if (areaId && !fieldId) {
+    // Find the field that contains this area
+    for (const f of currentFields) {
+      if (f.areas.find(a => a.id === areaId)) {
+        fieldId = f.id;
+        break;
+      }
+    }
+  }
+  
+  const drawer = document.getElementById('areaDrawer');
+  const backdrop = document.getElementById('drawerBackdrop');
+  const title = document.getElementById('areaDrawerTitle');
+  const parentField = document.getElementById('areaParentField');
+  const form = document.getElementById('areaForm');
+  
+  // Reset form
+  form.reset();
+  funClearAreaErrors();
+  
+  // Set field context
+  document.getElementById('areaFieldId').value = fieldId;
+  const fieldName = field ? field.name : currentFields.find(f => f.id === fieldId)?.name || '';
+  parentField.textContent = `in ${fieldName}`;
+  
+  if (areaId) {
+    // Edit mode
+    const area = currentFields
+      .find(f => f.id === fieldId)
+      ?.areas.find(a => a.id === areaId);
+    if (!area) return;
+    
+    title.textContent = 'Edit Area';
+    document.getElementById('areaName').value = area.name;
+    document.getElementById('areaType').value = area.typeId || '';
+    document.getElementById('areaSize').value = area.size || '';
+    document.getElementById('areaSizeUnit').value = area.sizeUnit || 'm2';
+    document.getElementById('areaNotes').value = area.notes || '';
+  } else {
+    // Add mode
+    title.textContent = 'Add Area';
+  }
+  
+  // Show drawer
+  backdrop.classList.remove('hidden');
+  drawer.classList.remove('hidden');
+  requestAnimationFrame(() => {
+    drawer.classList.remove('translate-x-full');
+    document.getElementById('areaName').focus();
+  });
+}
+
+function funCloseAreaDrawer() {
+  const drawer = document.getElementById('areaDrawer');
+  const backdrop = document.getElementById('drawerBackdrop');
+  
+  drawer.classList.add('translate-x-full');
+  setTimeout(() => {
+    drawer.classList.add('hidden');
+    backdrop.classList.add('hidden');
+    editingArea = null;
+  }, 300);
+}
+
+async function funHandleAreaSubmit(e) {
+  e.preventDefault();
+  
+  const formData = new FormData(e.target);
+  const areaData = {
+    fieldId: formData.get('fieldId'),
+    name: formData.get('name').trim(),
+    typeId: formData.get('typeId') || null,
+    size: formData.get('size') ? parseFloat(formData.get('size')) : null,
+    sizeUnit: formData.get('sizeUnit'),
+    notes: formData.get('notes').trim()
+  };
+  
+  // Validate
+  if (!funValidateAreaName(areaData.name)) {
+    return;
+  }
+  
+  try {
+    const saveBtn = document.getElementById('saveAreaBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+    
+    if (editingArea) {
+      // Update area using fields_list-logic.js
+      // Expected params: (areaId: string, areaData: object)
+      // Uses: areas collection
+      // Data flow: Updates the area record with new data
+      await updateArea(editingArea, areaData);
+      funShowSuccess('Area updated successfully');
+    } else {
+      // Create area using fields_list-logic.js
+      // Expected params: (areaData: object with userId added)
+      // Uses: areas collection
+      // Data flow: Creates new area record with generated ID
+      await createArea({ ...areaData, userId: currentUser });
+      funShowSuccess('Area created successfully');
+    }
+    
+    // Refresh fields list
+    await funLoadFields();
+    funCloseAreaDrawer();
+    
+  } catch (error) {
+    console.error('Failed to save area:', error);
+    funShowError('Failed to save area');
+  } finally {
+    const saveBtn = document.getElementById('saveAreaBtn');
+    saveBtn.disabled = false;
+    saveBtn.textContent = editingArea ? 'Update Area' : 'Save Area';
+  }
+}
+
+function funEditArea(areaId, fieldId) {
+  funOpenAreaDrawer(areaId, fieldId);
+}
+
+function funDeleteArea(areaId) {
+  // Find the area across all fields
+  let area = null;
+  let field = null;
+  
+  for (const f of currentFields) {
+    const foundArea = f.areas.find(a => a.id === areaId);
+    if (foundArea) {
+      area = foundArea;
+      field = f;
+      break;
+    }
+  }
+  
+  if (!area) return;
+  
+  deleteTarget = { type: 'area', id: areaId };
+  
+  const content = document.getElementById('deleteModalContent');
+  content.innerHTML = `
+    <p class="mb-2">You are about to delete the area <strong>"${funEscapeHtml(area.name)}"</strong> from field "${funEscapeHtml(field.name)}".</p>
+    <p class="mb-2">This will also delete:</p>
+    <ul class="list-disc list-inside text-sm space-y-1">
+      <li>${area.cropInstancesCount} crop instance${area.cropInstancesCount !== 1 ? 's' : ''}</li>
+      <li>All related task occurrences and logs</li>
+    </ul>
+  `;
+  
+  document.getElementById('deleteConfirmCheck').checked = false;
+  document.getElementById('confirmDelete').disabled = true;
+  document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+// Delete modal operations
+function funCloseDeleteModal() {
+  document.getElementById('deleteModal').classList.add('hidden');
+  deleteTarget = null;
+}
+
+async function funHandleConfirmDelete() {
+  if (!deleteTarget) return;
+  
+  try {
+    const confirmBtn = document.getElementById('confirmDelete');
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Deleting...';
+    
+    if (deleteTarget.type === 'field') {
+      // Delete field using fields_list-logic.js
+      // Expected params: (fieldId: string)
+      // Uses: fields, areas, cropInstances, taskOccurrences, logs collections
+      // Data flow: Cascading delete of field and all related records
+      await deleteField(deleteTarget.id);
+      funShowSuccess('Field deleted successfully');
+    } else if (deleteTarget.type === 'area') {
+      // Delete area using fields_list-logic.js
+      // Expected params: (areaId: string)
+      // Uses: areas, cropInstances, taskOccurrences, logs collections
+      // Data flow: Cascading delete of area and all related records
+      await deleteArea(deleteTarget.id);
+      funShowSuccess('Area deleted successfully');
+    }
+    
+    // Refresh fields list
+    await funLoadFields();
+    funCloseDeleteModal();
+    
+  } catch (error) {
+    console.error('Failed to delete:', error);
+    funShowError('Failed to delete item');
+  } finally {
+    const confirmBtn = document.getElementById('confirmDelete');
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'Delete';
+  }
+}
+
+// UI interaction functions
+function funToggleField(fieldId) {
+  const fieldCard = document.querySelector(`[data-field-id="${fieldId}"]`);
+  if (!fieldCard) return;
+  
+  const areasSection = fieldCard.querySelector('.field-areas');
+  const expandIcon = fieldCard.querySelector('.field-expand-icon');
+  
+  if (areasSection.classList.contains('hidden')) {
+    areasSection.classList.remove('hidden');
+    expandIcon.classList.add('rotate-180');
+  } else {
+    areasSection.classList.add('hidden');
+    expandIcon.classList.remove('rotate-180');
+  }
+}
+
+function funAddCrop(areaId) {
+  // Navigate to crop creation page with preselected area
+  window.location.hash = `#/page=crop_instances&action=add&areaId=${areaId}`;
+}
+
+// Validation functions
+function funValidateFieldName(name) {
+  const errorEl = document.getElementById('fieldNameError');
+  
+  if (!name || name.trim().length === 0) {
+    errorEl.textContent = 'Field name is required';
+    errorEl.classList.remove('hidden');
+    return false;
+  }
+  
+  errorEl.classList.add('hidden');
+  return true;
+}
+
+function funValidateAreaName(name) {
+  const errorEl = document.getElementById('areaNameError');
+  
+  if (!name || name.trim().length === 0) {
+    errorEl.textContent = 'Area name is required';
+    errorEl.classList.remove('hidden');
+    return false;
+  }
+  
+  errorEl.classList.add('hidden');
+  return true;
+}
+
+function funClearFieldErrors() {
+  document.getElementById('fieldNameError').classList.add('hidden');
+}
+
+function funClearAreaErrors() {
+  document.getElementById('areaNameError').classList.add('hidden');
+}
+
+// Utility functions
+function funEscapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function funGetAreaTypeName(typeId) {
+  const types = {
+    'atype-bed': 'Bed',
+    'atype-row': 'Row', 
+    'atype-block': 'Block',
+    'atype-grove': 'Grove',
+    'atype-corner': 'Corner'
+  };
+  return types[typeId] || typeId;
+}
+
+// Toast notifications
+function funShowSuccess(message) {
+  funShowToast(message, 'success');
+}
+
+function funShowError(message) {
+  funShowToast(message, 'error');
+}
+
+function funShowToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-white text-sm max-w-sm transition-all duration-300 ${
+    type === 'success' ? 'bg-green-600' :
+    type === 'error' ? 'bg-red-600' :
+    type === 'warning' ? 'bg-orange-600' :
+    'bg-blue-600'
+  }`;
+  toast.textContent = message;
+  
+  document.body.appendChild(toast);
+  
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100%)';
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300);
+  }, 5000);
+}
+
+// Handle page parameters from hash
+window.PageInit = {
+  onParams(params) {
+    if (params.highlightFieldId) {
+      // Find and highlight the specified field
+      setTimeout(() => {
+        const fieldCard = document.querySelector(`[data-field-id="${params.highlightFieldId}"]`);
+        if (fieldCard) {
+          fieldCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          fieldCard.classList.add('ring-2', 'ring-primary', 'ring-opacity-50');
+          setTimeout(() => {
+            fieldCard.classList.remove('ring-2', 'ring-primary', 'ring-opacity-50');
+          }, 3000);
+        }
+      }, 100);
+    }
+    
+    if (params.openDrawer === 'field_form_drawer') {
+      funOpenFieldDrawer();
+    }
+  }
+};
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400" aria-hidden="true" focusable="false">
+  <!-- Minimalist diary page -->
+  <rect x="70" y="40" width="260" height="320" rx="20" fill="#FFFFFF" stroke="#2E7D32" stroke-width="8" stroke-linejoin="round"/>
+  <!-- Header bar (calendar/diary header) -->
+  <rect x="70" y="40" width="260" height="64" rx="12" fill="#D9A441"/>
+  <!-- Diary entry lines -->
+  <line x1="100" y1="128" x2="320" y2="128" stroke="#2E7D32" stroke-width="8" stroke-linecap="round"/>
+  <line x1="100" y1="176" x2="260" y2="176" stroke="#2E7D32" stroke-width="8" stroke-linecap="round"/>
+  <line x1="100" y1="224" x2="300" y2="224" stroke="#2E7D32" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Stylized leaf (represents farm/nature) overlapping the page -->
+  <path d="M270 170
+           C320 170 370 230 330 290
+           C310 330 260 360 230 335
+           C200 305 210 250 270 170 Z"
+        fill="#2E7D32"/>
+
+  <!-- Central vein on the leaf (simple, high-contrast) -->
+  <path d="M268 182
+           C292 210 280 250 254 286"
+        fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Small ochre accent (stem/connection to planner) -->
+  <circle cx="280" cy="236" r="8" fill="#D9A441"/>
+
+  <!-- Clean outline accent to ensure scale legibility -->
+  <path d="M230 335
+           C260 360 310 338 330 290
+           C370 230 320 170 270 170"
+        fill="none" stroke="#2E7D32" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+</svg>

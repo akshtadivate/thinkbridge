@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Farm Planning Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #047857;
+            --color-secondary: #8C5E3C;
+            --color-accent: #B38600;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --border-radius-sm: 8px;
+            --border-radius-md: 16px;
+            --border-radius-lg: 24px;
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+      
+
+
+
+
+
+
+
+
+
+
+
+    <a href="#pageContent" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-white px-3 py-1 rounded shadow-lg z-50">Skip to main content</a>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover"
+        class="absolute top-16 right-6 bg-white border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar"
+                class="w-8 h-8 bg-primary text-white rounded-xl flex items-center justify-center text-sm font-medium">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-medium text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton"
+                class="w-full flex items-center text-sm gap-2 px-3 py-2 text-left text-error hover:bg-red-50 focus:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-error rounded-md transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Mobile sidebar overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 hidden md:hidden"></div>
+
+        <!-- Sidebar -->
+        
+
+
+
+
+
+
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)] bg-background" id="pageContent" role="main">
+            
+<section class="max-w-4xl mx-auto space-y-6">
+  <!-- Header with back button -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+      <button 
+        id="backButton" 
+        class="p-2 rounded-lg hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+        aria-label="Go back"
+      >
+        <i data-lucide="arrow-left" class="w-5 h-5 text-gray-600"></i>
+      </button>
+      <div>
+        <h1 id="taskTitle" class="text-[1.75rem] leading-[2.25rem] font-bold text-gray-900">Loading...</h1>
+        <p id="taskSubtitle" class="text-sm leading-[1.375rem] font-normal text-gray-600 mt-1">Task details</p>
+      </div>
+    </div>
+    <div id="statusBadge" class="px-3 py-1 rounded-lg text-sm font-medium">
+      <!-- Status badge will be populated -->
+    </div>
+  </div>
+
+  <!-- Task Context Card -->
+  <div class="bg-surface border-2 rounded-lg p-6 space-y-4">
+    <div class="flex items-start justify-between">
+      <div class="space-y-3 flex-1">
+        <div class="flex items-center gap-2">
+          <i id="taskIcon" data-lucide="droplets" class="w-6 h-6 text-primary"></i>
+          <div>
+            <h2 id="cropInstanceName" class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Loading crop...</h2>
+            <p id="areaInfo" class="text-sm leading-[1.375rem] font-normal text-gray-600">Loading area...</p>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-600">Due Date:</span>
+            <span id="dueDate" class="font-medium text-gray-900">--</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">Due Window:</span>
+            <span id="dueWindow" class="font-medium text-gray-900">--</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">Recommended Qty:</span>
+            <span id="recommendedQuantity" class="font-medium text-gray-900">--</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">Type:</span>
+            <span id="recurrenceType" class="font-medium text-gray-900">--</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Template Guidance -->
+    <div id="templateGuidance" class="bg-gray-50 rounded-lg p-4">
+      <h3 class="text-sm font-medium text-gray-800 mb-2">Template Guidance</h3>
+      <p id="templateNotes" class="text-sm text-gray-600">Loading guidance...</p>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="bg-surface border-2 rounded-lg p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Recent Activity</h2>
+      <button 
+        id="viewCropInstanceBtn"
+        class="text-sm text-primary hover:text-primary/80 font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+      >
+        View Crop Details →
+      </button>
+    </div>
+    
+    <div id="activityList" class="space-y-3">
+      <!-- Activity items will be populated here -->
+      <div class="text-center py-8 text-gray-500">
+        <i data-lucide="clock" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+        <p class="text-sm">Loading activity history...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Primary Actions -->
+  <div class="sticky bottom-0 bg-background pt-4 pb-2">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <button 
+        id="markDoneBtn"
+        class="bg-primary text-white px-4 py-3 rounded-lg font-medium hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors flex items-center justify-center gap-2"
+      >
+        <i data-lucide="check" class="w-4 h-4"></i>
+        <span>Done</span>
+      </button>
+      
+      <button 
+        id="skipTaskBtn"
+        class="bg-gray-100 text-gray-700 px-4 py-3 rounded-lg font-medium hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors flex items-center justify-center gap-2"
+      >
+        <i data-lucide="x" class="w-4 h-4"></i>
+        <span>Skip</span>
+      </button>
+      
+      <button 
+        id="snoozeTaskBtn"
+        class="bg-accent text-white px-4 py-3 rounded-lg font-medium hover:bg-accent/90 focus:bg-accent/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors flex items-center justify-center gap-2"
+      >
+        <i data-lucide="clock" class="w-4 h-4"></i>
+        <span>Snooze</span>
+      </button>
+      
+      <button 
+        id="editTemplateBtn"
+        class="bg-secondary text-white px-4 py-3 rounded-lg font-medium hover:bg-secondary/90 focus:bg-secondary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors flex items-center justify-center gap-2"
+      >
+        <i data-lucide="edit-3" class="w-4 h-4"></i>
+        <span>Edit</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Done Task Drawer -->
+<div id="doneDrawer" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden">
+  <div class="fixed bottom-0 left-0 right-0 bg-surface rounded-t-xl max-h-[80vh] overflow-hidden">
+    <div class="flex items-center justify-between p-4 border-b">
+      <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Mark Task Complete</h3>
+      <button id="closeDoneDrawer" class="p-2 rounded-lg hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+        <i data-lucide="x" class="w-5 h-5 text-gray-600"></i>
+      </button>
+    </div>
+    
+    <div class="p-4 overflow-y-auto max-h-[calc(80vh-4rem)]">
+      <form id="doneForm" class="space-y-4">
+        <!-- Task Summary -->
+        <div class="bg-gray-50 rounded-lg p-3">
+          <p id="doneTaskSummary" class="text-sm text-gray-700">Task summary will appear here</p>
+        </div>
+        
+        <!-- Quantity Input -->
+        <div id="quantitySection" class="space-y-2">
+          <label for="quantityInput" class="block text-sm font-medium text-gray-700">
+            Quantity <span id="quantityRequired" class="text-red-500">*</span>
+          </label>
+          <div class="flex gap-2">
+            <input 
+              type="number" 
+              id="quantityInput" 
+              step="0.01" 
+              min="0"
+              class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+              placeholder="Enter quantity"
+            >
+            <select 
+              id="unitSelect" 
+              class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white"
+            >
+              <option value="">Unit</option>
+            </select>
+          </div>
+          <div id="quantityError" class="text-sm text-red-600 hidden" role="alert"></div>
+        </div>
+        
+        <!-- Notes -->
+        <div class="space-y-2">
+          <label for="notesInput" class="block text-sm font-medium text-gray-700">Notes (Optional)</label>
+          <textarea 
+            id="notesInput" 
+            rows="3"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"
+            placeholder="Add any notes about completing this task..."
+          ></textarea>
+        </div>
+        
+        <!-- Photo Section -->
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Photo (Optional)</label>
+          <div class="flex gap-2">
+            <button 
+              type="button"
+              id="capturePhotoBtn"
+              class="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors flex items-center justify-center gap-2"
+            >
+              <i data-lucide="camera" class="w-4 h-4"></i>
+              <span>Take Photo</span>
+            </button>
+            <button 
+              type="button"
+              id="selectPhotoBtn"
+              class="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors flex items-center justify-center gap-2"
+            >
+              <i data-lucide="image" class="w-4 h-4"></i>
+              <span>Select Photo</span>
+            </button>
+          </div>
+          <input type="file" id="photoFileInput" accept="image" class="hidden">
+          <div id="photoPreview" class="hidden mt-2">
+            <img id="photoPreviewImg" src="" alt="Photo preview" class="w-full max-w-sm rounded-lg border">
+            <button 
+              type="button" 
+              id="removePhotoBtn"
+              class="mt-2 text-sm text-red-600 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 rounded"
+            >
+              Remove Photo
+            </button>
+          </div>
+          <div id="photoError" class="text-sm text-red-600 hidden" role="alert"></div>
+        </div>
+        
+        <!-- Submit Button -->
+        <div class="pt-4">
+          <button 
+            type="submit"
+            id="submitDoneBtn"
+            class="w-full bg-primary text-white px-4 py-3 rounded-lg font-medium hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Mark Complete
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Skip Task Drawer -->
+<div id="skipDrawer" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden">
+  <div class="fixed bottom-0 left-0 right-0 bg-surface rounded-t-xl max-h-[70vh] overflow-hidden">
+    <div class="flex items-center justify-between p-4 border-b">
+      <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Skip Task</h3>
+      <button id="closeSkipDrawer" class="p-2 rounded-lg hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+        <i data-lucide="x" class="w-5 h-5 text-gray-600"></i>
+      </button>
+    </div>
+    
+    <div class="p-4 overflow-y-auto max-h-[calc(70vh-4rem)]">
+      <form id="skipForm" class="space-y-4">
+        <!-- Task Summary -->
+        <div class="bg-gray-50 rounded-lg p-3">
+          <p id="skipTaskSummary" class="text-sm text-gray-700">Task summary will appear here</p>
+        </div>
+        
+        <!-- Reason Selection -->
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Reason for skipping <span class="text-red-500">*</span></label>
+          <div id="reasonOptions" class="space-y-2">
+            <!-- Reason options will be populated here -->
+          </div>
+          <div id="reasonError" class="text-sm text-red-600 hidden" role="alert"></div>
+        </div>
+        
+        <!-- Notes -->
+        <div class="space-y-2">
+          <label for="skipNotesInput" class="block text-sm font-medium text-gray-700">Additional Notes (Optional)</label>
+          <textarea 
+            id="skipNotesInput" 
+            rows="3"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"
+            placeholder="Add any additional details about why you're skipping this task..."
+          ></textarea>
+        </div>
+        
+        <!-- Submit Button -->
+        <div class="pt-4">
+          <button 
+            type="submit"
+            id="submitSkipBtn"
+            class="w-full bg-gray-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-gray-700 focus:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Skip Task
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Snooze Task Drawer -->
+<div id="snoozeDrawer" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden">
+  <div class="fixed bottom-0 left-0 right-0 bg-surface rounded-t-xl max-h-[60vh] overflow-hidden">
+    <div class="flex items-center justify-between p-4 border-b">
+      <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Snooze Task</h3>
+      <button id="closeSnoozeDrawer" class="p-2 rounded-lg hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+        <i data-lucide="x" class="w-5 h-5 text-gray-600"></i>
+      </button>
+    </div>
+    
+    <div class="p-4 overflow-y-auto max-h-[calc(60vh-4rem)]">
+      <form id="snoozeForm" class="space-y-4">
+        <!-- Task Summary -->
+        <div class="bg-gray-50 rounded-lg p-3">
+          <p id="snoozeTaskSummary" class="text-sm text-gray-700">Task summary will appear here</p>
+        </div>
+        
+        <!-- Quick Snooze Options -->
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Snooze until:</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button 
+              type="button" 
+              class="snooze-quick-btn px-3 py-2 text-sm border border-gray-300 rounded-lg hover:border-primary hover:text-primary focus:border-primary focus:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+              data-hours="2"
+            >
+              Later Today
+            </button>
+            <button 
+              type="button" 
+              class="snooze-quick-btn px-3 py-2 text-sm border border-gray-300 rounded-lg hover:border-primary hover:text-primary focus:border-primary focus:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+              data-days="1"
+            >
+              Tomorrow
+            </button>
+            <button 
+              type="button" 
+              class="snooze-quick-btn px-3 py-2 text-sm border border-gray-300 rounded-lg hover:border-primary hover:text-primary focus:border-primary focus:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+              data-days="3"
+            >
+              3 Days
+            </button>
+            <button 
+              type="button" 
+              class="snooze-quick-btn px-3 py-2 text-sm border border-gray-300 rounded-lg hover:border-primary hover:text-primary focus:border-primary focus:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+              data-days="7"
+            >
+              Next Week
+            </button>
+          </div>
+        </div>
+        
+        <!-- Custom Date -->
+        <div class="space-y-2">
+          <label for="customSnoozeDate" class="block text-sm font-medium text-gray-700">Or pick a custom date:</label>
+          <input 
+            type="datetime-local" 
+            id="customSnoozeDate"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+          >
+          <div id="snoozeError" class="text-sm text-red-600 hidden" role="alert"></div>
+        </div>
+        
+        <!-- Submit Button -->
+        <div class="pt-4">
+          <button 
+            type="submit"
+            id="submitSnoozeBtn"
+            class="w-full bg-accent text-white px-4 py-3 rounded-lg font-medium hover:bg-accent/90 focus:bg-accent/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Snooze Task
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+            
+
+
+
+
+
+
+            
+        </main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'localDB:';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            btn.addEventListener('click', () => {
+                const isOpen = !sidebar.classList.contains('hidden');
+                
+                if (isOpen) {
+                    // Close
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    // Open
+                    sidebar.classList.remove('hidden');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav link
+                    const firstLink = sidebar.querySelector('a');
+                    if (firstLink) firstLink.focus();
+                }
+            });
+            
+            // Close on overlay click
+            overlay.addEventListener('click', () => {
+                sidebar.classList.add('hidden');
+                overlay.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.focus();
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('hidden') && window.innerWidth < 768) {
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    // Default to first farmer user from dummy data
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-001');
+                    currentUserId = 'u-001';
+                }
+                
+                // Get user from users collection
+                try {
+                    const usersData = localStorage.getItem(APP_PREFIX + 'users');
+                    if (usersData) {
+                        const users = JSON.parse(usersData);
+                        const user = users.find(u => u.id === currentUserId);
+                        return user || null;
+                    }
+                } catch (e) {
+                    console.warn('Error loading user data:', e);
+                }
+                return null;
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName   = document.getElementById('userName');
+            const popoverAvatar = document.getElementById('popoverUserAvatar');
+            const popoverName = document.getElementById('popoverUserName');
+            const popoverEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverAvatar) popoverAvatar.textContent = initials;
+            if (popoverName) popoverName.textContent = displayName;
+            if (popoverEmail) popoverEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popover.classList.toggle('hidden');
+                popoverVisible = !popoverVisible;
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                
+                if (popoverVisible) {
+                    // Focus first focusable element in popover
+                    const firstFocusable = popover.querySelector('button');
+                    if (firstFocusable) firstFocusable.focus();
+                }
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) {
+                    UserUtils.signOut();
+                }
+            });
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX)) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `farm_assistant_data_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            // Show success toast
+            showToast('✅ App data exported successfully', 'success');
+        });
+        
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+        
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX)) {
+                            localStorage.setItem(key, value);
+                            importedCount++;
+                        }
+                    });
+                    
+                    if (importedCount > 0) {
+                        showToast(`✅ App data imported successfully (${importedCount} items). Please refresh the page.`, 'success');
+                    } else {
+                        showToast('⚠️ No valid app data found in file.', 'warning');
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    showToast('❌ Failed to import: Invalid JSON format.', 'error');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Simple toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-white text-sm max-w-sm transition-all duration-300 ${
+                type === 'success' ? 'bg-green-600' :
+                type === 'error' ? 'bg-red-600' :
+                type === 'warning' ? 'bg-orange-600' :
+                'bg-blue-600'
+            }`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        // Simple hash router (no entity IDs; UI-state params only)
+        const Router = (() => {
+            const pageContent = document.getElementById('pageContent');
+            const sideNav = document.getElementById('sideNav');
+
+            function parseHash(){
+                const h = location.hash || '';
+                const m = h.match(/page=([^&]+)/);
+                const page = m ? m[1] : null;
+                // Collect UI-state params only (view, tab, filter, mode, section)
+                const params = {};
+                (h.split('&').slice(1)).forEach(kv => {
+                    const [k,v] = kv.split('=');
+                    if (['view','tab','filter','mode','section'].includes(k)) {
+                        params[k] = decodeURIComponent(v||'');
+                    }
+                });
+                return { page, params };
+            }
+
+            async function loadPage(pageBase){
+                if (!pageBase) {
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+                            <div class="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="leaf" class="w-8 h-8 text-primary"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h2 class="text-display-md font-semibold text-gray-900">Welcome to Farm Assistant</h2>
+                                <p class="text-gray-600 max-w-md">Select a page from the sidebar to get started with managing your farming tasks and tracking your crops.</p>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+                
+                // Show loading state
+                pageContent.innerHTML = `
+                    <div class="flex items-center justify-center min-h-[200px]">
+                        <div class="flex items-center space-x-3 text-gray-600">
+                            <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                            <span>Loading...</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Ensure .html suffix
+                const url = pageBase.endsWith('.html') ? pageBase : `${pageBase}.html`;
+                
+                try {
+                    const res = await fetch(url, { cache: 'no-store' });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const html = await res.text();
+                    pageContent.innerHTML = html;
+                    lucide.createIcons();
+                    
+                    // Allow page to hook UI-state params if it exposes a global
+                    if (window.PageInit?.onParams) {
+                        window.PageInit.onParams(parseHash().params);
+                    }
+                } catch (e) {
+                    console.error('Failed to load page:', url, e);
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[200px] text-center space-y-4">
+                            <div class="w-12 h-12 bg-error/10 rounded-lg flex items-center justify-center">
+                                <i data-lucide="alert-circle" class="w-6 h-6 text-error"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h3 class="font-semibold text-gray-900">Failed to load page</h3>
+                                <p class="text-gray-600 text-sm">The page "${url}" could not be loaded.</p>
+                                <button onclick="Router.onRoute()" class="text-primary hover:text-primary/80 text-sm font-medium">Try again</button>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                }
+            }
+
+            function setActive(pageBase){
+                if (!sideNav) return;
+                
+                const links = sideNav.querySelectorAll('a[href]');
+                links.forEach(a => {
+                    const href = a.getAttribute('href') || '';
+                    const target = href.replace(/^#\/?page=/, '').replace(/\.html$/, '');
+                    const current = (pageBase || '').replace(/\.html$/, '');
+                    
+                    if (target && target === current) {
+                        a.classList.add('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.remove('text-gray-700');
+                    } else {
+                        a.classList.remove('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.add('text-gray-700');
+                    }
+                });
+            }
+
+            async function onRoute(){
+                const { page } = parseHash();
+                await loadPage(page);
+                setActive(page);
+            }
+
+            return { onRoute };
+        })();
+
+        // Make Router.onRoute globally accessible for error retry
+        window.Router = Router;
+
+        window.addEventListener('hashchange', Router.onRoute);
+        Router.onRoute();
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                try {
+                    window.AppActions[action](el);
+                } catch (err) {
+                    console.error('AppAction error:', action, err);
+                    showToast(`❌ Action "${action}" failed: ${err.message}`, 'error');
+                }
+            } else {
+                el.setAttribute('disabled', 'true');
+                el.setAttribute('title', 'Unavailable');
+                el.classList.add('opacity-50', 'cursor-not-allowed');
+                console.warn('AppAction not available:', action);
+            }
+        });
+
+        // Generate navigation items programmatically from page list
+        // Note: In a real implementation, this would be generated from the actual page list data
+        // For now, we have the single "Today's Work" page based on the provided page data
+    </script>
+
+    
+<script id="page-logic" type="module">
+/**
+ * Task Detail Page Logic
+ * 
+ * Data Requirements:
+ * - getTaskDetail(taskOccurrenceId): Returns complete task occurrence with linked template, cropInstance, area data
+ * - getRecentLogs(taskOccurrenceId, cropInstanceId, limit): Returns recent activity logs for the task/crop
+ * - getUnits(): Returns available units for quantity input
+ * - getReasonCodes(): Returns skip reason codes
+ * - markTaskComplete(taskOccurrenceId, logData): Marks task as complete and creates log entry
+ * - skipTask(taskOccurrenceId, skipData): Marks task as skipped with reason
+ * - snoozeTask(taskOccurrenceId, snoozeUntil): Snoozes task until specified date
+ * 
+ * Expected Return Types:
+ * - getTaskDetail(): { taskOccurrence, template, cropInstance, area, taskType, status }
+ * - getRecentLogs(): Array of log entries with linked photos and metadata
+ * - getUnits(): Array of unit objects with id, symbol, name
+ * - getReasonCodes(): Array of reason objects with id, name, description
+ */
+
+import { 
+  getTaskDetail, 
+  getRecentLogs, 
+  getUnits, 
+  getReasonCodes,
+  markTaskComplete,
+  skipTask,
+  snoozeTask,
+  createPhoto
+} from './task_detail-logic.js';
+
+// Page state
+let currentTaskOccurrenceId = null;
+let taskData = null;
+let selectedPhoto = null;
+let selectedSnoozeDate = null;
+
+// Initialize page
+function funInitializePage() {
+  // Get task ID from URL params (in a real router, this would come from route params)
+  const params = new URLSearchParams(window.location.search);
+  currentTaskOccurrenceId = params.get('taskOccurrenceId');
+  
+  if (!currentTaskOccurrenceId) {
+    funShowError('No task specified. Redirecting back...');
+    setTimeout(() => {
+      window.location.href = '#/page=todays_work';
+    }, 2000);
+    return;
+  }
+  
+  funLoadTaskData();
+  funSetupEventListeners();
+}
+
+// Load task data and populate UI
+async function funLoadTaskData() {
+  try {
+    // Get complete task details including linked data
+    taskData = await getTaskDetail(currentTaskOccurrenceId);
+    
+    if (!taskData || !taskData.taskOccurrence) {
+      funShowError('MISSING_TASK');
+      return;
+    }
+    
+    funPopulateTaskUI(taskData);
+    funLoadRecentActivity();
+    
+  } catch (error) {
+    console.error('Error loading task data:', error);
+    funShowError('Failed to load task details. Please try again.');
+  }
+}
+
+// Populate main task UI
+function funPopulateTaskUI(data) {
+  const { taskOccurrence, template, cropInstance, area, taskType, status } = data;
+  
+  // Header info
+  document.getElementById('taskTitle').textContent = template.name || taskType.nameEn;
+  document.getElementById('taskSubtitle').textContent = `${cropInstance.name} • ${area.name}`;
+  
+  // Status badge
+  const statusBadge = document.getElementById('statusBadge');
+  statusBadge.textContent = status.name;
+  statusBadge.className = `px-3 py-1 rounded-lg text-sm font-medium ${funGetStatusBadgeClass(status.id)}`;
+  
+  // Task icon
+  const taskIcon = document.getElementById('taskIcon');
+  taskIcon.setAttribute('data-lucide', funGetTaskTypeIcon(taskType.icon));
+  
+  // Crop and area info
+  document.getElementById('cropInstanceName').textContent = cropInstance.name;
+  document.getElementById('areaInfo').textContent = `${area.name} • ${area.size || ''}${area.sizeUnit || ''}`;
+  
+  // Task details
+  document.getElementById('dueDate').textContent = funFormatDate(taskOccurrence.dueDate);
+  document.getElementById('dueWindow').textContent = taskOccurrence.dueWindow || 'Not specified';
+  document.getElementById('recurrenceType').textContent = taskOccurrence.recurrenceType || 'One-time';
+  
+  // Recommended quantity
+  const recommendedQty = template.recommendedQuantity;
+  const unit = template.defaultUnitId; // Would need to resolve unit name
+  document.getElementById('recommendedQuantity').textContent = 
+    recommendedQty ? `${recommendedQty} ${unit}` : 'Not specified';
+  
+  // Template guidance
+  document.getElementById('templateNotes').textContent = 
+    template.notes || 'No specific guidance provided.';
+    
+  // Update page title for context
+  document.querySelector('title').textContent = `${template.name} - Task Detail`;
+}
+
+// Load recent activity/logs
+async function funLoadRecentActivity() {
+  try {
+    const logs = await getRecentLogs(currentTaskOccurrenceId, taskData.cropInstance.id, 5);
+    
+    const activityList = document.getElementById('activityList');
+    
+    if (!logs || logs.length === 0) {
+      activityList.innerHTML = `
+        <div class="text-center py-8 text-gray-500">
+          <i data-lucide="clipboard" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+          <p class="text-sm">No previous logs for this task.</p>
+          <p class="text-xs mt-1">Tap Done to record first entry.</p>
+        </div>
+      `;
+      return;
+    }
+    
+    activityList.innerHTML = logs.map(log => `
+      <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+        <div class="flex-shrink-0">
+          <i data-lucide="${funGetLogActionIcon(log.action)}" class="w-4 h-4 text-gray-600 mt-1"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-sm font-medium text-gray-900">${funFormatLogAction(log.action)}</span>
+            <span class="text-xs text-gray-500">${funFormatRelativeTime(log.timestamp)}</span>
+          </div>
+          ${log.quantity ? `<p class="text-xs text-gray-600">Quantity: ${log.quantity} ${log.unitId}</p>` : ''}
+          ${log.notes ? `<p class="text-xs text-gray-600 mt-1">${log.notes}</p>` : ''}
+          ${log.photoIds && log.photoIds.length > 0 ? `
+            <div class="flex gap-1 mt-2">
+              ${log.photoIds.slice(0, 2).map(photoId => `
+                <img src="${funGetPhotoThumbnail(photoId)}" alt="Activity photo" class="w-8 h-8 rounded border object-cover">
+              `).join('')}
+              ${log.photoIds.length > 2 ? `<div class="w-8 h-8 rounded border bg-gray-200 flex items-center justify-center text-xs text-gray-600">+${log.photoIds.length - 2}</div>` : ''}
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `).join('');
+    
+  } catch (error) {
+    console.error('Error loading activity:', error);
+    document.getElementById('activityList').innerHTML = `
+      <div class="text-center py-4 text-red-600">
+        <p class="text-sm">Failed to load activity history</p>
+      </div>
+    `;
+  }
+}
+
+// Setup event listeners
+function funSetupEventListeners() {
+  // Back button
+  document.getElementById('backButton').addEventListener('click', () => {
+    window.history.back();
+  });
+  
+  // Primary action buttons
+  document.getElementById('markDoneBtn').addEventListener('click', funOpenDoneDrawer);
+  document.getElementById('skipTaskBtn').addEventListener('click', funOpenSkipDrawer);
+  document.getElementById('snoozeTaskBtn').addEventListener('click', funOpenSnoozeDrawer);
+  document.getElementById('editTemplateBtn').addEventListener('click', funOpenTemplateEditor);
+  document.getElementById('viewCropInstanceBtn').addEventListener('click', funViewCropInstance);
+  
+  // Done drawer
+  document.getElementById('closeDoneDrawer').addEventListener('click', funCloseDoneDrawer);
+  document.getElementById('doneForm').addEventListener('submit', funSubmitDoneForm);
+  document.getElementById('capturePhotoBtn').addEventListener('click', funCapturePhoto);
+  document.getElementById('selectPhotoBtn').addEventListener('click', () => {
+    document.getElementById('photoFileInput').click();
+  });
+  document.getElementById('photoFileInput').addEventListener('change', funHandlePhotoSelect);
+  document.getElementById('removePhotoBtn').addEventListener('click', funRemovePhoto);
+  
+  // Skip drawer
+  document.getElementById('closeSkipDrawer').addEventListener('click', funCloseSkipDrawer);
+  document.getElementById('skipForm').addEventListener('submit', funSubmitSkipForm);
+  
+  // Snooze drawer
+  document.getElementById('closeSnoozeDrawer').addEventListener('click', funCloseSnoozeDrawer);
+  document.getElementById('snoozeForm').addEventListener('submit', funSubmitSnoozeForm);
+  
+  // Snooze quick buttons
+  document.querySelectorAll('.snooze-quick-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const hours = parseInt(e.target.getAttribute('data-hours')) || 0;
+      const days = parseInt(e.target.getAttribute('data-days')) || 0;
+      
+      const snoozeDate = new Date();
+      snoozeDate.setHours(snoozeDate.getHours() + hours);
+      snoozeDate.setDate(snoozeDate.getDate() + days);
+      
+      selectedSnoozeDate = snoozeDate.toISOString();
+      
+      // Update UI to show selection
+      document.querySelectorAll('.snooze-quick-btn').forEach(b => {
+        b.classList.remove('border-primary', 'text-primary', 'bg-primary/5');
+        b.classList.add('border-gray-300');
+      });
+      e.target.classList.add('border-primary', 'text-primary', 'bg-primary/5');
+      e.target.classList.remove('border-gray-300');
+      
+      // Clear custom date
+      document.getElementById('customSnoozeDate').value = '';
+    });
+  });
+  
+  // Custom snooze date
+  document.getElementById('customSnoozeDate').addEventListener('change', (e) => {
+    if (e.target.value) {
+      selectedSnoozeDate = new Date(e.target.value).toISOString();
+      
+      // Clear quick button selections
+      document.querySelectorAll('.snooze-quick-btn').forEach(b => {
+        b.classList.remove('border-primary', 'text-primary', 'bg-primary/5');
+        b.classList.add('border-gray-300');
+      });
+    }
+  });
+  
+  // Close drawers on backdrop click
+  ['doneDrawer', 'skipDrawer', 'snoozeDrawer'].forEach(drawerId => {
+    document.getElementById(drawerId).addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        document.getElementById(drawerId).classList.add('hidden');
+      }
+    });
+  });
+  
+  // Escape key to close drawers
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      funCloseAllDrawers();
+    }
+  });
+}
+
+// Done drawer functions
+async function funOpenDoneDrawer() {
+  if (!taskData) return;
+  
+  const drawer = document.getElementById('doneDrawer');
+  const { template, taskType, cropInstance } = taskData;
+  
+  // Populate task summary
+  document.getElementById('doneTaskSummary').textContent = 
+    `Complete "${template.name}" for ${cropInstance.name}`;
+  
+  // Setup quantity section
+  const requiresQuantity = template.requiresQuantity || taskType.requiresQuantity;
+  const quantitySection = document.getElementById('quantitySection');
+  const quantityRequired = document.getElementById('quantityRequired');
+  const quantityInput = document.getElementById('quantityInput');
+  
+  if (requiresQuantity) {
+    quantitySection.classList.remove('hidden');
+    quantityRequired.classList.remove('hidden');
+    quantityInput.required = true;
+    
+    // Set recommended quantity if available
+    if (template.recommendedQuantity) {
+      quantityInput.value = template.recommendedQuantity;
+    }
+  } else {
+    quantityRequired.classList.add('hidden');
+    quantityInput.required = false;
+  }
+  
+  // Load units
+  await funLoadUnits();
+  
+  // Reset form
+  if (!template.recommendedQuantity) {
+    quantityInput.value = '';
+  }
+  document.getElementById('notesInput').value = '';
+  funRemovePhoto();
+  
+  drawer.classList.remove('hidden');
+  
+  // Focus first input
+  if (requiresQuantity) {
+    quantityInput.focus();
+  } else {
+    document.getElementById('notesInput').focus();
+  }
+}
+
+function funCloseDoneDrawer() {
+  document.getElementById('doneDrawer').classList.add('hidden');
+  funClearErrors();
+}
+
+async function funLoadUnits() {
+  try {
+    const units = await getUnits();
+    const select = document.getElementById('unitSelect');
+    
+    select.innerHTML = '<option value="">Select unit</option>' + 
+      units.map(unit => `<option value="${unit.id}">${unit.symbol} (${unit.name})</option>`).join('');
+    
+    // Pre-select default unit if available
+    if (taskData?.template?.defaultUnitId) {
+      select.value = taskData.template.defaultUnitId;
+    }
+    
+  } catch (error) {
+    console.error('Error loading units:', error);
+  }
+}
+
+async function funSubmitDoneForm(e) {
+  e.preventDefault();
+  funClearErrors();
+  
+  const formData = new FormData(e.target);
+  const quantity = document.getElementById('quantityInput').value;
+  const unitId = document.getElementById('unitSelect').value;
+  const notes = document.getElementById('notesInput').value;
+  
+  // Validation
+  const requiresQuantity = taskData.template.requiresQuantity || taskData.taskType.requiresQuantity;
+  if (requiresQuantity && !quantity) {
+    funShowError('Quantity is required for this task type.', 'quantityError');
+    return;
+  }
+  
+  if (quantity && !unitId) {
+    funShowError('Please select a unit for the quantity.', 'quantityError');
+    return;
+  }
+  
+  try {
+    const submitBtn = document.getElementById('submitDoneBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Completing...';
+    
+    let photoId = null;
+    if (selectedPhoto) {
+      photoId = await createPhoto(selectedPhoto);
+    }
+    
+    const logData = {
+      action: 'completed',
+      quantity: quantity ? parseFloat(quantity) : null,
+      unitId: unitId || null,
+      notes: notes || null,
+      photoIds: photoId ? [photoId] : []
+    };
+    
+    await markTaskComplete(currentTaskOccurrenceId, logData);
+    
+    funCloseDoneDrawer();
+    funShowSuccess('Task marked as complete!');
+    
+    // Refresh task data
+    await funLoadTaskData();
+    
+  } catch (error) {
+    console.error('Error completing task:', error);
+    funShowError('Failed to complete task. Please try again.');
+  } finally {
+    const submitBtn = document.getElementById('submitDoneBtn');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Mark Complete';
+  }
+}
+
+// Photo handling functions
+function funCapturePhoto() {
+  // Check camera permission
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    funShowError('Camera not supported on this device.', 'photoError');
+    return;
+  }
+  
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+      // In a real implementation, this would open a camera interface
+      // For now, we'll simulate with file selection
+      funShowError('Camera capture not implemented. Please use "Select Photo" instead.', 'photoError');
+      stream.getTracks().forEach(track => track.stop());
+    })
+    .catch(error => {
+      console.error('Camera permission denied:', error);
+      funShowError('PHOTO_PERMISSION_DENIED', 'photoError');
+    });
+}
+
+function funHandlePhotoSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    funShowError('Please select a valid image file.', 'photoError');
+    return;
+  }
+  
+  // Validate file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    funShowError('Image file is too large. Please select a file under 5MB.', 'photoError');
+    return;
+  }
+  
+  selectedPhoto = file;
+  
+  // Show preview
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById('photoPreviewImg').src = e.target.result;
+    document.getElementById('photoPreview').classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+  
+  funClearErrors('photoError');
+}
+
+function funRemovePhoto() {
+  selectedPhoto = null;
+  document.getElementById('photoPreview').classList.add('hidden');
+  document.getElementById('photoFileInput').value = '';
+}
+
+// Skip drawer functions
+async function funOpenSkipDrawer() {
+  if (!taskData) return;
+  
+  const drawer = document.getElementById('skipDrawer');
+  const { template, cropInstance } = taskData;
+  
+  // Populate task summary
+  document.getElementById('skipTaskSummary').textContent = 
+    `Skip "${template.name}" for ${cropInstance.name}`;
+  
+  // Load and populate reason codes
+  await funLoadReasonCodes();
+  
+  // Reset form
+  document.getElementById('skipNotesInput').value = '';
+  document.querySelectorAll('input[name="skipReason"]').forEach(radio => {
+    radio.checked = false;
+  });
+  
+  drawer.classList.remove('hidden');
+  
+  // Focus first radio button
+  const firstRadio = drawer.querySelector('input[name="skipReason"]');
+  if (firstRadio) firstRadio.focus();
+}
+
+function funCloseSkipDrawer() {
+  document.getElementById('skipDrawer').classList.add('hidden');
+  funClearErrors();
+}
+
+async function funLoadReasonCodes() {
+  try {
+    const reasons = await getReasonCodes();
+    const container = document.getElementById('reasonOptions');
+    
+    container.innerHTML = reasons.map(reason => `
+      <label class="flex items-center gap-3 p-3 border border-gray-300 rounded-lg hover:border-primary cursor-pointer transition-colors">
+        <input 
+          type="radio" 
+          name="skipReason" 
+          value="${reason.id}"
+          class="text-primary focus:ring-primary focus:ring-2"
+        >
+        <div>
+          <div class="font-medium text-gray-900">${reason.name}</div>
+          ${reason.description ? `<div class="text-sm text-gray-600">${reason.description}</div>` : ''}
+        </div>
+      </label>
+    `).join('');
+    
+  } catch (error) {
+    console.error('Error loading reason codes:', error);
+    document.getElementById('reasonOptions').innerHTML = `
+      <p class="text-red-600 text-sm">Failed to load skip reasons</p>
+    `;
+  }
+}
+
+async function funSubmitSkipForm(e) {
+  e.preventDefault();
+  funClearErrors();
+  
+  const selectedReason = document.querySelector('input[name="skipReason"]:checked');
+  const notes = document.getElementById('skipNotesInput').value;
+  
+  // Validation
+  if (!selectedReason) {
+    funShowError('Please select a reason for skipping.', 'reasonError');
+    return;
+  }
+  
+  try {
+    const submitBtn = document.getElementById('submitSkipBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Skipping...';
+    
+    const skipData = {
+      reasonId: selectedReason.value,
+      notes: notes || null
+    };
+    
+    await skipTask(currentTaskOccurrenceId, skipData);
+    
+    funCloseSkipDrawer();
+    funShowSuccess('Task skipped successfully!');
+    
+    // Refresh task data
+    await funLoadTaskData();
+    
+  } catch (error) {
+    console.error('Error skipping task:', error);
+    funShowError('Failed to skip task. Please try again.');
+  } finally {
+    const submitBtn = document.getElementById('submitSkipBtn');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Skip Task';
+  }
+}
+
+// Snooze drawer functions
+function funOpenSnoozeDrawer() {
+  if (!taskData) return;
+  
+  const drawer = document.getElementById('snoozeDrawer');
+  const { template, cropInstance } = taskData;
+  
+  // Populate task summary
+  document.getElementById('snoozeTaskSummary').textContent = 
+    `Snooze "${template.name}" for ${cropInstance.name}`;
+  
+  // Reset selections
+  selectedSnoozeDate = null;
+  document.querySelectorAll('.snooze-quick-btn').forEach(btn => {
+    btn.classList.remove('border-primary', 'text-primary', 'bg-primary/5');
+    btn.classList.add('border-gray-300');
+  });
+  document.getElementById('customSnoozeDate').value = '';
+  
+  // Set minimum date to current time
+  const now = new Date();
+  now.setMinutes(now.getMinutes() + 30); // Minimum 30 minutes from now
+  document.getElementById('customSnoozeDate').min = now.toISOString().slice(0, 16);
+  
+  drawer.classList.remove('hidden');
+  
+  // Focus first quick button
+  const firstBtn = drawer.querySelector('.snooze-quick-btn');
+  if (firstBtn) firstBtn.focus();
+}
+
+function funCloseSnoozeDrawer() {
+  document.getElementById('snoozeDrawer').classList.add('hidden');
+  funClearErrors();
+}
+
+async function funSubmitSnoozeForm(e) {
+  e.preventDefault();
+  funClearErrors();
+  
+  // Check if a snooze option is selected
+  if (!selectedSnoozeDate) {
+    funShowError('Please select a snooze option.', 'snoozeError');
+    return;
+  }
+  
+  // Validate that snooze date is in the future
+  const snoozeTime = new Date(selectedSnoozeDate);
+  if (snoozeTime <= new Date()) {
+    funShowError('Snooze time must be in the future.', 'snoozeError');
+    return;
+  }
+  
+  try {
+    const submitBtn = document.getElementById('submitSnoozeBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Snoozing...';
+    
+    await snoozeTask(currentTaskOccurrenceId, selectedSnoozeDate);
+    
+    funCloseSnoozeDrawer();
+    funShowSuccess(`Task snoozed until ${funFormatDateTime(selectedSnoozeDate)}!`);
+    
+    // Refresh task data
+    await funLoadTaskData();
+    
+  } catch (error) {
+    console.error('Error snoozing task:', error);
+    funShowError('Failed to snooze task. Please try again.');
+  } finally {
+    const submitBtn = document.getElementById('submitSnoozeBtn');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Snooze Task';
+  }
+}
+
+// Navigation functions
+function funOpenTemplateEditor() {
+  if (!taskData) return;
+  window.location.href = `#/page=crop_instance&cropInstanceId=${taskData.cropInstance.id}`;
+}
+
+function funViewCropInstance() {
+  if (!taskData) return;
+  window.location.href = `#/page=crop_instance&cropInstanceId=${taskData.cropInstance.id}`;
+}
+
+// Utility functions
+function funCloseAllDrawers() {
+  document.getElementById('doneDrawer').classList.add('hidden');
+  document.getElementById('skipDrawer').classList.add('hidden');
+  document.getElementById('snoozeDrawer').classList.add('hidden');
+}
+
+function funClearErrors(specificErrorId = null) {
+  const errorIds = specificErrorId ? [specificErrorId] : ['quantityError', 'photoError', 'reasonError', 'snoozeError'];
+  errorIds.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.textContent = '';
+      element.classList.add('hidden');
+    }
+  });
+}
+
+function funShowError(message, errorElementId = null) {
+  if (message === 'MISSING_TASK') {
+    document.querySelector('main').innerHTML = `
+      <div class="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+        <div class="w-16 h-16 bg-red-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="alert-circle" class="w-8 h-8 text-red-600"></i>
+        </div>
+        <div class="space-y-2">
+          <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Task Not Found</h2>
+          <p class="text-gray-600 max-w-md">This work item was removed or changed.</p>
+          <button onclick="window.location.href='#/page=todays_work'" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors">
+            Return to Today's Work
+          </button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+  
+  if (message === 'PHOTO_PERMISSION_DENIED') {
+    funShowError('Camera permissions are required to take photos. Please enable camera access in your browser settings or use "Select Photo" to choose from your device.', errorElementId);
+    return;
+  }
+  
+  if (errorElementId) {
+    const errorElement = document.getElementById(errorElementId);
+    if (errorElement) {
+      errorElement.textContent = message;
+      errorElement.classList.remove('hidden');
+      errorElement.setAttribute('role', 'alert');
+    }
+  } else {
+    // Show global error
+    console.error('Error:', message);
+    // In a real app, this might show a toast or alert
+  }
+}
+
+function funShowSuccess(message) {
+  // In a real app, this would show a success toast
+  console.log('Success:', message);
+}
+
+function funGetStatusBadgeClass(statusId) {
+  const classes = {
+    'status-due': 'bg-orange-100 text-orange-800',
+    'status-overdue': 'bg-red-100 text-red-800',
+    'status-planned': 'bg-blue-100 text-blue-800',
+    'status-completed': 'bg-green-100 text-green-800',
+    'status-skipped': 'bg-gray-100 text-gray-800',
+    'status-snoozed': 'bg-yellow-100 text-yellow-800'
+  };
+  return classes[statusId] || 'bg-gray-100 text-gray-800';
+}
+
+function funGetTaskTypeIcon(iconKey) {
+  const icons = {
+    'water-drop': 'droplets',
+    'fertilizer': 'leaf',
+    'harvest': 'package',
+    'spray': 'spray-can'
+  };
+  return icons[iconKey] || 'circle-check';
+}
+
+function funGetLogActionIcon(action) {
+  const icons = {
+    'completed': 'check-circle',
+    'skipped': 'x-circle',
+    'snoozed': 'clock'
+  };
+  return icons[action] || 'circle';
+}
+
+function funFormatLogAction(action) {
+  const actions = {
+    'completed': 'Completed',
+    'skipped': 'Skipped',
+    'snoozed': 'Snoozed'
+  };
+  return actions[action] || action;
+}
+
+function funFormatDate(dateString) {
+  if (!dateString) return 'Not set';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-IN', { 
+    day: '2-digit', 
+    month: '2-digit', 
+    year: 'numeric' 
+  });
+}
+
+function funFormatDateTime(dateString) {
+  if (!dateString) return 'Not set';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-IN', { 
+    day: '2-digit', 
+    month: '2-digit', 
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function funFormatRelativeTime(dateString) {
+  if (!dateString) return 'Unknown';
+  
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffHours / 24);
+  
+  if (diffDays > 7) {
+    return date.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit' });
+  } else if (diffDays > 0) {
+    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+  } else if (diffHours > 0) {
+    return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+  } else {
+    return 'Just now';
+  }
+}
+
+function funGetPhotoThumbnail(photoId) {
+  // In a real implementation, this would resolve photo URL from storage
+  // For now, return a placeholder
+  return 'https://images.unsplash.com/photo-1574285013029-29296a71930e?w=100&h=100&fit=crop&crop=center';
+}
+
+// Initialize page when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', funInitializePage);
+} else {
+  funInitializePage();
+}
+
+// Reinitialize icons after dynamic content updates
+function funRefreshIcons() {
+  if (typeof lucide !== 'undefined' && lucide.createIcons) {
+    lucide.createIcons();
+  }
+}
+
+// Call icon refresh after UI updates
+const originalLoadTaskData = funLoadTaskData;
+funLoadTaskData = async function() {
+  await originalLoadTaskData();
+  funRefreshIcons();
+};
+
+const originalLoadRecentActivity = funLoadRecentActivity;
+funLoadRecentActivity = async function() {
+  await originalLoadRecentActivity();
+  funRefreshIcons();
+};
+</script>
+
+</body>
+
+</html>

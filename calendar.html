@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Farm Planning Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #047857;
+            --color-secondary: #8C5E3C;
+            --color-accent: #B38600;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --border-radius-sm: 8px;
+            --border-radius-md: 16px;
+            --border-radius-lg: 24px;
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+    
+
+
+
+
+
+
+
+    <a href="#pageContent" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-white px-3 py-1 rounded shadow-lg z-50">Skip to main content</a>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover"
+        class="absolute top-16 right-6 bg-white border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar"
+                class="w-8 h-8 bg-primary text-white rounded-xl flex items-center justify-center text-sm font-medium">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-medium text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton"
+                class="w-full flex items-center text-sm gap-2 px-3 py-2 text-left text-error hover:bg-red-50 focus:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-error rounded-md transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Mobile sidebar overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 hidden md:hidden"></div>
+
+        <!-- Sidebar -->
+        
+
+
+
+
+
+
+
+
+
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)] bg-background" id="pageContent" role="main">
+            
+<section class="max-w-7xl mx-auto">
+  <!-- Header with view toggle and filters -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+    <div>
+      <h1 class="text-[1.75rem] leading-[2.25rem] font-bold text-gray-900">Calendar</h1>
+      <p class="text-sm leading-[1.375rem] font-normal text-gray-600 mt-1">Plan your farming activities with visual scheduling</p>
+    </div>
+    
+    <div class="flex items-center gap-3">
+      <!-- View Mode Toggle -->
+      <div class="flex items-center bg-gray-100 rounded p-1">
+        <button id="weekViewBtn" 
+                class="px-3 py-1.5 text-sm font-medium rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                aria-pressed="true">
+          Week
+        </button>
+        <button id="monthViewBtn" 
+                class="px-3 py-1.5 text-sm font-medium rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+          Month
+        </button>
+      </div>
+      
+      <!-- Filter Button -->
+      <button id="filterBtn" 
+              class="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+              aria-label="Open filters">
+        <i data-lucide="filter" class="w-4 h-4"></i>
+        <span class="text-sm font-medium">Filters</span>
+        <span id="activeFiltersCount" class="hidden bg-primary text-white text-xs px-2 py-0.5 rounded-full">0</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Calendar Navigation -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+      <button id="prevPeriodBtn" 
+              class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+              aria-label="Previous period">
+        <i data-lucide="chevron-left" class="w-5 h-5"></i>
+      </button>
+      
+      <h2 id="currentPeriodTitle" class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 min-w-[200px] text-center">
+        <!-- Will be populated by JS -->
+      </h2>
+      
+      <button id="nextPeriodBtn" 
+              class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+              aria-label="Next period">
+        <i data-lucide="chevron-right" class="w-5 h-5"></i>
+      </button>
+    </div>
+    
+    <button id="todayBtn" 
+            class="px-4 py-2 text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary hover:text-white focus:bg-primary focus:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+      Today
+    </button>
+  </div>
+
+  <!-- Calendar Grid Container -->
+  <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+    <!-- Week View Headers -->
+    <div id="weekHeaders" class="grid grid-cols-7 border-b border-gray-200 bg-gray-50">
+      <div class="p-3 text-sm font-medium text-gray-600 text-center">Mon</div>
+      <div class="p-3 text-sm font-medium text-gray-600 text-center">Tue</div>
+      <div class="p-3 text-sm font-medium text-gray-600 text-center">Wed</div>
+      <div class="p-3 text-sm font-medium text-gray-600 text-center">Thu</div>
+      <div class="p-3 text-sm font-medium text-gray-600 text-center">Fri</div>
+      <div class="p-3 text-sm font-medium text-gray-600 text-center">Sat</div>
+      <div class="p-3 text-sm font-medium text-gray-600 text-center">Sun</div>
+    </div>
+
+    <!-- Month View Headers (initially hidden) -->
+    <div id="monthHeaders" class="hidden grid grid-cols-7 border-b border-gray-200 bg-gray-50">
+      <div class="p-2 text-xs font-medium text-gray-600 text-center">Mon</div>
+      <div class="p-2 text-xs font-medium text-gray-600 text-center">Tue</div>
+      <div class="p-2 text-xs font-medium text-gray-600 text-center">Wed</div>
+      <div class="p-2 text-xs font-medium text-gray-600 text-center">Thu</div>
+      <div class="p-2 text-xs font-medium text-gray-600 text-center">Fri</div>
+      <div class="p-2 text-xs font-medium text-gray-600 text-center">Sat</div>
+      <div class="p-2 text-xs font-medium text-gray-600 text-center">Sun</div>
+    </div>
+
+    <!-- Calendar Body -->
+    <div id="calendarBody" class="min-h-[400px]">
+      <!-- Will be populated by JS -->
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div id="emptyState" class="hidden text-center py-12">
+    <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+      <i data-lucide="calendar-x" class="w-8 h-8 text-gray-400"></i>
+    </div>
+    <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-2">No tasks in this timeframe</h3>
+    <p class="text-sm leading-[1.375rem] font-normal text-gray-600 mb-4">Add a Crop to start scheduling work.</p>
+    <button id="addCropBtn" 
+            class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+      Add Crop
+    </button>
+  </div>
+</section>
+
+<!-- Filter Drawer -->
+<div id="filterDrawer" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="filterDrawerTitle">
+  <div class="fixed inset-0 bg-gray-900 bg-opacity-50" id="filterOverlay"></div>
+  <div class="fixed right-0 top-0 h-full w-80 bg-white shadow-lg transform translate-x-full transition-transform duration-300" id="filterPanel">
+    <div class="flex flex-col h-full">
+      <!-- Header -->
+      <div class="flex items-center justify-between p-6 border-b border-gray-200">
+        <h2 id="filterDrawerTitle" class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Filters</h2>
+        <button id="closeFilterBtn" 
+                class="p-2 text-gray-400 hover:text-gray-600 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                aria-label="Close filters">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      
+      <!-- Filter Content -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-6">
+        <!-- Date Range Shortcuts -->
+        <div>
+          <h3 class="text-sm font-medium text-gray-900 mb-3">Quick Date Range</h3>
+          <div class="space-y-2">
+            <button class="dateRangeBtn w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors" data-range="thisWeek">
+              This Week
+            </button>
+            <button class="dateRangeBtn w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors" data-range="next2Weeks">
+              Next 2 Weeks
+            </button>
+            <button class="dateRangeBtn w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors" data-range="thisMonth">
+              This Month
+            </button>
+          </div>
+        </div>
+        
+        <!-- Field Filter -->
+        <div>
+          <label for="fieldFilter" class="block text-sm font-medium text-gray-900 mb-3">Field</label>
+          <select id="fieldFilter" 
+                  class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus:border-primary">
+            <option value="">All Fields</option>
+            <!-- Populated by JS -->
+          </select>
+        </div>
+        
+        <!-- Area Filter -->
+        <div>
+          <label for="areaFilter" class="block text-sm font-medium text-gray-900 mb-3">Area</label>
+          <select id="areaFilter" 
+                  class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus:border-primary">
+            <option value="">All Areas</option>
+            <!-- Populated by JS -->
+          </select>
+        </div>
+        
+        <!-- Crop Filter -->
+        <div>
+          <label for="cropFilter" class="block text-sm font-medium text-gray-900 mb-3">Crop</label>
+          <select id="cropFilter" 
+                  class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus:border-primary">
+            <option value="">All Crops</option>
+            <!-- Populated by JS -->
+          </select>
+        </div>
+        
+        <!-- Task Type Filter -->
+        <div>
+          <label for="taskTypeFilter" class="block text-sm font-medium text-gray-900 mb-3">Task Type</label>
+          <select id="taskTypeFilter" 
+                  class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus:border-primary">
+            <option value="">All Task Types</option>
+            <!-- Populated by JS -->
+          </select>
+        </div>
+        
+        <!-- Status Filter -->
+        <div>
+          <label for="statusFilter" class="block text-sm font-medium text-gray-900 mb-3">Status</label>
+          <select id="statusFilter" 
+                  class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus:border-primary">
+            <option value="">All Statuses</option>
+            <!-- Populated by JS -->
+          </select>
+        </div>
+      </div>
+      
+      <!-- Footer Actions -->
+      <div class="p-6 border-t border-gray-200 space-y-3">
+        <button id="applyFiltersBtn" 
+                class="w-full px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+          Apply Filters
+        </button>
+        <button id="clearFiltersBtn" 
+                class="w-full px-4 py-2 text-gray-700 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+          Clear All
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Weather Notice Banner (shown when weather events affect tasks) -->
+<div id="weatherBanner" class="hidden bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded-r-lg">
+  <div class="flex items-start">
+    <i data-lucide="cloud-rain" class="w-5 h-5 text-blue-400 mt-0.5 mr-3"></i>
+    <div class="flex-1">
+      <p class="text-sm text-blue-800">
+        <span id="weatherMessage">Rain expected today.</span>
+        <button id="skipWateringBtn" class="ml-2 text-blue-600 underline hover:text-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
+          Skip watering tasks?
+        </button>
+      </p>
+    </div>
+    <button id="dismissWeatherBanner" class="text-blue-400 hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400" aria-label="Dismiss">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+  </div>
+</div>
+
+            
+        </main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'localDB:';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            btn.addEventListener('click', () => {
+                const isOpen = !sidebar.classList.contains('hidden');
+                
+                if (isOpen) {
+                    // Close
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    // Open
+                    sidebar.classList.remove('hidden');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav link
+                    const firstLink = sidebar.querySelector('a');
+                    if (firstLink) firstLink.focus();
+                }
+            });
+            
+            // Close on overlay click
+            overlay.addEventListener('click', () => {
+                sidebar.classList.add('hidden');
+                overlay.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.focus();
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('hidden') && window.innerWidth < 768) {
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    // Default to first farmer user from dummy data
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-001');
+                    currentUserId = 'u-001';
+                }
+                
+                // Get user from users collection
+                try {
+                    const usersData = localStorage.getItem(APP_PREFIX + 'users');
+                    if (usersData) {
+                        const users = JSON.parse(usersData);
+                        const user = users.find(u => u.id === currentUserId);
+                        return user || null;
+                    }
+                } catch (e) {
+                    console.warn('Error loading user data:', e);
+                }
+                return null;
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName   = document.getElementById('userName');
+            const popoverAvatar = document.getElementById('popoverUserAvatar');
+            const popoverName = document.getElementById('popoverUserName');
+            const popoverEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverAvatar) popoverAvatar.textContent = initials;
+            if (popoverName) popoverName.textContent = displayName;
+            if (popoverEmail) popoverEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popover.classList.toggle('hidden');
+                popoverVisible = !popoverVisible;
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                
+                if (popoverVisible) {
+                    // Focus first focusable element in popover
+                    const firstFocusable = popover.querySelector('button');
+                    if (firstFocusable) firstFocusable.focus();
+                }
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) {
+                    UserUtils.signOut();
+                }
+            });
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX)) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `farm_assistant_data_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            // Show success toast
+            showToast('✅ App data exported successfully', 'success');
+        });
+        
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+        
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX)) {
+                            localStorage.setItem(key, value);
+                            importedCount++;
+                        }
+                    });
+                    
+                    if (importedCount > 0) {
+                        showToast(`✅ App data imported successfully (${importedCount} items). Please refresh the page.`, 'success');
+                    } else {
+                        showToast('⚠️ No valid app data found in file.', 'warning');
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    showToast('❌ Failed to import: Invalid JSON format.', 'error');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Simple toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-white text-sm max-w-sm transition-all duration-300 ${
+                type === 'success' ? 'bg-green-600' :
+                type === 'error' ? 'bg-red-600' :
+                type === 'warning' ? 'bg-orange-600' :
+                'bg-blue-600'
+            }`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        // Simple hash router (no entity IDs; UI-state params only)
+        const Router = (() => {
+            const pageContent = document.getElementById('pageContent');
+            const sideNav = document.getElementById('sideNav');
+
+            function parseHash(){
+                const h = location.hash || '';
+                const m = h.match(/page=([^&]+)/);
+                const page = m ? m[1] : null;
+                // Collect UI-state params only (view, tab, filter, mode, section)
+                const params = {};
+                (h.split('&').slice(1)).forEach(kv => {
+                    const [k,v] = kv.split('=');
+                    if (['view','tab','filter','mode','section'].includes(k)) {
+                        params[k] = decodeURIComponent(v||'');
+                    }
+                });
+                return { page, params };
+            }
+
+            async function loadPage(pageBase){
+                if (!pageBase) {
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+                            <div class="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="leaf" class="w-8 h-8 text-primary"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h2 class="text-display-md font-semibold text-gray-900">Welcome to Farm Assistant</h2>
+                                <p class="text-gray-600 max-w-md">Select a page from the sidebar to get started with managing your farming tasks and tracking your crops.</p>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+                
+                // Show loading state
+                pageContent.innerHTML = `
+                    <div class="flex items-center justify-center min-h-[200px]">
+                        <div class="flex items-center space-x-3 text-gray-600">
+                            <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                            <span>Loading...</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Ensure .html suffix
+                const url = pageBase.endsWith('.html') ? pageBase : `${pageBase}.html`;
+                
+                try {
+                    const res = await fetch(url, { cache: 'no-store' });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const html = await res.text();
+                    pageContent.innerHTML = html;
+                    lucide.createIcons();
+                    
+                    // Allow page to hook UI-state params if it exposes a global
+                    if (window.PageInit?.onParams) {
+                        window.PageInit.onParams(parseHash().params);
+                    }
+                } catch (e) {
+                    console.error('Failed to load page:', url, e);
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[200px] text-center space-y-4">
+                            <div class="w-12 h-12 bg-error/10 rounded-lg flex items-center justify-center">
+                                <i data-lucide="alert-circle" class="w-6 h-6 text-error"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h3 class="font-semibold text-gray-900">Failed to load page</h3>
+                                <p class="text-gray-600 text-sm">The page "${url}" could not be loaded.</p>
+                                <button onclick="Router.onRoute()" class="text-primary hover:text-primary/80 text-sm font-medium">Try again</button>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                }
+            }
+
+            function setActive(pageBase){
+                if (!sideNav) return;
+                
+                const links = sideNav.querySelectorAll('a[href]');
+                links.forEach(a => {
+                    const href = a.getAttribute('href') || '';
+                    const target = href.replace(/^#\/?page=/, '').replace(/\.html$/, '');
+                    const current = (pageBase || '').replace(/\.html$/, '');
+                    
+                    if (target && target === current) {
+                        a.classList.add('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.remove('text-gray-700');
+                    } else {
+                        a.classList.remove('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.add('text-gray-700');
+                    }
+                });
+            }
+
+            async function onRoute(){
+                const { page } = parseHash();
+                await loadPage(page);
+                setActive(page);
+            }
+
+            return { onRoute };
+        })();
+
+        // Make Router.onRoute globally accessible for error retry
+        window.Router = Router;
+
+        window.addEventListener('hashchange', Router.onRoute);
+        Router.onRoute();
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                try {
+                    window.AppActions[action](el);
+                } catch (err) {
+                    console.error('AppAction error:', action, err);
+                    showToast(`❌ Action "${action}" failed: ${err.message}`, 'error');
+                }
+            } else {
+                el.setAttribute('disabled', 'true');
+                el.setAttribute('title', 'Unavailable');
+                el.classList.add('opacity-50', 'cursor-not-allowed');
+                console.warn('AppAction not available:', action);
+            }
+        });
+
+        // Generate navigation items programmatically from page list
+        // Note: In a real implementation, this would be generated from the actual page list data
+        // For now, we have the single "Today's Work" page based on the provided page data
+    </script>
+
+    
+<script id="page-logic" type="module">
+import { 
+  getTaskOccurrencesByDateRange,
+  getCropInstances,
+  getAreas,
+  getFields,
+  getTaskTypes,
+  getStatusCodes,
+  getWeatherEventsByDateRange,
+  getUserSettings
+} from './calendar-logic.js';
+
+// Calendar state management
+let currentDate = new Date();
+let viewMode = 'week'; // 'week' or 'month'
+let activeFilters = {
+  fieldId: '',
+  areaId: '',
+  cropInstanceId: '',
+  taskTypeId: '',
+  statusId: '',
+  dateRange: null
+};
+
+// Initialize calendar
+document.addEventListener('DOMContentLoaded', funInitializeCalendar);
+
+async function funInitializeCalendar() {
+  try {
+    // Load user settings to get preferred view mode
+    const userSettings = await getUserSettings();
+    if (userSettings && userSettings.calendarViewMode) {
+      viewMode = userSettings.calendarViewMode;
+    }
+    
+    funSetupEventListeners();
+    await funPopulateFilterOptions();
+    await funRenderCalendar();
+    funUpdateViewModeButtons();
+  } catch (error) {
+    console.error('Failed to initialize calendar:', error);
+    funShowError('Failed to load calendar data');
+  }
+}
+
+function funSetupEventListeners() {
+  // View mode toggle
+  document.getElementById('weekViewBtn').addEventListener('click', () => funSwitchViewMode('week'));
+  document.getElementById('monthViewBtn').addEventListener('click', () => funSwitchViewMode('month'));
+  
+  // Navigation
+  document.getElementById('prevPeriodBtn').addEventListener('click', funNavigatePrevious);
+  document.getElementById('nextPeriodBtn').addEventListener('click', funNavigateNext);
+  document.getElementById('todayBtn').addEventListener('click', funGoToToday);
+  
+  // Filters
+  document.getElementById('filterBtn').addEventListener('click', funOpenFilterDrawer);
+  document.getElementById('closeFilterBtn').addEventListener('click', funCloseFilterDrawer);
+  document.getElementById('filterOverlay').addEventListener('click', funCloseFilterDrawer);
+  document.getElementById('applyFiltersBtn').addEventListener('click', funApplyFilters);
+  document.getElementById('clearFiltersBtn').addEventListener('click', funClearFilters);
+  
+  // Date range shortcuts
+  document.querySelectorAll('.dateRangeBtn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const range = e.target.dataset.range;
+      funApplyDateRangeShortcut(range);
+    });
+  });
+  
+  // Weather banner
+  document.getElementById('dismissWeatherBanner')?.addEventListener('click', funDismissWeatherBanner);
+  document.getElementById('skipWateringBtn')?.addEventListener('click', funSkipWateringTasks);
+  
+  // Empty state action
+  document.getElementById('addCropBtn')?.addEventListener('click', () => {
+    window.location.hash = '#/page=crop_instance_create';
+  });
+  
+  // Keyboard navigation
+  document.addEventListener('keydown', funHandleKeyboardNavigation);
+}
+
+async function funPopulateFilterOptions() {
+  try {
+    // Get all data for filter options
+    // Expected return type: { fields: Array<Field>, areas: Array<Area>, cropInstances: Array<CropInstance>, taskTypes: Array<TaskType>, statusCodes: Array<StatusCode> }
+    // Data source: fields, areas, cropInstances, taskTypes, statusCodes collections
+    const [fields, areas, cropInstances, taskTypes, statusCodes] = await Promise.all([
+      getFields(),
+      getAreas(),
+      getCropInstances(),
+      getTaskTypes(),
+      getStatusCodes()
+    ]);
+    
+    // Populate field filter
+    const fieldSelect = document.getElementById('fieldFilter');
+    fields.forEach(field => {
+      const option = document.createElement('option');
+      option.value = field.id;
+      option.textContent = field.name;
+      fieldSelect.appendChild(option);
+    });
+    
+    // Populate area filter
+    const areaSelect = document.getElementById('areaFilter');
+    areas.forEach(area => {
+      const option = document.createElement('option');
+      option.value = area.id;
+      option.textContent = area.name;
+      areaSelect.appendChild(option);
+    });
+    
+    // Populate crop filter
+    const cropSelect = document.getElementById('cropFilter');
+    cropInstances.forEach(crop => {
+      const option = document.createElement('option');
+      option.value = crop.id;
+      option.textContent = crop.name;
+      cropSelect.appendChild(option);
+    });
+    
+    // Populate task type filter
+    const taskTypeSelect = document.getElementById('taskTypeFilter');
+    taskTypes.forEach(taskType => {
+      const option = document.createElement('option');
+      option.value = taskType.id;
+      option.textContent = taskType.nameEn; // Use English name for display
+      taskTypeSelect.appendChild(option);
+    });
+    
+    // Populate status filter
+    const statusSelect = document.getElementById('statusFilter');
+    statusCodes.forEach(status => {
+      const option = document.createElement('option');
+      option.value = status.id;
+      option.textContent = status.name;
+      statusSelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error('Failed to populate filter options:', error);
+  }
+}
+
+async function funRenderCalendar() {
+  try {
+    const { startDate, endDate } = funGetDateRange();
+    
+    // Get task occurrences for the date range
+    // Expected return type: Array<TaskOccurrenceWithDetails> where TaskOccurrenceWithDetails includes joined data from cropInstances, areas, taskTypes, statusCodes
+    // Data source: taskOccurrences collection filtered by dueDate range and active filters, joined with related collections
+    const taskOccurrences = await getTaskOccurrencesByDateRange(startDate, endDate, activeFilters);
+    
+    // Check for weather events that might affect tasks
+    // Expected return type: Array<WeatherEvent>
+    // Data source: weatherEvents collection filtered by date range
+    const weatherEvents = await getWeatherEventsByDateRange(startDate, endDate);
+    
+    // Update period title
+    funUpdatePeriodTitle(startDate, endDate);
+    
+    // Show weather banner if there are rain events
+    funCheckWeatherEvents(weatherEvents);
+    
+    // Render calendar grid
+    if (viewMode === 'week') {
+      funRenderWeekView(startDate, endDate, taskOccurrences);
+    } else {
+      funRenderMonthView(startDate, endDate, taskOccurrences);
+    }
+    
+    // Show empty state if no tasks
+    const emptyState = document.getElementById('emptyState');
+    const calendarBody = document.getElementById('calendarBody');
+    
+    if (taskOccurrences.length === 0) {
+      emptyState.classList.remove('hidden');
+      calendarBody.style.display = 'none';
+    } else {
+      emptyState.classList.add('hidden');
+      calendarBody.style.display = 'block';
+    }
+    
+  } catch (error) {
+    console.error('Failed to render calendar:', error);
+    funShowError('Failed to load calendar data');
+  }
+}
+
+function funRenderWeekView(startDate, endDate, taskOccurrences) {
+  const calendarBody = document.getElementById('calendarBody');
+  const weekHeaders = document.getElementById('weekHeaders');
+  const monthHeaders = document.getElementById('monthHeaders');
+  
+  weekHeaders.classList.remove('hidden');
+  monthHeaders.classList.add('hidden');
+  
+  // Create week grid (7 columns, 1 row for week view)
+  let html = '<div class="grid grid-cols-7 min-h-[400px]">';
+  
+  const days = funGenerateDaysInRange(startDate, endDate);
+  
+  days.forEach(day => {
+    const dayTasks = taskOccurrences.filter(task => 
+      new Date(task.dueDate).toDateString() === day.toDateString()
+    );
+    
+    const isToday = day.toDateString() === new Date().toDateString();
+    const isCurrentMonth = day.getMonth() === currentDate.getMonth();
+    
+    html += `
+      <div class="border-r border-gray-200 last:border-r-0 p-4 ${isToday ? 'bg-blue-50' : ''}" role="gridcell">
+        <div class="mb-3">
+          <div class="text-sm font-medium ${isToday ? 'text-blue-600' : isCurrentMonth ? 'text-gray-900' : 'text-gray-400'}">
+            ${day.getDate()}
+          </div>
+          ${isToday ? '<div class="text-xs text-blue-600">Today</div>' : ''}
+        </div>
+        <div class="space-y-1">
+          ${funRenderDayTasks(dayTasks, 'week')}
+        </div>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  calendarBody.innerHTML = html;
+  
+  // Add event listeners for task clicks
+  funAddTaskClickListeners();
+}
+
+function funRenderMonthView(startDate, endDate, taskOccurrences) {
+  const calendarBody = document.getElementById('calendarBody');
+  const weekHeaders = document.getElementById('weekHeaders');
+  const monthHeaders = document.getElementById('monthHeaders');
+  
+  weekHeaders.classList.add('hidden');
+  monthHeaders.classList.remove('hidden');
+  
+  // Create month grid (7 columns, multiple rows)
+  const days = funGenerateDaysInRange(startDate, endDate);
+  const weeks = [];
+  
+  // Group days into weeks
+  for (let i = 0; i < days.length; i += 7) {
+    weeks.push(days.slice(i, i + 7));
+  }
+  
+  let html = '<div class="grid grid-cols-1">';
+  
+  weeks.forEach(week => {
+    html += '<div class="grid grid-cols-7 border-b border-gray-200 last:border-b-0">';
+    
+    week.forEach(day => {
+      const dayTasks = taskOccurrences.filter(task => 
+        new Date(task.dueDate).toDateString() === day.toDateString()
+      );
+      
+      const isToday = day.toDateString() === new Date().toDateString();
+      const isCurrentMonth = day.getMonth() === currentDate.getMonth();
+      
+      html += `
+        <div class="border-r border-gray-200 last:border-r-0 p-2 min-h-[100px] ${isToday ? 'bg-blue-50' : ''}" role="gridcell">
+          <div class="mb-2">
+            <div class="text-xs font-medium ${isToday ? 'text-blue-600' : isCurrentMonth ? 'text-gray-900' : 'text-gray-400'}">
+              ${day.getDate()}
+            </div>
+          </div>
+          <div class="space-y-1">
+            ${funRenderDayTasks(dayTasks, 'month')}
+          </div>
+        </div>
+      `;
+    });
+    
+    html += '</div>';
+  });
+  
+  html += '</div>';
+  calendarBody.innerHTML = html;
+  
+  // Add event listeners for task clicks
+  funAddTaskClickListeners();
+}
+
+function funRenderDayTasks(tasks, viewMode) {
+  if (tasks.length === 0) return '';
+  
+  const maxVisible = viewMode === 'week' ? 5 : 3;
+  const visibleTasks = tasks.slice(0, maxVisible);
+  const hiddenCount = tasks.length - maxVisible;
+  
+  let html = '';
+  
+  visibleTasks.forEach(task => {
+    const statusColor = funGetStatusColor(task.statusId);
+    const taskTypeIcon = funGetTaskTypeIcon(task.taskType?.icon);
+    
+    html += `
+      <div class="task-event cursor-pointer p-1 rounded text-xs flex items-center gap-1 ${statusColor} hover:opacity-80 focus:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-opacity"
+           tabindex="0" 
+           role="button"
+           data-task-id="${task.id}"
+           aria-label="Task: ${task.taskType?.nameEn || 'Task'} for ${task.cropInstance?.name || 'Unknown crop'}">
+        <i data-lucide="${taskTypeIcon}" class="w-3 h-3 flex-shrink-0"></i>
+        <span class="truncate">${task.cropInstance?.name || 'Unknown'}</span>
+        ${task.statusId === 'status-overdue' ? '<i data-lucide="alert-circle" class="w-3 h-3 text-red-600 flex-shrink-0"></i>' : ''}
+      </div>
+    `;
+  });
+  
+  if (hiddenCount > 0) {
+    html += `
+      <div class="text-xs text-gray-500 font-medium">
+        +${hiddenCount} more
+      </div>
+    `;
+  }
+  
+  return html;
+}
+
+function funAddTaskClickListeners() {
+  document.querySelectorAll('.task-event').forEach(element => {
+    element.addEventListener('click', (e) => {
+      const taskId = e.currentTarget.dataset.taskId;
+      if (taskId) {
+        window.location.hash = `#/page=task_detail&taskOccurrenceId=${taskId}`;
+      }
+    });
+    
+    element.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const taskId = e.currentTarget.dataset.taskId;
+        if (taskId) {
+          window.location.hash = `#/page=task_detail&taskOccurrenceId=${taskId}`;
+        }
+      }
+    });
+  });
+}
+
+function funGetStatusColor(statusId) {
+  switch (statusId) {
+    case 'status-due':
+      return 'bg-yellow-100 text-yellow-800 border border-yellow-200';
+    case 'status-overdue':
+      return 'bg-red-100 text-red-800 border border-red-200';
+    case 'status-completed':
+      return 'bg-green-100 text-green-800 border border-green-200';
+    case 'status-planned':
+      return 'bg-blue-100 text-blue-800 border border-blue-200';
+    case 'status-snoozed':
+      return 'bg-purple-100 text-purple-800 border border-purple-200';
+    default:
+      return 'bg-gray-100 text-gray-800 border border-gray-200';
+  }
+}
+
+function funGetTaskTypeIcon(icon) {
+  const iconMap = {
+    'water-drop': 'droplets',
+    'fertilizer': 'zap',
+    'harvest': 'package',
+    'pruning': 'scissors',
+    'planting': 'sprout'
+  };
+  return iconMap[icon] || 'check-circle';
+}
+
+function funSwitchViewMode(newMode) {
+  if (newMode === viewMode) return;
+  
+  viewMode = newMode;
+  funUpdateViewModeButtons();
+  funRenderCalendar();
+  
+  // Save preference (this would call a method to update user settings)
+  // updateUserCalendarViewMode(newMode);
+}
+
+function funUpdateViewModeButtons() {
+  const weekBtn = document.getElementById('weekViewBtn');
+  const monthBtn = document.getElementById('monthViewBtn');
+  
+  if (viewMode === 'week') {
+    weekBtn.classList.add('bg-white', 'text-primary', 'shadow-sm');
+    weekBtn.classList.remove('text-gray-600');
+    weekBtn.setAttribute('aria-pressed', 'true');
+    
+    monthBtn.classList.remove('bg-white', 'text-primary', 'shadow-sm');
+    monthBtn.classList.add('text-gray-600');
+    monthBtn.setAttribute('aria-pressed', 'false');
+  } else {
+    monthBtn.classList.add('bg-white', 'text-primary', 'shadow-sm');
+    monthBtn.classList.remove('text-gray-600');
+    monthBtn.setAttribute('aria-pressed', 'true');
+    
+    weekBtn.classList.remove('bg-white', 'text-primary', 'shadow-sm');
+    weekBtn.classList.add('text-gray-600');
+    weekBtn.setAttribute('aria-pressed', 'false');
+  }
+}
+
+function funNavigatePrevious() {
+  if (viewMode === 'week') {
+    currentDate.setDate(currentDate.getDate() - 7);
+  } else {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+  }
+  funRenderCalendar();
+}
+
+function funNavigateNext() {
+  if (viewMode === 'week') {
+    currentDate.setDate(currentDate.getDate() + 7);
+  } else {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+  }
+  funRenderCalendar();
+}
+
+function funGoToToday() {
+  currentDate = new Date();
+  funRenderCalendar();
+}
+
+function funGetDateRange() {
+  let startDate, endDate;
+  
+  if (activeFilters.dateRange) {
+    return activeFilters.dateRange;
+  }
+  
+  if (viewMode === 'week') {
+    // Get start of week (Monday)
+    const startOfWeek = new Date(currentDate);
+    const day = startOfWeek.getDay();
+    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+    startDate = new Date(startOfWeek.setDate(diff));
+    
+    // Get end of week (Sunday)
+    endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 6);
+  } else {
+    // Get start of month
+    startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    
+    // Get end of month
+    endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    
+    // Extend to show complete weeks
+    const startDay = startDate.getDay();
+    const startDiff = startDate.getDate() - startDay + (startDay === 0 ? -6 : 1);
+    startDate.setDate(startDiff);
+    
+    const endDay = endDate.getDay();
+    const endDiff = endDate.getDate() + (endDay === 0 ? 0 : 7 - endDay);
+    endDate.setDate(endDiff);
+  }
+  
+  return { startDate, endDate };
+}
+
+function funGenerateDaysInRange(startDate, endDate) {
+  const days = [];
+  const current = new Date(startDate);
+  
+  while (current <= endDate) {
+    days.push(new Date(current));
+    current.setDate(current.getDate() + 1);
+  }
+  
+  return days;
+}
+
+function funUpdatePeriodTitle(startDate, endDate) {
+  const titleElement = document.getElementById('currentPeriodTitle');
+  
+  if (viewMode === 'week') {
+    const startMonth = startDate.toLocaleDateString('en-GB', { month: 'short' });
+    const endMonth = endDate.toLocaleDateString('en-GB', { month: 'short' });
+    const startDay = startDate.getDate();
+    const endDay = endDate.getDate();
+    const year = startDate.getFullYear();
+    
+    if (startMonth === endMonth) {
+      titleElement.textContent = `${startMonth} ${startDay}-${endDay}, ${year}`;
+    } else {
+      titleElement.textContent = `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${year}`;
+    }
+  } else {
+    titleElement.textContent = currentDate.toLocaleDateString('en-GB', { 
+      month: 'long', 
+      year: 'numeric' 
+    });
+  }
+}
+
+function funCheckWeatherEvents(weatherEvents) {
+  const banner = document.getElementById('weatherBanner');
+  const message = document.getElementById('weatherMessage');
+  
+  const rainEvents = weatherEvents.filter(event => 
+    event.weatherEventType === 'rain' || event.weatherEventType === 'heavyRain'
+  );
+  
+  if (rainEvents.length > 0) {
+    const today = new Date().toDateString();
+    const todayRain = rainEvents.find(event => 
+      new Date(event.date).toDateString() === today
+    );
+    
+    if (todayRain) {
+      message.textContent = `${todayRain.severity} rain expected today (${todayRain.amount}mm).`;
+      banner.classList.remove('hidden');
+    }
+  }
+}
+
+function funDismissWeatherBanner() {
+  document.getElementById('weatherBanner').classList.add('hidden');
+}
+
+function funSkipWateringTasks() {
+  // This would navigate to a bulk task management page or show a confirmation dialog
+  // For now, just show a toast message
+  alert('This would skip all watering tasks for today. Feature coming soon!');
+  funDismissWeatherBanner();
+}
+
+// Filter management
+function funOpenFilterDrawer() {
+  const drawer = document.getElementById('filterDrawer');
+  const panel = document.getElementById('filterPanel');
+  
+  drawer.classList.remove('hidden');
+  setTimeout(() => {
+    panel.classList.remove('translate-x-full');
+  }, 10);
+  
+  // Focus first input
+  document.getElementById('fieldFilter').focus();
+}
+
+function funCloseFilterDrawer() {
+  const drawer = document.getElementById('filterDrawer');
+  const panel = document.getElementById('filterPanel');
+  
+  panel.classList.add('translate-x-full');
+  setTimeout(() => {
+    drawer.classList.add('hidden');
+  }, 300);
+}
+
+function funApplyFilters() {
+  // Get filter values
+  activeFilters.fieldId = document.getElementById('fieldFilter').value;
+  activeFilters.areaId = document.getElementById('areaFilter').value;
+  activeFilters.cropInstanceId = document.getElementById('cropFilter').value;
+  activeFilters.taskTypeId = document.getElementById('taskTypeFilter').value;
+  activeFilters.statusId = document.getElementById('statusFilter').value;
+  
+  funUpdateActiveFiltersCount();
+  funCloseFilterDrawer();
+  funRenderCalendar();
+}
+
+function funClearFilters() {
+  // Reset all filters
+  activeFilters = {
+    fieldId: '',
+    areaId: '',
+    cropInstanceId: '',
+    taskTypeId: '',
+    statusId: '',
+    dateRange: null
+  };
+  
+  // Reset form values
+  document.getElementById('fieldFilter').value = '';
+  document.getElementById('areaFilter').value = '';
+  document.getElementById('cropFilter').value = '';
+  document.getElementById('taskTypeFilter').value = '';
+  document.getElementById('statusFilter').value = '';
+  
+  funUpdateActiveFiltersCount();
+  funRenderCalendar();
+}
+
+function funApplyDateRangeShortcut(range) {
+  const today = new Date();
+  let startDate, endDate;
+  
+  switch (range) {
+    case 'thisWeek':
+      const startOfWeek = new Date(today);
+      const day = startOfWeek.getDay();
+      const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+      startDate = new Date(startOfWeek.setDate(diff));
+      endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + 6);
+      break;
+      
+    case 'next2Weeks':
+      startDate = new Date(today);
+      endDate = new Date(today);
+      endDate.setDate(today.getDate() + 14);
+      break;
+      
+    case 'thisMonth':
+      startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+      endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      break;
+  }
+  
+  activeFilters.dateRange = { startDate, endDate };
+  currentDate = new Date(startDate);
+  
+  funApplyFilters();
+}
+
+function funUpdateActiveFiltersCount() {
+  const count = Object.values(activeFilters).filter(value => 
+    value && value !== '' && value !== null
+  ).length;
+  
+  const badge = document.getElementById('activeFiltersCount');
+  if (count > 0) {
+    badge.textContent = count;
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+}
+
+function funHandleKeyboardNavigation(e) {
+  // Calendar keyboard navigation
+  if (e.target.closest('#calendarBody')) {
+    switch (e.key) {
+      case 'ArrowLeft':
+        e.preventDefault();
+        funNavigatePrevious();
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        funNavigateNext();
+        break;
+      case 'Home':
+        e.preventDefault();
+        funGoToToday();
+        break;
+    }
+  }
+  
+  // Filter drawer navigation
+  if (e.key === 'Escape' && !document.getElementById('filterDrawer').classList.contains('hidden')) {
+    funCloseFilterDrawer();
+  }
+}
+
+function funShowError(message) {
+  const calendarBody = document.getElementById('calendarBody');
+  calendarBody.innerHTML = `
+    <div class="flex flex-col items-center justify-center py-12 text-center">
+      <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
+        <i data-lucide="alert-circle" class="w-6 h-6 text-red-600"></i>
+      </div>
+      <h3 class="text-lg font-semibold text-gray-900 mb-2">Error Loading Calendar</h3>
+      <p class="text-gray-600 mb-4">${message}</p>
+      <button onclick="funRenderCalendar()" class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+        Try Again
+      </button>
+    </div>
+  `;
+}
+
+// Expose for global access if needed
+window.PageInit = {
+  onParams: (params) => {
+    if (params.view) {
+      viewMode = params.view;
+      funUpdateViewModeButtons();
+    }
+    funRenderCalendar();
+  }
+};
+
+// Re-create icons after dynamic content
+lucide.createIcons();
+</script>
+
+</body>
+</html>

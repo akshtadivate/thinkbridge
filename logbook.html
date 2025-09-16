@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Farm Planning Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #047857;
+            --color-secondary: #8C5E3C;
+            --color-accent: #B38600;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --border-radius-sm: 8px;
+            --border-radius-md: 16px;
+            --border-radius-lg: 24px;
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    <a href="#pageContent" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-white px-3 py-1 rounded shadow-lg z-50">Skip to main content</a>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover"
+        class="absolute top-16 right-6 bg-white border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar"
+                class="w-8 h-8 bg-primary text-white rounded-xl flex items-center justify-center text-sm font-medium">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-medium text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton"
+                class="w-full flex items-center text-sm gap-2 px-3 py-2 text-left text-error hover:bg-red-50 focus:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-error rounded-md transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Mobile sidebar overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 hidden md:hidden"></div>
+
+        <!-- Sidebar -->
+        
+
+
+
+
+
+
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)] bg-background" id="pageContent" role="main">
+            
+<section class="h-full flex flex-col">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+      <i data-lucide="book" class="w-6 h-6 text-primary"></i>
+      <h1 class="text-[1.75rem] leading-[2.25rem] font-bold text-gray-900">Logbook</h1>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="filterButton" class="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+        <i data-lucide="filter" class="w-4 h-4"></i>
+        <span class="text-sm font-medium">Filters</span>
+      </button>
+      <button id="exportButton" class="flex items-center gap-2 px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+        <i data-lucide="download" class="w-4 h-4"></i>
+        <span class="text-sm font-medium">Export</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Aggregation Bar -->
+  <div id="aggregationBar" class="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="aggregationStats">
+      <!-- Stats will be populated by JavaScript -->
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 overflow-hidden">
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden flex flex-col items-center justify-center min-h-[400px] text-center space-y-4">
+      <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center">
+        <i data-lucide="book" class="w-8 h-8 text-gray-400"></i>
+      </div>
+      <div class="space-y-2">
+        <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">No records yet</h2>
+        <p class="text-gray-600 max-w-md">Your actions will appear here when you mark tasks done.</p>
+        <a href="#/page=todays_work" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors text-sm font-medium">
+          <i data-lucide="sunrise" class="w-4 h-4"></i>
+          See Today's Work
+        </a>
+      </div>
+    </div>
+
+    <!-- Logs List -->
+    <div id="logsList" class="space-y-4 overflow-y-auto max-h-[calc(100vh-320px)]">
+      <!-- Logs will be populated by JavaScript -->
+    </div>
+
+    <!-- Load More Button -->
+    <div id="loadMoreContainer" class="hidden mt-6 text-center">
+      <button id="loadMoreButton" class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors text-sm font-medium">
+        Load More
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Filter Drawer -->
+<div id="filterDrawer" class="fixed inset-0 z-50 hidden">
+  <div class="fixed inset-0 bg-gray-900 bg-opacity-50" id="filterOverlay"></div>
+  <div class="fixed right-0 top-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 translate-x-full" id="filterPanel">
+    <div class="p-6 border-b">
+      <div class="flex items-center justify-between">
+        <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Filters</h2>
+        <button id="closeFilterDrawer" class="p-2 rounded-lg hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+    <div class="p-6 space-y-6">
+      <!-- Field Filter -->
+      <div>
+        <label for="fieldFilter" class="block text-sm font-medium text-gray-700 mb-2">Field</label>
+        <select id="fieldFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+          <option value="">All Fields</option>
+        </select>
+      </div>
+
+      <!-- Area Filter -->
+      <div>
+        <label for="areaFilter" class="block text-sm font-medium text-gray-700 mb-2">Area</label>
+        <select id="areaFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+          <option value="">All Areas</option>
+        </select>
+      </div>
+
+      <!-- Crop Filter -->
+      <div>
+        <label for="cropFilter" class="block text-sm font-medium text-gray-700 mb-2">Crop</label>
+        <select id="cropFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+          <option value="">All Crops</option>
+        </select>
+      </div>
+
+      <!-- Task Type Filter -->
+      <div>
+        <label for="taskTypeFilter" class="block text-sm font-medium text-gray-700 mb-2">Task Type</label>
+        <select id="taskTypeFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+          <option value="">All Task Types</option>
+        </select>
+      </div>
+
+      <!-- Date Range Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="date" id="startDateFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
+          <input type="date" id="endDateFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm">
+        </div>
+      </div>
+
+      <!-- Filter Actions -->
+      <div class="space-y-2 pt-4 border-t">
+        <button id="applyFilters" class="w-full px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors text-sm font-medium">
+          Apply Filters
+        </button>
+        <button id="clearFilters" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors text-sm font-medium">
+          Clear All
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Export Modal -->
+<div id="exportModal" class="fixed inset-0 z-50 hidden">
+  <div class="fixed inset-0 bg-gray-900 bg-opacity-50" id="exportOverlay"></div>
+  <div class="fixed inset-0 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-lg max-w-md w-full p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Export Logs</h2>
+        <button id="closeExportModal" class="p-2 rounded-lg hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      
+      <div class="space-y-4">
+        <div class="p-4 bg-gray-50 rounded-lg">
+          <div class="text-sm text-gray-600" id="exportSummary">
+            <!-- Export summary will be populated -->
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-2">
+          <input type="checkbox" id="includePhotos" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
+          <label for="includePhotos" class="text-sm font-medium text-gray-700">Include photo references</label>
+        </div>
+        
+        <div class="text-xs text-gray-500" id="exportSizeEstimate">
+          <!-- Size estimate will be populated -->
+        </div>
+      </div>
+      
+      <div class="flex gap-2 mt-6">
+        <button id="cancelExport" class="flex-1 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors text-sm font-medium">
+          Cancel
+        </button>
+        <button id="confirmExport" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors text-sm font-medium">
+          <i data-lucide="download" class="w-4 h-4 inline mr-2"></i>
+          Export
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Photo Fullscreen Modal -->
+<div id="photoModal" class="fixed inset-0 z-50 hidden">
+  <div class="fixed inset-0 bg-black bg-opacity-90" id="photoOverlay"></div>
+  <div class="fixed inset-0 flex items-center justify-center p-4">
+    <div class="relative max-w-4xl max-h-full">
+      <button id="closePhotoModal" class="absolute top-4 right-4 z-10 p-2 bg-black bg-opacity-50 text-white rounded-lg hover:bg-opacity-70 focus:bg-opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      
+      <img id="photoModalImage" src="" alt="" class="max-w-full max-h-full rounded-lg">
+      
+      <div class="absolute bottom-4 left-4 right-4 bg-black bg-opacity-70 text-white p-4 rounded-lg">
+        <div id="photoMetadata" class="space-y-1">
+          <!-- Photo metadata will be populated -->
+        </div>
+        <div class="flex gap-2 mt-3">
+          <button id="downloadPhoto" class="px-3 py-1 bg-white bg-opacity-20 rounded text-sm hover:bg-opacity-30 focus:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
+            <i data-lucide="download" class="w-4 h-4 inline mr-1"></i>
+            Download
+          </button>
+          <button id="deletePhoto" class="px-3 py-1 bg-red-500 bg-opacity-70 rounded text-sm hover:bg-opacity-90 focus:bg-opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
+            <i data-lucide="trash-2" class="w-4 h-4 inline mr-1"></i>
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'localDB:';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            btn.addEventListener('click', () => {
+                const isOpen = !sidebar.classList.contains('hidden');
+                
+                if (isOpen) {
+                    // Close
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    // Open
+                    sidebar.classList.remove('hidden');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav link
+                    const firstLink = sidebar.querySelector('a');
+                    if (firstLink) firstLink.focus();
+                }
+            });
+            
+            // Close on overlay click
+            overlay.addEventListener('click', () => {
+                sidebar.classList.add('hidden');
+                overlay.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.focus();
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('hidden') && window.innerWidth < 768) {
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    // Default to first farmer user from dummy data
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-001');
+                    currentUserId = 'u-001';
+                }
+                
+                // Get user from users collection
+                try {
+                    const usersData = localStorage.getItem(APP_PREFIX + 'users');
+                    if (usersData) {
+                        const users = JSON.parse(usersData);
+                        const user = users.find(u => u.id === currentUserId);
+                        return user || null;
+                    }
+                } catch (e) {
+                    console.warn('Error loading user data:', e);
+                }
+                return null;
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName   = document.getElementById('userName');
+            const popoverAvatar = document.getElementById('popoverUserAvatar');
+            const popoverName = document.getElementById('popoverUserName');
+            const popoverEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverAvatar) popoverAvatar.textContent = initials;
+            if (popoverName) popoverName.textContent = displayName;
+            if (popoverEmail) popoverEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popover.classList.toggle('hidden');
+                popoverVisible = !popoverVisible;
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                
+                if (popoverVisible) {
+                    // Focus first focusable element in popover
+                    const firstFocusable = popover.querySelector('button');
+                    if (firstFocusable) firstFocusable.focus();
+                }
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) {
+                    UserUtils.signOut();
+                }
+            });
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX)) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `farm_assistant_data_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            // Show success toast
+            showToast('✅ App data exported successfully', 'success');
+        });
+        
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+        
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX)) {
+                            localStorage.setItem(key, value);
+                            importedCount++;
+                        }
+                    });
+                    
+                    if (importedCount > 0) {
+                        showToast(`✅ App data imported successfully (${importedCount} items). Please refresh the page.`, 'success');
+                    } else {
+                        showToast('⚠️ No valid app data found in file.', 'warning');
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    showToast('❌ Failed to import: Invalid JSON format.', 'error');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Simple toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-white text-sm max-w-sm transition-all duration-300 ${
+                type === 'success' ? 'bg-green-600' :
+                type === 'error' ? 'bg-red-600' :
+                type === 'warning' ? 'bg-orange-600' :
+                'bg-blue-600'
+            }`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        // Simple hash router (no entity IDs; UI-state params only)
+        const Router = (() => {
+            const pageContent = document.getElementById('pageContent');
+            const sideNav = document.getElementById('sideNav');
+
+            function parseHash(){
+                const h = location.hash || '';
+                const m = h.match(/page=([^&]+)/);
+                const page = m ? m[1] : null;
+                // Collect UI-state params only (view, tab, filter, mode, section)
+                const params = {};
+                (h.split('&').slice(1)).forEach(kv => {
+                    const [k,v] = kv.split('=');
+                    if (['view','tab','filter','mode','section'].includes(k)) {
+                        params[k] = decodeURIComponent(v||'');
+                    }
+                });
+                return { page, params };
+            }
+
+            async function loadPage(pageBase){
+                if (!pageBase) {
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+                            <div class="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="leaf" class="w-8 h-8 text-primary"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h2 class="text-display-md font-semibold text-gray-900">Welcome to Farm Assistant</h2>
+                                <p class="text-gray-600 max-w-md">Select a page from the sidebar to get started with managing your farming tasks and tracking your crops.</p>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+                
+                // Show loading state
+                pageContent.innerHTML = `
+                    <div class="flex items-center justify-center min-h-[200px]">
+                        <div class="flex items-center space-x-3 text-gray-600">
+                            <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                            <span>Loading...</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Ensure .html suffix
+                const url = pageBase.endsWith('.html') ? pageBase : `${pageBase}.html`;
+                
+                try {
+                    const res = await fetch(url, { cache: 'no-store' });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const html = await res.text();
+                    pageContent.innerHTML = html;
+                    lucide.createIcons();
+                    
+                    // Allow page to hook UI-state params if it exposes a global
+                    if (window.PageInit?.onParams) {
+                        window.PageInit.onParams(parseHash().params);
+                    }
+                } catch (e) {
+                    console.error('Failed to load page:', url, e);
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[200px] text-center space-y-4">
+                            <div class="w-12 h-12 bg-error/10 rounded-lg flex items-center justify-center">
+                                <i data-lucide="alert-circle" class="w-6 h-6 text-error"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h3 class="font-semibold text-gray-900">Failed to load page</h3>
+                                <p class="text-gray-600 text-sm">The page "${url}" could not be loaded.</p>
+                                <button onclick="Router.onRoute()" class="text-primary hover:text-primary/80 text-sm font-medium">Try again</button>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                }
+            }
+
+            function setActive(pageBase){
+                if (!sideNav) return;
+                
+                const links = sideNav.querySelectorAll('a[href]');
+                links.forEach(a => {
+                    const href = a.getAttribute('href') || '';
+                    const target = href.replace(/^#\/?page=/, '').replace(/\.html$/, '');
+                    const current = (pageBase || '').replace(/\.html$/, '');
+                    
+                    if (target && target === current) {
+                        a.classList.add('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.remove('text-gray-700');
+                    } else {
+                        a.classList.remove('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.add('text-gray-700');
+                    }
+                });
+            }
+
+            async function onRoute(){
+                const { page } = parseHash();
+                await loadPage(page);
+                setActive(page);
+            }
+
+            return { onRoute };
+        })();
+
+        // Make Router.onRoute globally accessible for error retry
+        window.Router = Router;
+
+        window.addEventListener('hashchange', Router.onRoute);
+        Router.onRoute();
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                try {
+                    window.AppActions[action](el);
+                } catch (err) {
+                    console.error('AppAction error:', action, err);
+                    showToast(`❌ Action "${action}" failed: ${err.message}`, 'error');
+                }
+            } else {
+                el.setAttribute('disabled', 'true');
+                el.setAttribute('title', 'Unavailable');
+                el.classList.add('opacity-50', 'cursor-not-allowed');
+                console.warn('AppAction not available:', action);
+            }
+        });
+
+        // Generate navigation items programmatically from page list
+        // Note: In a real implementation, this would be generated from the actual page list data
+        // For now, we have the single "Today's Work" page based on the provided page data
+    </script>
+
+    
+<script id="page-logic" type="module">
+import { 
+  getLogbookData, 
+  getFilterOptions, 
+  calculateAggregatedTotals,
+  exportLogsData,
+  getPhotoById,
+  deletePhotoById 
+} from './logbook-logic.js';
+
+// State management
+let currentFilters = {
+  fieldId: '',
+  areaId: '',
+  cropInstanceId: '',
+  taskTypeId: '',
+  startDate: '',
+  endDate: ''
+};
+
+let currentPage = 1;
+const pageSize = 50;
+let allLogs = [];
+let filteredLogs = [];
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', funInitializePage);
+
+async function funInitializePage() {
+  try {
+    await funLoadFilterOptions();
+    await funLoadLogbookData();
+    funSetupEventListeners();
+    lucide.createIcons();
+  } catch (error) {
+    console.error('Error initializing logbook page:', error);
+    funShowError('Failed to load logbook data');
+  }
+}
+
+// Load filter options from logbook-logic.js
+// Expected return: { fields: [{id, name}], areas: [{id, name}], crops: [{id, name}], taskTypes: [{id, nameEn}] }
+// Collections used: fields, areas, cropInstances, taskTypes
+async function funLoadFilterOptions() {
+  try {
+    const filterOptions = await getFilterOptions();
+    
+    // Populate field filter
+    const fieldSelect = document.getElementById('fieldFilter');
+    fieldSelect.innerHTML = '<option value="">All Fields</option>';
+    filterOptions.fields.forEach(field => {
+      const option = document.createElement('option');
+      option.value = field.id;
+      option.textContent = field.name;
+      fieldSelect.appendChild(option);
+    });
+
+    // Populate area filter
+    const areaSelect = document.getElementById('areaFilter');
+    areaSelect.innerHTML = '<option value="">All Areas</option>';
+    filterOptions.areas.forEach(area => {
+      const option = document.createElement('option');
+      option.value = area.id;
+      option.textContent = area.name;
+      areaSelect.appendChild(option);
+    });
+
+    // Populate crop filter
+    const cropSelect = document.getElementById('cropFilter');
+    cropSelect.innerHTML = '<option value="">All Crops</option>';
+    filterOptions.crops.forEach(crop => {
+      const option = document.createElement('option');
+      option.value = crop.id;
+      option.textContent = crop.name;
+      cropSelect.appendChild(option);
+    });
+
+    // Populate task type filter
+    const taskTypeSelect = document.getElementById('taskTypeFilter');
+    taskTypeSelect.innerHTML = '<option value="">All Task Types</option>';
+    filterOptions.taskTypes.forEach(taskType => {
+      const option = document.createElement('option');
+      option.value = taskType.id;
+      option.textContent = taskType.nameEn;
+      taskTypeSelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error('Error loading filter options:', error);
+  }
+}
+
+// Load logbook data from logbook-logic.js
+// Expected return: { logs: [{id, timestamp, action, quantity, unitSymbol, cropName, areaName, fieldName, taskTypeName, notes, photoIds, skipReasonName}], totalCount }
+// Collections used: logs, cropInstances, areas, fields, taskTypes, units, photos, reasonCodes
+// Method should handle pagination and filtering
+async function funLoadLogbookData() {
+  try {
+    const data = await getLogbookData(currentFilters, currentPage, pageSize);
+    
+    if (currentPage === 1) {
+      allLogs = [];
+      filteredLogs = [];
+    }
+    
+    allLogs.push(...data.logs);
+    filteredLogs = allLogs;
+    
+    if (data.logs.length === 0 && currentPage === 1) {
+      funShowEmptyState();
+    } else {
+      funHideEmptyState();
+      funRenderLogs();
+    }
+    
+    // Show/hide load more button
+    const loadMoreContainer = document.getElementById('loadMoreContainer');
+    const loadMoreButton = document.getElementById('loadMoreButton');
+    if (data.logs.length === pageSize) {
+      loadMoreContainer.classList.remove('hidden');
+      loadMoreButton.disabled = false;
+      loadMoreButton.textContent = 'Load More';
+    } else {
+      loadMoreContainer.classList.add('hidden');
+    }
+    
+    // Update aggregation bar
+    await funUpdateAggregationBar();
+    
+  } catch (error) {
+    console.error('Error loading logbook data:', error);
+    funShowError('Failed to load logbook data');
+  }
+}
+
+// Calculate and update aggregated totals
+// Expected return: { totalWaterL, totalFertilizerKg, totalHarvestKg, totalLogs }
+// Collections used: logs, units (for conversions)
+async function funUpdateAggregationBar() {
+  try {
+    const totals = await calculateAggregatedTotals(currentFilters);
+    
+    const statsContainer = document.getElementById('aggregationStats');
+    statsContainer.innerHTML = `
+      <div class="text-center">
+        <div class="text-2xl font-bold text-primary">${totals.totalLogs}</div>
+        <div class="text-sm text-gray-600">Total Records</div>
+      </div>
+      <div class="text-center">
+        <div class="text-2xl font-bold text-secondary">${totals.totalWaterL.toFixed(1)}L</div>
+        <div class="text-sm text-gray-600">Water Applied</div>
+      </div>
+      <div class="text-center">
+        <div class="text-2xl font-bold text-accent">${totals.totalFertilizerKg.toFixed(1)}kg</div>
+        <div class="text-sm text-gray-600">Fertilizer Used</div>
+      </div>
+      <div class="text-center">
+        <div class="text-2xl font-bold text-primary">${totals.totalHarvestKg.toFixed(1)}kg</div>
+        <div class="text-sm text-gray-600">Total Harvest</div>
+      </div>
+    `;
+  } catch (error) {
+    console.error('Error updating aggregation bar:', error);
+  }
+}
+
+// Render logs list
+function funRenderLogs() {
+  const logsList = document.getElementById('logsList');
+  
+  // Group logs by date
+  const groupedLogs = funGroupLogsByDate(filteredLogs);
+  
+  let html = '';
+  Object.keys(groupedLogs).sort((a, b) => new Date(b) - new Date(a)).forEach(date => {
+    const logs = groupedLogs[date];
+    const formattedDate = funFormatDate(new Date(date));
+    
+    html += `
+      <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
+        <div class="px-4 py-3 border-b border-gray-100 bg-gray-50 rounded-t-lg">
+          <h3 class="text-sm font-semibold text-gray-900">${formattedDate}</h3>
+        </div>
+        <div class="divide-y divide-gray-100">
+          ${logs.map(log => funRenderLogRow(log)).join('')}
+        </div>
+      </div>
+    `;
+  });
+  
+  logsList.innerHTML = html;
+  lucide.createIcons();
+}
+
+// Render individual log row
+function funRenderLogRow(log) {
+  const actionBadge = funGetActionBadge(log.action);
+  const photoThumbnail = log.photoIds && log.photoIds.length > 0 
+    ? `<button class="photo-thumbnail w-10 h-10 bg-gray-200 rounded-lg overflow-hidden hover:opacity-80 focus:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary" data-photo-id="${log.photoIds[0]}">
+         <img src="${funGetThumbnailUrl(log.photoIds[0])}" alt="Log photo" class="w-full h-full object-cover" onerror="this.style.display='none'">
+       </button>`
+    : '';
+    
+  const quantityDisplay = log.quantity 
+    ? `<span class="font-medium">${log.quantity} ${log.unitSymbol || ''}</span>`
+    : '';
+    
+  const notesSnippet = log.notes 
+    ? `<p class="text-sm text-gray-600 mt-1">${funTruncateText(log.notes, 60)}</p>`
+    : '';
+    
+  const skipReason = log.action === 'skipped' && log.skipReasonName
+    ? `<span class="text-xs text-gray-500">Reason: ${log.skipReasonName}</span>`
+    : '';
+
+  return `
+    <div class="p-4 hover:bg-gray-50">
+      <div class="flex items-start gap-3">
+        ${photoThumbnail}
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 mb-1">
+            ${actionBadge}
+            <span class="text-sm text-gray-500">${funFormatTime(new Date(log.timestamp))}</span>
+          </div>
+          <div class="flex items-center gap-2 text-sm">
+            <span class="font-medium text-gray-900">${log.taskTypeName}</span>
+            <span class="text-gray-400">•</span>
+            <span class="text-gray-600">${log.cropName}</span>
+            <span class="text-gray-400">•</span>
+            <span class="text-gray-600">${log.areaName}</span>
+          </div>
+          ${quantityDisplay ? `<div class="mt-1">${quantityDisplay}</div>` : ''}
+          ${notesSnippet}
+          ${skipReason ? `<div class="mt-1">${skipReason}</div>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Utility functions
+function funGroupLogsByDate(logs) {
+  return logs.reduce((groups, log) => {
+    const date = new Date(log.timestamp).toISOString().split('T')[0];
+    if (!groups[date]) groups[date] = [];
+    groups[date].push(log);
+    return groups;
+  }, {});
+}
+
+function funFormatDate(date) {
+  return date.toLocaleDateString('en-IN', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long', 
+    day: 'numeric'
+  });
+}
+
+function funFormatTime(date) {
+  return date.toLocaleTimeString('en-IN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+}
+
+function funGetActionBadge(action) {
+  const badges = {
+    completed: '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Completed</span>',
+    skipped: '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Skipped</span>',
+    snoozed: '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Snoozed</span>'
+  };
+  return badges[action] || `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">${action}</span>`;
+}
+
+function funTruncateText(text, maxLength) {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + '...';
+}
+
+function funGetThumbnailUrl(photoId) {
+  // This would normally get the thumbnail URL from storage
+  // For now, using placeholder
+  return `https://images.unsplash.com/photo-1574779131721-0b8be6ba4dae?w=40&h=40&fit=crop`;
+}
+
+function funShowEmptyState() {
+  document.getElementById('emptyState').classList.remove('hidden');
+  document.getElementById('logsList').classList.add('hidden');
+}
+
+function funHideEmptyState() {
+  document.getElementById('emptyState').classList.add('hidden');
+  document.getElementById('logsList').classList.remove('hidden');
+}
+
+function funShowError(message) {
+  const logsList = document.getElementById('logsList');
+  logsList.innerHTML = `
+    <div class="flex flex-col items-center justify-center min-h-[200px] text-center space-y-4">
+      <div class="w-12 h-12 bg-error/10 rounded-lg flex items-center justify-center">
+        <i data-lucide="alert-circle" class="w-6 h-6 text-error"></i>
+      </div>
+      <div class="space-y-2">
+        <h3 class="font-semibold text-gray-900">Error</h3>
+        <p class="text-gray-600 text-sm">${message}</p>
+        <button onclick="funInitializePage()" class="text-primary hover:text-primary/80 text-sm font-medium">Try again</button>
+      </div>
+    </div>
+  `;
+  lucide.createIcons();
+}
+
+// Event listeners setup
+function funSetupEventListeners() {
+  // Filter drawer
+  document.getElementById('filterButton').addEventListener('click', funOpenFilterDrawer);
+  document.getElementById('closeFilterDrawer').addEventListener('click', funCloseFilterDrawer);
+  document.getElementById('filterOverlay').addEventListener('click', funCloseFilterDrawer);
+  
+  // Filter actions
+  document.getElementById('applyFilters').addEventListener('click', funApplyFilters);
+  document.getElementById('clearFilters').addEventListener('click', funClearFilters);
+  
+  // Export modal
+  document.getElementById('exportButton').addEventListener('click', funOpenExportModal);
+  document.getElementById('closeExportModal').addEventListener('click', funCloseExportModal);
+  document.getElementById('exportOverlay').addEventListener('click', funCloseExportModal);
+  document.getElementById('cancelExport').addEventListener('click', funCloseExportModal);
+  document.getElementById('confirmExport').addEventListener('click', funPerformExport);
+  
+  // Photo modal
+  document.getElementById('closePhotoModal').addEventListener('click', funClosePhotoModal);
+  document.getElementById('photoOverlay').addEventListener('click', funClosePhotoModal);
+  document.getElementById('downloadPhoto').addEventListener('click', funDownloadPhoto);
+  document.getElementById('deletePhoto').addEventListener('click', funDeletePhoto);
+  
+  // Load more
+  document.getElementById('loadMoreButton').addEventListener('click', funLoadMore);
+  
+  // Photo thumbnail clicks
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.photo-thumbnail')) {
+      const photoId = e.target.closest('.photo-thumbnail').getAttribute('data-photo-id');
+      funOpenPhotoModal(photoId);
+    }
+  });
+  
+  // Keyboard shortcuts
+  document.addEventListener('keydown', funHandleKeyboardShortcuts);
+}
+
+// Filter drawer functions
+function funOpenFilterDrawer() {
+  const drawer = document.getElementById('filterDrawer');
+  const panel = document.getElementById('filterPanel');
+  drawer.classList.remove('hidden');
+  setTimeout(() => panel.classList.remove('translate-x-full'), 10);
+}
+
+function funCloseFilterDrawer() {
+  const panel = document.getElementById('filterPanel');
+  panel.classList.add('translate-x-full');
+  setTimeout(() => document.getElementById('filterDrawer').classList.add('hidden'), 300);
+}
+
+async function funApplyFilters() {
+  currentFilters = {
+    fieldId: document.getElementById('fieldFilter').value,
+    areaId: document.getElementById('areaFilter').value,
+    cropInstanceId: document.getElementById('cropFilter').value,
+    taskTypeId: document.getElementById('taskTypeFilter').value,
+    startDate: document.getElementById('startDateFilter').value,
+    endDate: document.getElementById('endDateFilter').value
+  };
+  
+  currentPage = 1;
+  await funLoadLogbookData();
+  funCloseFilterDrawer();
+}
+
+function funClearFilters() {
+  document.getElementById('fieldFilter').value = '';
+  document.getElementById('areaFilter').value = '';
+  document.getElementById('cropFilter').value = '';
+  document.getElementById('taskTypeFilter').value = '';
+  document.getElementById('startDateFilter').value = '';
+  document.getElementById('endDateFilter').value = '';
+}
+
+// Export modal functions
+async function funOpenExportModal() {
+  const modal = document.getElementById('exportModal');
+  modal.classList.remove('hidden');
+  
+  // Update export summary
+  const summary = document.getElementById('exportSummary');
+  const estimate = document.getElementById('exportSizeEstimate');
+  
+  try {
+    const exportData = await exportLogsData(currentFilters);
+    summary.textContent = `${exportData.logCount} logs selected for export`;
+    estimate.textContent = `Estimated size: ~${Math.round(exportData.estimatedSizeKB)}KB`;
+  } catch (error) {
+    summary.textContent = 'Error calculating export data';
+    estimate.textContent = '';
+  }
+}
+
+function funCloseExportModal() {
+  document.getElementById('exportModal').classList.add('hidden');
+}
+
+// Export logs data and download as JSON
+// Expected return: { logs: [...], metadata: {...} }
+// Collections used: logs and related collections based on filters
+async function funPerformExport() {
+  try {
+    const includePhotos = document.getElementById('includePhotos').checked;
+    const exportData = await exportLogsData(currentFilters, includePhotos);
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `logbook_export_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    funCloseExportModal();
+  } catch (error) {
+    console.error('Error exporting logs:', error);
+    alert('Failed to export logs. Please try again.');
+  }
+}
+
+// Photo modal functions
+async function funOpenPhotoModal(photoId) {
+  try {
+    const photoData = await getPhotoById(photoId);
+    if (!photoData) {
+      alert('Photo not available locally');
+      return;
+    }
+    
+    const modal = document.getElementById('photoModal');
+    const img = document.getElementById('photoModalImage');
+    const metadata = document.getElementById('photoMetadata');
+    
+    img.src = photoData.storageRef;
+    img.alt = photoData.alt || 'Farm log photo';
+    
+    metadata.innerHTML = `
+      <div class="text-sm"><strong>Taken:</strong> ${funFormatDate(new Date(photoData.createdAt))}</div>
+      <div class="text-sm"><strong>Size:</strong> ${photoData.width}x${photoData.height}px (${Math.round(photoData.sizeBytes / 1024)}KB)</div>
+      <div class="text-sm"><strong>Format:</strong> ${photoData.mimeType}</div>
+    `;
+    
+    modal.classList.remove('hidden');
+    modal.setAttribute('data-photo-id', photoId);
+  } catch (error) {
+    console.error('Error opening photo modal:', error);
+    alert('Failed to load photo');
+  }
+}
+
+function funClosePhotoModal() {
+  document.getElementById('photoModal').classList.add('hidden');
+  document.getElementById('photoModalImage').src = '';
+}
+
+function funDownloadPhoto() {
+  const img = document.getElementById('photoModalImage');
+  const a = document.createElement('a');
+  a.href = img.src;
+  a.download = `farm_photo_${new Date().toISOString().split('T')[0]}.jpg`;
+  a.click();
+}
+
+async function funDeletePhoto() {
+  if (!confirm('Are you sure you want to delete this photo? This action cannot be undone.')) {
+    return;
+  }
+  
+  try {
+    const modal = document.getElementById('photoModal');
+    const photoId = modal.getAttribute('data-photo-id');
+    
+    await deletePhotoById(photoId);
+    funClosePhotoModal();
+    
+    // Refresh the logs to update photo availability
+    await funLoadLogbookData();
+    
+    alert('Photo deleted successfully');
+  } catch (error) {
+    console.error('Error deleting photo:', error);
+    alert('Failed to delete photo');
+  }
+}
+
+// Load more function
+async function funLoadMore() {
+  const button = document.getElementById('loadMoreButton');
+  button.disabled = true;
+  button.textContent = 'Loading...';
+  
+  currentPage++;
+  await funLoadLogbookData();
+}
+
+// Keyboard shortcuts
+function funHandleKeyboardShortcuts(e) {
+  if (e.key === 'Escape') {
+    // Close any open modals/drawers
+    if (!document.getElementById('filterDrawer').classList.contains('hidden')) {
+      funCloseFilterDrawer();
+    }
+    if (!document.getElementById('exportModal').classList.contains('hidden')) {
+      funCloseExportModal();
+    }
+    if (!document.getElementById('photoModal').classList.contains('hidden')) {
+      funClosePhotoModal();
+    }
+  }
+  
+  if (e.ctrlKey || e.metaKey) {
+    if (e.key === 'f') {
+      e.preventDefault();
+      funOpenFilterDrawer();
+    }
+    if (e.key === 'e') {
+      e.preventDefault();
+      funOpenExportModal();
+    }
+  }
+}
+
+// Make functions available globally for error recovery
+window.funInitializePage = funInitializePage;
+</script>
+
+</body>
+
+</html>

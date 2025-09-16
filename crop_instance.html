@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Farm Planning Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #047857;
+            --color-secondary: #8C5E3C;
+            --color-accent: #B38600;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --border-radius-sm: 8px;
+            --border-radius-md: 16px;
+            --border-radius-lg: 24px;
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+    <a href="#pageContent" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-white px-3 py-1 rounded shadow-lg z-50">Skip to main content</a>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover"
+        class="absolute top-16 right-6 bg-white border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar"
+                class="w-8 h-8 bg-primary text-white rounded-xl flex items-center justify-center text-sm font-medium">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-medium text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton"
+                class="w-full flex items-center text-sm gap-2 px-3 py-2 text-left text-error hover:bg-red-50 focus:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-error rounded-md transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Mobile sidebar overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 hidden md:hidden"></div>
+
+        <!-- Sidebar -->
+       
+
+
+
+
+
+
+
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)] bg-background" id="pageContent" role="main">
+            
+<section class="max-w-4xl mx-auto space-y-6">
+  <!-- Header -->
+  <div class="bg-surface rounded-lg p-6 shadow-sm border">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <button onclick="history.back()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+          </button>
+          <h1 id="cropInstanceName" class="text-[1.75rem] leading-[2.25rem] font-bold text-gray-900">Loading...</h1>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-gray-600">
+          <span id="appliedTemplateVersion">Template v0.0</span>
+          <div id="updateIndicator" class="hidden items-center gap-1 px-2 py-1 bg-accent/10 text-accent rounded">
+            <i data-lucide="info" class="w-3 h-3"></i>
+            <span>Updates available</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="applyUpdatesBtn" class="hidden px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors">
+          Apply Preset Updates
+        </button>
+        <button id="editOverridesBtn" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+          Edit Overrides
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preset Summary -->
+  <div class="bg-surface rounded-lg p-6 shadow-sm border">
+    <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-4">Preset Summary</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 text-gray-600">
+          <i data-lucide="droplets" class="w-4 h-4"></i>
+          <span class="font-medium">Watering</span>
+        </div>
+        <p id="wateringFreq" class="text-sm text-gray-800">Every 3 days</p>
+      </div>
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 text-gray-600">
+          <i data-lucide="flask" class="w-4 h-4"></i>
+          <span class="font-medium">Typical Nutrients</span>
+        </div>
+        <p id="typicalNutrients" class="text-sm text-gray-800">NPK, calcium</p>
+      </div>
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 text-gray-600">
+          <i data-lucide="bug" class="w-4 h-4"></i>
+          <span class="font-medium">Common Pests</span>
+        </div>
+        <p id="typicalPests" class="text-sm text-gray-800">aphids, whitefly</p>
+      </div>
+    </div>
+    <div class="mt-4 pt-4 border-t">
+      <div class="flex items-center gap-4 text-sm">
+        <div class="flex items-center gap-2">
+          <i data-lucide="calendar" class="w-4 h-4 text-gray-500"></i>
+          <span class="text-gray-600">Started:</span>
+          <span id="startDate" class="font-medium">15/01/2025</span>
+        </div>
+        <div id="harvestETA" class="flex items-center gap-2">
+          <i data-lucide="harvest" class="w-4 h-4 text-gray-500"></i>
+          <span class="text-gray-600">Expected harvest:</span>
+          <span class="font-medium text-accent">15/04/2025</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="bg-surface rounded-lg p-6 shadow-sm border">
+    <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-4">Upcoming Tasks (Next 30 Days)</h2>
+    <div id="taskTimeline" class="space-y-3">
+      <!-- Timeline items will be populated here -->
+      <div class="flex items-center justify-center py-8 text-gray-500">
+        <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mr-3"></div>
+        Loading tasks...
+      </div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="bg-surface rounded-lg p-6 shadow-sm border">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Recent History</h2>
+      <div class="relative">
+        <input id="historySearch" type="text" placeholder="Search logs..." 
+               class="pl-8 pr-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary">
+        <i data-lucide="search" class="w-4 h-4 absolute left-2.5 top-2.5 text-gray-400"></i>
+      </div>
+    </div>
+    <div id="historyLogs" class="space-y-3">
+      <!-- History items will be populated here -->
+      <div class="flex items-center justify-center py-8 text-gray-500">
+        <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mr-3"></div>
+        Loading history...
+      </div>
+    </div>
+  </div>
+
+  <!-- Save as Template CTA -->
+  <div class="bg-accent/5 border border-accent/20 rounded-lg p-4">
+    <div class="flex items-center justify-between">
+      <div>
+        <h3 class="font-medium text-gray-900">Create Personal Template</h3>
+        <p class="text-sm text-gray-600">Save this crop's settings as your personal template for future use</p>
+      </div>
+      <button id="saveAsTemplateBtn" class="px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors">
+        Save as My Template
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Overrides Drawer -->
+<div id="overridesDrawer" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden">
+  <div class="fixed right-0 top-0 h-full w-full max-w-md bg-surface shadow-lg transform translate-x-full transition-transform">
+    <div class="h-full flex flex-col">
+      <!-- Drawer Header -->
+      <div class="flex items-center justify-between p-6 border-b">
+        <h3 class="text-lg font-semibold text-gray-900">Edit Overrides</h3>
+        <button id="closeDrawerBtn" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Drawer Content -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-6">
+        <div class="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+          <p>Changes only affect this crop instance. Library updates won't override these settings unless you apply them.</p>
+        </div>
+
+        <form id="overridesForm" class="space-y-4">
+          <!-- Watering Interval -->
+          <div>
+            <label for="intervalDays" class="block text-sm font-medium text-gray-700 mb-1">
+              Watering Interval (days)
+            </label>
+            <div class="flex items-center gap-2">
+              <input type="number" id="intervalDays" min="1" max="30" 
+                     class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+              <span class="text-xs text-gray-500" id="libraryDefault">Library: 3</span>
+            </div>
+          </div>
+
+          <!-- Recommended Quantity -->
+          <div>
+            <label for="recommendedQuantity" class="block text-sm font-medium text-gray-700 mb-1">
+              Recommended Quantity
+            </label>
+            <div class="flex items-center gap-2">
+              <input type="number" id="recommendedQuantity" step="0.1" min="0"
+                     class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+              <select id="defaultUnitId" class="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                <!-- Units will be populated here -->
+              </select>
+            </div>
+          </div>
+
+          <!-- Days to Maturity -->
+          <div>
+            <label for="daysToMaturity" class="block text-sm font-medium text-gray-700 mb-1">
+              Days to Maturity
+            </label>
+            <div class="flex items-center gap-2">
+              <input type="number" id="daysToMaturity" min="1" max="3650"
+                     class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+              <span class="text-xs text-gray-500" id="libraryMaturity">Library: 90</span>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Drawer Footer -->
+      <div class="p-6 border-t bg-gray-50">
+        <div class="flex items-center gap-3">
+          <button id="saveOverridesBtn" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+            Save Changes
+          </button>
+          <button id="cancelOverridesBtn" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Apply Updates Modal -->
+<div id="applyUpdatesModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden items-center justify-center">
+  <div class="bg-surface rounded-xl p-6 max-w-md w-full mx-4 shadow-lg">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
+        <i data-lucide="info" class="w-5 h-5 text-accent"></i>
+      </div>
+      <h3 class="text-lg font-semibold text-gray-900">Apply Preset Updates</h3>
+    </div>
+    <div class="space-y-3 mb-6">
+      <p class="text-sm text-gray-600">New template version available. Preview changes:</p>
+      <div id="updateDiff" class="bg-gray-50 rounded-lg p-3 text-sm">
+        <!-- Diff will be populated here -->
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <button id="confirmUpdatesBtn" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+        Apply Updates
+      </button>
+      <button id="cancelUpdatesBtn" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
+           
+        </main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'localDB:';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            btn.addEventListener('click', () => {
+                const isOpen = !sidebar.classList.contains('hidden');
+                
+                if (isOpen) {
+                    // Close
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    // Open
+                    sidebar.classList.remove('hidden');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav link
+                    const firstLink = sidebar.querySelector('a');
+                    if (firstLink) firstLink.focus();
+                }
+            });
+            
+            // Close on overlay click
+            overlay.addEventListener('click', () => {
+                sidebar.classList.add('hidden');
+                overlay.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.focus();
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('hidden') && window.innerWidth < 768) {
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    // Default to first farmer user from dummy data
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-001');
+                    currentUserId = 'u-001';
+                }
+                
+                // Get user from users collection
+                try {
+                    const usersData = localStorage.getItem(APP_PREFIX + 'users');
+                    if (usersData) {
+                        const users = JSON.parse(usersData);
+                        const user = users.find(u => u.id === currentUserId);
+                        return user || null;
+                    }
+                } catch (e) {
+                    console.warn('Error loading user data:', e);
+                }
+                return null;
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName   = document.getElementById('userName');
+            const popoverAvatar = document.getElementById('popoverUserAvatar');
+            const popoverName = document.getElementById('popoverUserName');
+            const popoverEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverAvatar) popoverAvatar.textContent = initials;
+            if (popoverName) popoverName.textContent = displayName;
+            if (popoverEmail) popoverEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popover.classList.toggle('hidden');
+                popoverVisible = !popoverVisible;
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                
+                if (popoverVisible) {
+                    // Focus first focusable element in popover
+                    const firstFocusable = popover.querySelector('button');
+                    if (firstFocusable) firstFocusable.focus();
+                }
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) {
+                    UserUtils.signOut();
+                }
+            });
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX)) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `farm_assistant_data_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            // Show success toast
+            showToast('✅ App data exported successfully', 'success');
+        });
+        
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+        
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX)) {
+                            localStorage.setItem(key, value);
+                            importedCount++;
+                        }
+                    });
+                    
+                    if (importedCount > 0) {
+                        showToast(`✅ App data imported successfully (${importedCount} items). Please refresh the page.`, 'success');
+                    } else {
+                        showToast('⚠️ No valid app data found in file.', 'warning');
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    showToast('❌ Failed to import: Invalid JSON format.', 'error');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Simple toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-white text-sm max-w-sm transition-all duration-300 ${
+                type === 'success' ? 'bg-green-600' :
+                type === 'error' ? 'bg-red-600' :
+                type === 'warning' ? 'bg-orange-600' :
+                'bg-blue-600'
+            }`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        // Simple hash router (no entity IDs; UI-state params only)
+        const Router = (() => {
+            const pageContent = document.getElementById('pageContent');
+            const sideNav = document.getElementById('sideNav');
+
+            function parseHash(){
+                const h = location.hash || '';
+                const m = h.match(/page=([^&]+)/);
+                const page = m ? m[1] : null;
+                // Collect UI-state params only (view, tab, filter, mode, section)
+                const params = {};
+                (h.split('&').slice(1)).forEach(kv => {
+                    const [k,v] = kv.split('=');
+                    if (['view','tab','filter','mode','section'].includes(k)) {
+                        params[k] = decodeURIComponent(v||'');
+                    }
+                });
+                return { page, params };
+            }
+
+            async function loadPage(pageBase){
+                if (!pageBase) {
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+                            <div class="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="leaf" class="w-8 h-8 text-primary"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h2 class="text-display-md font-semibold text-gray-900">Welcome to Farm Assistant</h2>
+                                <p class="text-gray-600 max-w-md">Select a page from the sidebar to get started with managing your farming tasks and tracking your crops.</p>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+                
+                // Show loading state
+                pageContent.innerHTML = `
+                    <div class="flex items-center justify-center min-h-[200px]">
+                        <div class="flex items-center space-x-3 text-gray-600">
+                            <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                            <span>Loading...</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Ensure .html suffix
+                const url = pageBase.endsWith('.html') ? pageBase : `${pageBase}.html`;
+                
+                try {
+                    const res = await fetch(url, { cache: 'no-store' });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const html = await res.text();
+                    pageContent.innerHTML = html;
+                    lucide.createIcons();
+                    
+                    // Allow page to hook UI-state params if it exposes a global
+                    if (window.PageInit?.onParams) {
+                        window.PageInit.onParams(parseHash().params);
+                    }
+                } catch (e) {
+                    console.error('Failed to load page:', url, e);
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[200px] text-center space-y-4">
+                            <div class="w-12 h-12 bg-error/10 rounded-lg flex items-center justify-center">
+                                <i data-lucide="alert-circle" class="w-6 h-6 text-error"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h3 class="font-semibold text-gray-900">Failed to load page</h3>
+                                <p class="text-gray-600 text-sm">The page "${url}" could not be loaded.</p>
+                                <button onclick="Router.onRoute()" class="text-primary hover:text-primary/80 text-sm font-medium">Try again</button>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                }
+            }
+
+            function setActive(pageBase){
+                if (!sideNav) return;
+                
+                const links = sideNav.querySelectorAll('a[href]');
+                links.forEach(a => {
+                    const href = a.getAttribute('href') || '';
+                    const target = href.replace(/^#\/?page=/, '').replace(/\.html$/, '');
+                    const current = (pageBase || '').replace(/\.html$/, '');
+                    
+                    if (target && target === current) {
+                        a.classList.add('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.remove('text-gray-700');
+                    } else {
+                        a.classList.remove('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.add('text-gray-700');
+                    }
+                });
+            }
+
+            async function onRoute(){
+                const { page } = parseHash();
+                await loadPage(page);
+                setActive(page);
+            }
+
+            return { onRoute };
+        })();
+
+        // Make Router.onRoute globally accessible for error retry
+        window.Router = Router;
+
+        window.addEventListener('hashchange', Router.onRoute);
+        Router.onRoute();
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                try {
+                    window.AppActions[action](el);
+                } catch (err) {
+                    console.error('AppAction error:', action, err);
+                    showToast(`❌ Action "${action}" failed: ${err.message}`, 'error');
+                }
+            } else {
+                el.setAttribute('disabled', 'true');
+                el.setAttribute('title', 'Unavailable');
+                el.classList.add('opacity-50', 'cursor-not-allowed');
+                console.warn('AppAction not available:', action);
+            }
+        });
+
+        // Generate navigation items programmatically from page list
+        // Note: In a real implementation, this would be generated from the actual page list data
+        // For now, we have the single "Today's Work" page based on the provided page data
+    </script>
+
+    
+<script id="page-logic" type="module">
+import { 
+  getCropInstance, 
+  updateCropInstanceOverrides, 
+  getLibraryCrop,
+  getScheduledTasksForCrop,
+  getLogsForCrop,
+  getUnits,
+  saveAsMyTemplate,
+  applyLibraryUpdates
+} from './crop_instance-logic.js';
+
+// Get crop instance ID from URL params
+function funGetCropInstanceIdFromUrl() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('cropInstanceId');
+}
+
+let currentCropInstance = null;
+let currentLibraryCrop = null;
+let originalOverrides = {};
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', async function() {
+  const cropInstanceId = funGetCropInstanceIdFromUrl();
+  
+  if (!cropInstanceId) {
+    funShowError('Crop instance ID is required');
+    return;
+  }
+
+  await funLoadPageData(cropInstanceId);
+  funSetupEventListeners();
+});
+
+// Load all page data
+async function funLoadPageData(cropInstanceId) {
+  try {
+    // Get crop instance data
+    // Expected return: { cropInstance, libraryCrop } where cropInstance contains all crop instance fields from schema
+    // and libraryCrop contains the referenced library crop data
+    currentCropInstance = await getCropInstance(cropInstanceId);
+    
+    if (!currentCropInstance) {
+      funShowError('Crop instance not found');
+      return;
+    }
+
+    // Get library crop if available
+    if (currentCropInstance.libraryCropId) {
+      currentLibraryCrop = await getLibraryCrop(currentCropInstance.libraryCropId);
+    }
+
+    // Store original overrides for comparison
+    originalOverrides = { ...currentCropInstance.overrides || {} };
+
+    // Populate header
+    funPopulateHeader();
+    
+    // Populate preset summary
+    funPopulatePresetSummary();
+    
+    // Load timeline
+    await funLoadTimeline(cropInstanceId);
+    
+    // Load history
+    await funLoadHistory(cropInstanceId);
+
+  } catch (error) {
+    console.error('Error loading page data:', error);
+    funShowError('Failed to load crop instance data');
+  }
+}
+
+// Populate header section
+function funPopulateHeader() {
+  const nameElement = document.getElementById('cropInstanceName');
+  const versionElement = document.getElementById('appliedTemplateVersion');
+  const updateIndicator = document.getElementById('updateIndicator');
+  const applyUpdatesBtn = document.getElementById('applyUpdatesBtn');
+
+  if (nameElement) {
+    nameElement.textContent = currentCropInstance.name || 'Unnamed Crop';
+  }
+
+  if (versionElement && currentCropInstance.appliedTemplateVersion) {
+    versionElement.textContent = `Template v${currentCropInstance.appliedTemplateVersion}`;
+  }
+
+  // Check if updates are available (compare with library version)
+  if (currentLibraryCrop && currentLibraryCrop.version !== currentCropInstance.appliedTemplateVersion) {
+    updateIndicator?.classList.remove('hidden');
+    updateIndicator?.classList.add('flex');
+    applyUpdatesBtn?.classList.remove('hidden');
+  }
+}
+
+// Populate preset summary
+function funPopulatePresetSummary() {
+  // Get watering frequency from overrides or library default
+  const wateringFreq = funGetEffectiveValue('defaultIntervalDays', 3);
+  document.getElementById('wateringFreq').textContent = `Every ${wateringFreq} days`;
+
+  // Populate from library crop if available
+  if (currentLibraryCrop) {
+    document.getElementById('typicalNutrients').textContent = currentLibraryCrop.typicalNutrients || 'Not specified';
+    document.getElementById('typicalPests').textContent = currentLibraryCrop.typicalPests || 'Not specified';
+  }
+
+  // Format and display start date
+  if (currentCropInstance.startDate) {
+    const startDate = new Date(currentCropInstance.startDate);
+    document.getElementById('startDate').textContent = funFormatDate(startDate);
+  }
+
+  // Calculate and display harvest ETA
+  funCalculateHarvestETA();
+}
+
+// Calculate harvest ETA
+function funCalculateHarvestETA() {
+  const harvestElement = document.getElementById('harvestETA');
+  
+  if (currentCropInstance.startDate && currentCropInstance.daysToMaturity) {
+    const startDate = new Date(currentCropInstance.startDate);
+    const harvestDate = new Date(startDate.getTime() + (currentCropInstance.daysToMaturity * 24 * 60 * 60 * 1000));
+    
+    harvestElement.querySelector('span:last-child').textContent = funFormatDate(harvestDate);
+  } else {
+    harvestElement.style.display = 'none';
+  }
+}
+
+// Load timeline of scheduled tasks
+async function funLoadTimeline(cropInstanceId) {
+  try {
+    // Get scheduled tasks for next 30 days
+    // Expected return: array of task occurrences with due dates, task type info, status
+    // Should return tasks from taskOccurrences collection filtered by cropInstanceId and next 30 days
+    const tasks = await getScheduledTasksForCrop(cropInstanceId, 30);
+    
+    const timelineElement = document.getElementById('taskTimeline');
+    
+    if (!tasks || tasks.length === 0) {
+      timelineElement.innerHTML = `
+        <div class="text-center py-8 text-gray-500">
+          <i data-lucide="calendar-x" class="w-8 h-8 mx-auto mb-2"></i>
+          <p>No scheduled tasks in the next 30 days</p>
+        </div>
+      `;
+      lucide.createIcons();
+      return;
+    }
+
+    const timelineHTML = tasks.map(task => {
+      const dueDate = new Date(task.dueDate);
+      const isOverdue = dueDate < new Date() && task.statusId === 'status-overdue';
+      const isDue = task.statusId === 'status-due';
+      
+      return `
+        <div class="flex items-center gap-4 p-3 border rounded-lg ${isOverdue ? 'border-red-200 bg-red-50' : isDue ? 'border-primary/20 bg-primary/5' : 'border-gray-200'}">
+          <div class="flex-shrink-0 w-8 h-8 rounded-lg ${isOverdue ? 'bg-red-100 text-red-600' : isDue ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-600'} flex items-center justify-center">
+            <i data-lucide="${task.taskType?.icon || 'circle'}" class="w-4 h-4"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-medium text-gray-900">${task.taskType?.nameEn || 'Task'}</span>
+              <span class="px-2 py-1 text-xs rounded ${isOverdue ? 'bg-red-100 text-red-700' : isDue ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-600'}">
+                ${task.dueWindow || 'Scheduled'}
+              </span>
+            </div>
+            <div class="text-sm text-gray-600">
+              Due: ${funFormatDate(dueDate)}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    timelineElement.innerHTML = timelineHTML;
+    lucide.createIcons();
+
+  } catch (error) {
+    console.error('Error loading timeline:', error);
+    document.getElementById('taskTimeline').innerHTML = `
+      <div class="text-center py-8 text-red-500">
+        <p>Failed to load scheduled tasks</p>
+      </div>
+    `;
+  }
+}
+
+// Load history logs
+async function funLoadHistory(cropInstanceId) {
+  try {
+    // Get recent logs for this crop (limit 20)
+    // Expected return: array of log entries with action, timestamp, notes, task info
+    // Should return from logs collection filtered by cropInstanceId, sorted by timestamp desc
+    const logs = await getLogsForCrop(cropInstanceId, 20);
+    
+    const historyElement = document.getElementById('historyLogs');
+    
+    if (!logs || logs.length === 0) {
+      historyElement.innerHTML = `
+        <div class="text-center py-8 text-gray-500">
+          <i data-lucide="clock" class="w-8 h-8 mx-auto mb-2"></i>
+          <p>No history logs found</p>
+        </div>
+      `;
+      lucide.createIcons();
+      return;
+    }
+
+    funRenderHistoryLogs(logs);
+
+  } catch (error) {
+    console.error('Error loading history:', error);
+    document.getElementById('historyLogs').innerHTML = `
+      <div class="text-center py-8 text-red-500">
+        <p>Failed to load history logs</p>
+      </div>
+    `;
+  }
+}
+
+// Render history logs
+function funRenderHistoryLogs(logs) {
+  const historyElement = document.getElementById('historyLogs');
+  
+  const historyHTML = logs.map(log => {
+    const timestamp = new Date(log.timestamp);
+    const actionColor = {
+      'completed': 'text-green-600 bg-green-50',
+      'skipped': 'text-orange-600 bg-orange-50',
+      'snoozed': 'text-blue-600 bg-blue-50'
+    }[log.action] || 'text-gray-600 bg-gray-50';
+
+    return `
+      <div class="flex items-start gap-4 p-3 border rounded-lg">
+        <div class="flex-shrink-0 w-8 h-8 rounded-lg ${actionColor} flex items-center justify-center">
+          <i data-lucide="${log.action === 'completed' ? 'check' : log.action === 'skipped' ? 'x' : 'clock'}" class="w-4 h-4"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="font-medium text-gray-900 capitalize">${log.action}</span>
+            <span class="text-sm text-gray-500">${funFormatDateTime(timestamp)}</span>
+          </div>
+          ${log.notes ? `<p class="text-sm text-gray-600 mb-2">${log.notes}</p>` : ''}
+          ${log.quantity ? `<div class="text-xs text-gray-500">Quantity: ${log.quantity} ${log.unit?.symbol || ''}</div>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  historyElement.innerHTML = historyHTML;
+  lucide.createIcons();
+}
+
+// Setup event listeners
+function funSetupEventListeners() {
+  // Edit overrides button
+  document.getElementById('editOverridesBtn')?.addEventListener('click', funOpenOverridesDrawer);
+  
+  // Apply updates button
+  document.getElementById('applyUpdatesBtn')?.addEventListener('click', funOpenApplyUpdatesModal);
+  
+  // Save as template button
+  document.getElementById('saveAsTemplateBtn')?.addEventListener('click', funSaveAsTemplate);
+  
+  // Drawer controls
+  document.getElementById('closeDrawerBtn')?.addEventListener('click', funCloseOverridesDrawer);
+  document.getElementById('cancelOverridesBtn')?.addEventListener('click', funCloseOverridesDrawer);
+  document.getElementById('saveOverridesBtn')?.addEventListener('click', funSaveOverrides);
+  
+  // Modal controls
+  document.getElementById('cancelUpdatesBtn')?.addEventListener('click', funCloseApplyUpdatesModal);
+  document.getElementById('confirmUpdatesBtn')?.addEventListener('click', funApplyUpdates);
+  
+  // Search functionality
+  document.getElementById('historySearch')?.addEventListener('input', funFilterHistory);
+  
+  // Close drawer/modal on backdrop click
+  document.getElementById('overridesDrawer')?.addEventListener('click', function(e) {
+    if (e.target === this) funCloseOverridesDrawer();
+  });
+  
+  document.getElementById('applyUpdatesModal')?.addEventListener('click', function(e) {
+    if (e.target === this) funCloseApplyUpdatesModal();
+  });
+}
+
+// Open overrides drawer
+async function funOpenOverridesDrawer() {
+  const drawer = document.getElementById('overridesDrawer');
+  const drawerContent = drawer.querySelector('.transform');
+  
+  // Load units for dropdown
+  await funLoadUnitsDropdown();
+  
+  // Populate current values
+  funPopulateOverridesForm();
+  
+  drawer.classList.remove('hidden');
+  
+  // Animate in
+  setTimeout(() => {
+    drawerContent.classList.remove('translate-x-full');
+  }, 10);
+}
+
+// Close overrides drawer
+function funCloseOverridesDrawer() {
+  const drawer = document.getElementById('overridesDrawer');
+  const drawerContent = drawer.querySelector('.transform');
+  
+  drawerContent.classList.add('translate-x-full');
+  
+  setTimeout(() => {
+    drawer.classList.add('hidden');
+  }, 300);
+}
+
+// Load units dropdown
+async function funLoadUnitsDropdown() {
+  try {
+    // Get all units
+    // Expected return: array of unit objects with id, symbol, name fields
+    const units = await getUnits();
+    
+    const select = document.getElementById('defaultUnitId');
+    if (!select) return;
+    
+    select.innerHTML = units.map(unit => 
+      `<option value="${unit.id}">${unit.symbol} (${unit.name})</option>`
+    ).join('');
+    
+  } catch (error) {
+    console.error('Error loading units:', error);
+  }
+}
+
+// Populate overrides form
+function funPopulateOverridesForm() {
+  // Get current effective values
+  const intervalDays = funGetEffectiveValue('defaultIntervalDays');
+  const recommendedQuantity = funGetEffectiveValue('recommendedQuantity');
+  const defaultUnitId = funGetEffectiveValue('defaultUnitId');
+  const daysToMaturity = currentCropInstance.daysToMaturity;
+  
+  // Populate form fields
+  document.getElementById('intervalDays').value = intervalDays || '';
+  document.getElementById('recommendedQuantity').value = recommendedQuantity || '';
+  document.getElementById('defaultUnitId').value = defaultUnitId || '';
+  document.getElementById('daysToMaturity').value = daysToMaturity || '';
+  
+  // Show library defaults
+  if (currentLibraryCrop) {
+    document.getElementById('libraryDefault').textContent = `Library: ${currentLibraryCrop.defaultIntervalDays || 'Not set'}`;
+    document.getElementById('libraryMaturity').textContent = `Library: ${currentLibraryCrop.daysToMaturity || 'Not set'}`;
+  }
+}
+
+// Save overrides
+async function funSaveOverrides() {
+  try {
+    const form = document.getElementById('overridesForm');
+    const formData = new FormData(form);
+    
+    // Collect override values
+    const overrides = {};
+    
+    const intervalDays = document.getElementById('intervalDays').value;
+    const recommendedQuantity = document.getElementById('recommendedQuantity').value;
+    const defaultUnitId = document.getElementById('defaultUnitId').value;
+    const daysToMaturity = document.getElementById('daysToMaturity').value;
+    
+    if (intervalDays) overrides.defaultIntervalDays = intervalDays;
+    if (recommendedQuantity) overrides.recommendedQuantity = recommendedQuantity;
+    if (defaultUnitId) overrides.defaultUnitId = defaultUnitId;
+    if (daysToMaturity) overrides.daysToMaturity = daysToMaturity;
+    
+    // Update crop instance overrides
+    // Expected: updates cropInstances collection overrides field and rebuilds task schedule
+    await updateCropInstanceOverrides(currentCropInstance.id, overrides);
+    
+    // Update current instance data
+    currentCropInstance.overrides = overrides;
+    if (daysToMaturity) {
+      currentCropInstance.daysToMaturity = parseInt(daysToMaturity);
+    }
+    
+    // Close drawer
+    funCloseOverridesDrawer();
+    
+    // Refresh page data
+    await funRefreshPageData();
+    
+    // Show success message
+    funShowToast('✅ Overrides saved successfully. Schedule updated.', 'success');
+    
+  } catch (error) {
+    console.error('Error saving overrides:', error);
+    funShowToast('❌ Failed to save overrides', 'error');
+  }
+}
+
+// Open apply updates modal
+function funOpenApplyUpdatesModal() {
+  if (!currentLibraryCrop) return;
+  
+  // Show diff between current and library version
+  funPopulateUpdateDiff();
+  
+  document.getElementById('applyUpdatesModal').classList.remove('hidden');
+  document.getElementById('applyUpdatesModal').classList.add('flex');
+}
+
+// Close apply updates modal
+function funCloseApplyUpdatesModal() {
+  const modal = document.getElementById('applyUpdatesModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+// Populate update diff
+function funPopulateUpdateDiff() {
+  const diffElement = document.getElementById('updateDiff');
+  if (!currentLibraryCrop) return;
+  
+  const changes = [];
+  
+  // Compare versions
+  changes.push(`Version: ${currentCropInstance.appliedTemplateVersion} → ${currentLibraryCrop.version}`);
+  
+  // Add other potential changes
+  if (currentLibraryCrop.daysToMaturity !== currentCropInstance.daysToMaturity) {
+    changes.push(`Days to maturity: ${currentCropInstance.daysToMaturity} → ${currentLibraryCrop.daysToMaturity}`);
+  }
+  
+  diffElement.innerHTML = changes.map(change => 
+    `<div class="flex items-center gap-2 text-sm">
+      <i data-lucide="arrow-right" class="w-3 h-3 text-accent"></i>
+      <span>${change}</span>
+    </div>`
+  ).join('');
+  
+  lucide.createIcons();
+}
+
+// Apply library updates
+async function funApplyUpdates() {
+  try {
+    // Apply library updates to crop instance
+    // Expected: updates cropInstance with latest library template version and rebuilds tasks
+    await applyLibraryUpdates(currentCropInstance.id);
+    
+    funCloseApplyUpdatesModal();
+    
+    // Refresh page data
+    await funRefreshPageData();
+    
+    funShowToast('✅ Library updates applied successfully', 'success');
+    
+  } catch (error) {
+    console.error('Error applying updates:', error);
+    funShowToast('❌ Failed to apply updates', 'error');
+  }
+}
+
+// Save as template
+async function funSaveAsTemplate() {
+  try {
+    // Save crop instance as user template
+    // Expected: creates new template in taskTemplates collection based on current crop instance settings
+    const templateId = await saveAsMyTemplate(currentCropInstance.id);
+    
+    // Navigate to library page with confirmation
+    window.location.href = `library.html?openDrawer=save_template_confirmation&sourceCropInstanceId=${currentCropInstance.id}&templateId=${templateId}`;
+    
+  } catch (error) {
+    console.error('Error saving template:', error);
+    funShowToast('❌ Failed to save template', 'error');
+  }
+}
+
+// Filter history logs
+function funFilterHistory(e) {
+  const searchTerm = e.target.value.toLowerCase();
+  const logs = document.querySelectorAll('#historyLogs > div');
+  
+  logs.forEach(log => {
+    const text = log.textContent.toLowerCase();
+    log.style.display = text.includes(searchTerm) ? 'block' : 'none';
+  });
+}
+
+// Helper functions
+function funGetEffectiveValue(key, defaultValue = null) {
+  // Check overrides first, then library crop, then default
+  if (currentCropInstance.overrides && currentCropInstance.overrides[key] !== undefined) {
+    return currentCropInstance.overrides[key];
+  }
+  
+  if (currentLibraryCrop && currentLibraryCrop[key] !== undefined) {
+    return currentLibraryCrop[key];
+  }
+  
+  return defaultValue;
+}
+
+function funFormatDate(date) {
+  // Format as dd/MM/yyyy for India locale
+  return date.toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+}
+
+function funFormatDateTime(date) {
+  return date.toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+async function funRefreshPageData() {
+  // Reload timeline and recalculate harvest ETA
+  await funLoadTimeline(currentCropInstance.id);
+  funCalculateHarvestETA();
+  funPopulatePresetSummary();
+  
+  // Hide update indicator if updates were applied
+  if (currentLibraryCrop && currentLibraryCrop.version === currentCropInstance.appliedTemplateVersion) {
+    document.getElementById('updateIndicator')?.classList.add('hidden');
+    document.getElementById('applyUpdatesBtn')?.classList.add('hidden');
+  }
+}
+
+function funShowError(message) {
+  document.querySelector('section').innerHTML = `
+    <div class="flex flex-col items-center justify-center min-h-[400px] text-center space-y-4">
+      <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+        <i data-lucide="alert-circle" class="w-6 h-6 text-red-600"></i>
+      </div>
+      <div class="space-y-2">
+        <h2 class="text-lg font-semibold text-gray-900">Error</h2>
+        <p class="text-gray-600">${message}</p>
+        <button onclick="history.back()" class="text-primary hover:text-primary/80 font-medium">Go Back</button>
+      </div>
+    </div>
+  `;
+  lucide.createIcons();
+}
+
+function funShowToast(message, type = 'info') {
+  // Create and show toast notification
+  const toast = document.createElement('div');
+  toast.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-white text-sm max-w-sm transition-all duration-300 ${
+    type === 'success' ? 'bg-green-600' :
+    type === 'error' ? 'bg-red-600' :
+    type === 'warning' ? 'bg-orange-600' :
+    'bg-blue-600'
+  }`;
+  toast.textContent = message;
+  
+  document.body.appendChild(toast);
+  
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100%)';
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300);
+  }, 5000);
+}
+</script>
+</body>
+</html>

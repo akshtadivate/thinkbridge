@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Farm Planning Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #047857;
+            --color-secondary: #8C5E3C;
+            --color-accent: #B38600;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --border-radius-sm: 8px;
+            --border-radius-md: 16px;
+            --border-radius-lg: 24px;
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+    <header class="bg-surface px-6 py-4 flex justify-between items-center border-b shadow-sm">
+        <div class="flex items-center gap-3">
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary" aria-label="Open Menu" aria-expanded="false">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+            <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 400 400" aria-hidden="true" focusable="false" class="w-8 h-8">
+                    <!-- Minimalist diary page -->
+                    <rect x="70" y="40" width="260" height="320" rx="20" fill="#FFFFFF" stroke="#2E7D32" stroke-width="8" stroke-linejoin="round"/>
+                    <!-- Header bar (calendar/diary header) -->
+                    <rect x="70" y="40" width="260" height="64" rx="12" fill="#D9A441"/>
+                    <!-- Diary entry lines -->
+                    <line x1="100" y1="128" x2="320" y2="128" stroke="#2E7D32" stroke-width="8" stroke-linecap="round"/>
+                    <line x1="100" y1="176" x2="260" y2="176" stroke="#2E7D32" stroke-width="8" stroke-linecap="round"/>
+                    <line x1="100" y1="224" x2="300" y2="224" stroke="#2E7D32" stroke-width="8" stroke-linecap="round"/>
+                    <!-- Stylized leaf (represents farm/nature) overlapping the page -->
+                    <path d="M270 170
+                             C320 170 370 230 330 290
+                             C310 330 260 360 230 335
+                             C200 305 210 250 270 170 Z"
+                          fill="#2E7D32"/>
+                    <!-- Central vein on the leaf (simple, high-contrast) -->
+                    <path d="M268 182
+                             C292 210 280 250 254 286"
+                          fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- Small ochre accent (stem/connection to planner) -->
+                    <circle cx="280" cy="236" r="8" fill="#D9A441"/>
+                    <!-- Clean outline accent to ensure scale legibility -->
+                    <path d="M230 335
+                             C260 360 310 338 330 290
+                             C370 230 320 170 270 170"
+                          fill="none" stroke="#2E7D32" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+                </svg>
+                <h1 class="text-display-lg font-bold text-primary">Farm Assistant</h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <!-- Import/Export buttons -->
+            <button id="importAppData" class="text-sm px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition">Import App Data</button>
+            <button id="exportAppData" class="text-sm px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition">Export App Data</button>
+            <input type="file" id="importFile" accept="application/json" class="hidden" />
+
+            <button id="userProfileButton"
+                class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                aria-label="User profile" aria-expanded="false" aria-controls="userProfilePopover">
+                <div id="userAvatar"
+                    class="w-8 h-8 bg-primary text-white rounded-xl flex items-center justify-center text-sm font-medium">
+                </div>
+                <div class="hidden sm:block">
+                    <div id="userName" class="text-sm font-medium text-gray-700"></div>
+                </div>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <a href="#pageContent" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-white px-3 py-1 rounded shadow-lg z-50">Skip to main content</a>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover"
+        class="absolute top-16 right-6 bg-white border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar"
+                class="w-8 h-8 bg-primary text-white rounded-xl flex items-center justify-center text-sm font-medium">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-medium text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton"
+                class="w-full flex items-center text-sm gap-2 px-3 py-2 text-left text-error hover:bg-red-50 focus:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-error rounded-md transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Mobile sidebar overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 hidden md:hidden"></div>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-50 w-64 bg-surface hidden md:block transition-transform duration-300 border-r shadow-sm md:shadow-none">
+            <nav class="p-4 space-y-2 pt-6" role="navigation" id="sideNav">
+                <!-- Generated navigation items will replace this comment -->
+
+                <a href="#/page=todays_work"
+                    class="flex items-center gap-3 px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 focus:text-primary focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-colors">
+                    <i data-lucide="sunrise" class="w-5 h-5"></i>
+                    <span class="font-medium">Today's Work</span>
+                </a>
+
+                <a href="#/page=area_detail"
+                    class="flex items-center gap-3 px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 focus:text-primary focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-colors">
+                    <i data-lucide="layers" class="w-5 h-5"></i>
+                    <span class="font-medium">Area Detail</span>  
+                </a>
+
+                <a href="#/page=field_detail"
+                    class="flex items-center gap-3 px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 
+                    focus:text-primary focus:bg-gray-50 focus:outline-none focus-visible:ring-2 
+                    focus-visible:ring-primary rounded-lg transition-colors">
+                    <i data-lucide="map" class="w-5 h-5"></i>
+                    <span class="font-medium">Field Detail</span>
+                </a>
+
+                <a href="#/page=fields_list"
+                    class="flex items-center gap-3 px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 focus:text-primary focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-colors">
+                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                    <span class="font-medium">Fields List</span>
+                </a>
+
+                <a href="#/page=task_detail"
+                    class="flex items-center gap-3 px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 focus:text-primary focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-colors">
+                    <i data-lucide="check-square" class="w-5 h-5"></i>
+                    <span class="font-medium">Task Detail</span>
+                  </a>
+
+                <a href="#/page=crop_instance"
+                    class="flex items-center gap-3 px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 focus:text-primary focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-colors">
+                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                    <span class="font-medium">Crop Instance</span>
+                </a>
+                
+                <a href="#/page=calendar"
+                    class="flex items-center gap-3 px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 focus:text-primary focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-colors">
+                    <i data-lucide="calendar" class="w-5 h-5"></i>
+                    <span class="font-medium">Calendar</span>
+                </a>
+
+                <a href="#/page=onboarding"
+                    class="flex items-center gap-3 px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 focus:text-primary focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-colors">
+                    <i data-lucide="info" class="w-5 h-5"></i>
+                    <span class="font-medium">Onboarding</span>
+                </a>
+                
+                <a href="#/page=quick_note"
+                    class="flex items-center gap-3 px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 focus:text-primary focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-colors">
+                    <i data-lucide="help-circle" class="w-5 h-5"></i>
+                    <span class="font-medium">Quick Note</span>
+                    </a>
+                        
+                <a href="#/page=logbook"
+                    class="flex items-center gap-3 px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 focus:text-primary focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-colors">
+                    <i data-lucide="book" class="w-5 h-5"></i>
+                    <span class="font-medium">Logbook</span>
+                </a>
+
+                <a href="#/page=library"
+                    class="flex items-center gap-3 px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 focus:text-primary focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-colors">
+                    <i data-lucide="archive" class="w-5 h-5"></i>
+                    <span class="font-medium">Library</span>
+
+                <a href="#/page=settings"
+                    class="flex items-center gap-3 px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-50 focus:text-primary focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-colors">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                    <span class="font-medium">Settings</span> 
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)] bg-background" id="pageContent" role="main">
+            
+<section class="max-w-4xl mx-auto">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+      <i data-lucide="sunrise" class="w-6 h-6 text-primary"></i>
+      <h1 class="text-display-lg font-bold text-gray-900">Today's Work</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <!-- Language Toggle -->
+      <button id="languageToggle" class="flex items-center gap-2 px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-colors">
+        <i data-lucide="globe" class="w-4 h-4"></i>
+        <span id="currentLanguage">EN</span>
+      </button>
+      <!-- Offline Badge -->
+      <div id="offlineBadge" class="hidden px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded">
+        <i data-lucide="wifi-off" class="w-3 h-3 inline mr-1"></i>
+        Offline
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div id="quickStats" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white p-4 rounded-lg border">
+      <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="clock" class="w-4 h-4 text-orange-500"></i>
+        <span class="text-sm font-medium text-gray-600">Overdue</span>
+      </div>
+      <div id="overdueCount" class="text-xl font-bold text-orange-600">0</div>
+    </div>
+    <div class="bg-white p-4 rounded-lg border">
+      <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="calendar" class="w-4 h-4 text-blue-500"></i>
+        <span class="text-sm font-medium text-gray-600">Due Today</span>
+      </div>
+      <div id="dueTodayCount" class="text-xl font-bold text-blue-600">0</div>
+    </div>
+    <div class="bg-white p-4 rounded-lg border">
+      <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="calendar-days" class="w-4 h-4 text-green-500"></i>
+        <span class="text-sm font-medium text-gray-600">This Week</span>
+      </div>
+      <div id="thisWeekCount" class="text-xl font-bold text-green-600">0</div>
+    </div>
+    <div class="bg-white p-4 rounded-lg border">
+      <div class="flex items-center gap-2 mb-2">
+        <i data-lucide="check-circle" class="w-4 h-4 text-primary"></i>
+        <span class="text-sm font-medium text-gray-600">Completed</span>
+      </div>
+      <div id="completedCount" class="text-xl font-bold text-primary">0</div>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="bg-white p-4 rounded-lg border mb-6">
+    <div class="flex flex-col sm:flex-row gap-4">
+      <div class="flex-1">
+        <div class="relative">
+          <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+          <input 
+            type="text" 
+            id="searchInput"
+            placeholder="Search tasks, areas, or crops..."
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+          >
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <select id="statusFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+          <option value="">All Status</option>
+          <option value="overdue">Overdue</option>
+          <option value="due">Due Today</option>
+          <option value="planned">This Week</option>
+        </select>
+        <select id="areaFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+          <option value="">All Areas</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div id="emptyState" class="hidden text-center py-12">
+    <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+      <i data-lucide="calendar-check" class="w-8 h-8 text-gray-400"></i>
+    </div>
+    <h3 class="text-display-md font-semibold text-gray-900 mb-2">No work scheduled for today</h3>
+    <p class="text-gray-600 mb-6 max-w-md mx-auto">Add your first Field or add a Crop to an Area to start tracking your farming tasks.</p>
+    <button onclick="window.location.hash = '#/page=fields'" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+      <i data-lucide="plus" class="w-4 h-4"></i>
+      Add Field
+    </button>
+  </div>
+
+  <!-- Tasks List -->
+  <div id="tasksList" class="space-y-4">
+    <!-- Area groups will be populated here -->
+  </div>
+
+  <!-- Quick Add Note Floating Button -->
+  <button id="quickAddNote" class="fixed bottom-6 right-6 w-14 h-14 bg-secondary text-white rounded-full shadow-lg hover:bg-secondary/90 focus:bg-secondary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary transition-colors">
+    <i data-lucide="plus" class="w-6 h-6"></i>
+  </button>
+</section>
+
+<!-- Quick Log Modal -->
+<div id="quickLogModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden">
+  <div class="flex items-end justify-center min-h-screen p-4">
+    <div class="bg-white rounded-t-xl w-full max-w-lg max-h-[70vh] overflow-hidden">
+      <div class="p-4 border-b">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-gray-900">Quick Log</h3>
+          <button id="closeQuickLog" class="p-1 hover:bg-gray-100 rounded-full">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+      <div class="p-4 overflow-y-auto">
+        <div id="quickLogContent">
+          <!-- Content will be populated when modal opens -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Photo Capture Modal -->
+<div id="photoCaptureModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-xl w-full max-w-md">
+      <div class="p-4 border-b">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-gray-900">Add Photo</h3>
+          <button id="closePhotoCapture" class="p-1 hover:bg-gray-100 rounded-full">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+      <div class="p-4"> /*i remove comment from accept="image*..." */
+        <input type="file" id="photoInput" accept="image" capture="camera" class="hidden">
+        <div id="photoPreview" class="hidden mb-4">
+          <img id="previewImage" class="w-full rounded-lg" alt="Photo preview">
+        </div>
+        <div class="flex gap-3">
+          <button id="capturePhoto" class="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+            <i data-lucide="camera" class="w-4 h-4"></i>
+            Take Photo
+          </button>
+          <button id="selectPhoto" class="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+            <i data-lucide="image" class="w-4 h-4"></i>
+            Select File
+          </button>
+        </div>
+        <div id="photoActions" class="hidden mt-4 flex gap-3">
+          <button id="retakePhoto" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+            Retake
+          </button>
+          <button id="confirmPhoto" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+            Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+            
+
+
+
+        </main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'localDB:';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            btn.addEventListener('click', () => {
+                const isOpen = !sidebar.classList.contains('hidden');
+                
+                if (isOpen) {
+                    // Close
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    // Open
+                    sidebar.classList.remove('hidden');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav link
+                    const firstLink = sidebar.querySelector('a');
+                    if (firstLink) firstLink.focus();
+                }
+            });
+            
+            // Close on overlay click
+            overlay.addEventListener('click', () => {
+                sidebar.classList.add('hidden');
+                overlay.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.focus();
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('hidden') && window.innerWidth < 768) {
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    // Default to first farmer user from dummy data
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-001');
+                    currentUserId = 'u-001';
+                }
+                
+                // Get user from users collection
+                try {
+                    const usersData = localStorage.getItem(APP_PREFIX + 'users');
+                    if (usersData) {
+                        const users = JSON.parse(usersData);
+                        const user = users.find(u => u.id === currentUserId);
+                        return user || null;
+                    }
+                } catch (e) {
+                    console.warn('Error loading user data:', e);
+                }
+                return null;
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName   = document.getElementById('userName');
+            const popoverAvatar = document.getElementById('popoverUserAvatar');
+            const popoverName = document.getElementById('popoverUserName');
+            const popoverEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverAvatar) popoverAvatar.textContent = initials;
+            if (popoverName) popoverName.textContent = displayName;
+            if (popoverEmail) popoverEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popover.classList.toggle('hidden');
+                popoverVisible = !popoverVisible;
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                
+                if (popoverVisible) {
+                    // Focus first focusable element in popover
+                    const firstFocusable = popover.querySelector('button');
+                    if (firstFocusable) firstFocusable.focus();
+                }
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) {
+                    UserUtils.signOut();
+                }
+            });
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX)) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `farm_assistant_data_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            // Show success toast
+            showToast('✅ App data exported successfully', 'success');
+        });
+        
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+        
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX)) {
+                            localStorage.setItem(key, value);
+                            importedCount++;
+                        }
+                    });
+                    
+                    if (importedCount > 0) {
+                        showToast(`✅ App data imported successfully (${importedCount} items). Please refresh the page.`, 'success');
+                    } else {
+                        showToast('⚠️ No valid app data found in file.', 'warning');
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    showToast('❌ Failed to import: Invalid JSON format.', 'error');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Simple toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-white text-sm max-w-sm transition-all duration-300 ${
+                type === 'success' ? 'bg-green-600' :
+                type === 'error' ? 'bg-red-600' :
+                type === 'warning' ? 'bg-orange-600' :
+                'bg-blue-600'
+            }`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        // Simple hash router (no entity IDs; UI-state params only)
+        const Router = (() => {
+            const pageContent = document.getElementById('pageContent');
+            const sideNav = document.getElementById('sideNav');
+
+            function parseHash(){
+                const h = location.hash || '';
+                const m = h.match(/page=([^&]+)/);
+                const page = m ? m[1] : null;
+                // Collect UI-state params only (view, tab, filter, mode, section)
+                const params = {};
+                (h.split('&').slice(1)).forEach(kv => {
+                    const [k,v] = kv.split('=');
+                    if (['view','tab','filter','mode','section'].includes(k)) {
+                        params[k] = decodeURIComponent(v||'');
+                    }
+                });
+                return { page, params };
+            }
+
+            async function loadPage(pageBase){
+                if (!pageBase) {
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+                            <div class="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="leaf" class="w-8 h-8 text-primary"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h2 class="text-display-md font-semibold text-gray-900">Welcome to Farm Assistant</h2>
+                                <p class="text-gray-600 max-w-md">Select a page from the sidebar to get started with managing your farming tasks and tracking your crops.</p>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+                
+                // Show loading state
+                pageContent.innerHTML = `
+                    <div class="flex items-center justify-center min-h-[200px]">
+                        <div class="flex items-center space-x-3 text-gray-600">
+                            <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                            <span>Loading...</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Ensure .html suffix
+                const url = pageBase.endsWith('.html') ? pageBase : `${pageBase}.html`;
+                
+                try {
+                    const res = await fetch(url, { cache: 'no-store' });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const html = await res.text();
+                    pageContent.innerHTML = html;
+                    lucide.createIcons();
+                    
+                    // Allow page to hook UI-state params if it exposes a global
+                    if (window.PageInit?.onParams) {
+                        window.PageInit.onParams(parseHash().params);
+                    }
+                } catch (e) {
+                    console.error('Failed to load page:', url, e);
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[200px] text-center space-y-4">
+                            <div class="w-12 h-12 bg-error/10 rounded-lg flex items-center justify-center">
+                                <i data-lucide="alert-circle" class="w-6 h-6 text-error"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h3 class="font-semibold text-gray-900">Failed to load page</h3>
+                                <p class="text-gray-600 text-sm">The page "${url}" could not be loaded.</p>
+                                <button onclick="Router.onRoute()" class="text-primary hover:text-primary/80 text-sm font-medium">Try again</button>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                }
+            }
+
+            function setActive(pageBase){
+                if (!sideNav) return;
+                
+                const links = sideNav.querySelectorAll('a[href]');
+                links.forEach(a => {
+                    const href = a.getAttribute('href') || '';
+                    const target = href.replace(/^#\/?page=/, '').replace(/\.html$/, '');
+                    const current = (pageBase || '').replace(/\.html$/, '');
+                    
+                    if (target && target === current) {
+                        a.classList.add('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.remove('text-gray-700');
+                    } else {
+                        a.classList.remove('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.add('text-gray-700');
+                    }
+                });
+            }
+
+            async function onRoute(){
+                const { page } = parseHash();
+                await loadPage(page);
+                setActive(page);
+            }
+
+            return { onRoute };
+        })();
+
+        // Make Router.onRoute globally accessible for error retry
+        window.Router = Router;
+
+        window.addEventListener('hashchange', Router.onRoute);
+        Router.onRoute();
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                try {
+                    window.AppActions[action](el);
+                } catch (err) {
+                    console.error('AppAction error:', action, err);
+                    showToast(`❌ Action "${action}" failed: ${err.message}`, 'error');
+                }
+            } else {
+                el.setAttribute('disabled', 'true');
+                el.setAttribute('title', 'Unavailable');
+                el.classList.add('opacity-50', 'cursor-not-allowed');
+                console.warn('AppAction not available:', action);
+            }
+        });
+
+        // Generate navigation items programmatically from page list
+        // Note: In a real implementation, this would be generated from the actual page list data
+        // For now, we have the single "Today's Work" page based on the provided page data
+    </script>
+
+    
+<script id="page-logic" type="module">
+import { 
+  getTodayAndWeekTasks, 
+  getTaskStats, 
+  markTaskComplete, 
+  skipTask, 
+  snoozeTask,
+  createTaskLog,
+  getUserAreas,
+  getCurrentUser,
+  getUserSettings,
+  getI18nBundle,
+  savePhoto
+} from './todays_work-logic.js';
+
+// Global state
+let currentTasks = [];
+let filteredTasks = [];
+let currentUser = null;
+let userSettings = null;
+let i18nBundle = null;
+let selectedPhotoBlob = null;
+
+// Initialize page
+async function funInitializePage() {
+  try {
+    // Load user data and settings
+    currentUser = await getCurrentUser();
+    userSettings = await getUserSettings(currentUser?.uid);
+    i18nBundle = await getI18nBundle(userSettings?.language || 'EN');
+    
+    // Update language display
+    document.getElementById('currentLanguage').textContent = userSettings?.language || 'EN';
+    
+    // Load and display tasks
+    await funLoadTasks();
+    await funLoadAreaFilter();
+    
+    // Setup event listeners
+    funSetupEventListeners();
+    
+    // Check online/offline status
+    funUpdateOfflineStatus();
+    
+  } catch (error) {
+    console.error('Failed to initialize page:', error);
+    funShowToast('❌ Failed to load tasks', 'error');
+  }
+}
+
+// Load tasks from todays_work-logic.js
+// Expected return: Array of task objects grouped by area with crop instances and task details
+// Collections used: taskOccurrences, cropInstances, areas, taskTemplates, taskTypes, statusCodes, units
+async function funLoadTasks() {
+  try {
+    if (!currentUser) return;
+    
+    // Get today and this week's tasks with all related data
+    const tasksData = await getTodayAndWeekTasks(currentUser.uid);
+    currentTasks = tasksData.tasks || [];
+    
+    // Get task statistics
+    const stats = await getTaskStats(currentUser.uid);
+    
+    // Update stats display
+    document.getElementById('overdueCount').textContent = stats.overdue || 0;
+    document.getElementById('dueTodayCount').textContent = stats.dueToday || 0;
+    document.getElementById('thisWeekCount').textContent = stats.thisWeek || 0;
+    document.getElementById('completedCount').textContent = stats.completed || 0;
+    
+    // Apply current filters
+    funApplyFilters();
+    
+  } catch (error) {
+    console.error('Failed to load tasks:', error);
+    funShowToast('❌ Failed to load tasks', 'error');
+  }
+}
+
+// Load areas for filter dropdown
+// Expected return: Array of area objects
+// Collections used: areas, fields
+async function funLoadAreaFilter() {
+  try {
+    if (!currentUser) return;
+    
+    const areas = await getUserAreas(currentUser.uid);
+    const areaFilter = document.getElementById('areaFilter');
+    
+    // Clear existing options except "All Areas"
+    while (areaFilter.children.length > 1) {
+      areaFilter.removeChild(areaFilter.lastChild);
+    }
+    
+    // Add area options
+    areas.forEach(area => {
+      const option = document.createElement('option');
+      option.value = area.id;
+      option.textContent = area.name;
+      areaFilter.appendChild(option);
+    });
+    
+  } catch (error) {
+    console.error('Failed to load areas:', error);
+  }
+}
+
+// Apply search and filter
+function funApplyFilters() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  const statusFilter = document.getElementById('statusFilter').value;
+  const areaFilter = document.getElementById('areaFilter').value;
+  
+  filteredTasks = currentTasks.filter(task => {
+    // Search filter
+    if (searchTerm) {
+      const searchText = `${task.areaName} ${task.cropName} ${task.taskName}`.toLowerCase();
+      if (!searchText.includes(searchTerm)) return false;
+    }
+    
+    // Status filter
+    if (statusFilter) {
+      if (statusFilter === 'overdue' && task.status !== 'overdue') return false;
+      if (statusFilter === 'due' && task.status !== 'due') return false;
+      if (statusFilter === 'planned' && task.status !== 'planned') return false;
+    }
+    
+    // Area filter
+    if (areaFilter && task.areaId !== areaFilter) return false;
+    
+    return true;
+  });
+  
+  funRenderTasks();
+}
+
+// Render tasks list grouped by area
+function funRenderTasks() {
+  const tasksList = document.getElementById('tasksList');
+  const emptyState = document.getElementById('emptyState');
+  
+  if (filteredTasks.length === 0) {
+    tasksList.innerHTML = '';
+    emptyState.classList.remove('hidden');
+    return;
+  }
+  
+  emptyState.classList.add('hidden');
+  
+  // Group tasks by area
+  const groupedTasks = {};
+  filteredTasks.forEach(task => {
+    if (!groupedTasks[task.areaId]) {
+      groupedTasks[task.areaId] = {
+        areaName: task.areaName,
+        crops: {}
+      };
+    }
+    
+    if (!groupedTasks[task.areaId].crops[task.cropInstanceId]) {
+      groupedTasks[task.areaId].crops[task.cropInstanceId] = {
+        cropName: task.cropName,
+        tasks: []
+      };
+    }
+    
+    groupedTasks[task.areaId].crops[task.cropInstanceId].tasks.push(task);
+  });
+  
+  // Render grouped tasks
+  let html = '';
+  Object.entries(groupedTasks).forEach(([areaId, areaData]) => {
+    html += `
+      <div class="bg-white rounded-lg border overflow-hidden">
+        <div class="p-4 bg-gray-50 border-b">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold text-gray-900 flex items-center gap-2">
+              <i data-lucide="map-pin" class="w-4 h-4 text-gray-600"></i>
+              ${areaData.areaName}
+            </h3>
+            <button class="text-sm text-gray-600 hover:text-gray-800 flex items-center gap-1" onclick="funShowBatchActions('${areaId}')">
+              <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+              Batch
+            </button>
+          </div>
+        </div>
+        <div class="divide-y divide-gray-100">
+    `;
+    
+    Object.entries(areaData.crops).forEach(([cropId, cropData]) => {
+      html += `
+        <div class="p-4">
+          <h4 class="font-medium text-gray-800 mb-3 flex items-center gap-2">
+            <i data-lucide="sprout" class="w-4 h-4 text-green-600"></i>
+            ${cropData.cropName}
+          </h4>
+          <div class="space-y-2">
+      `;
+      
+      cropData.tasks.forEach(task => {
+        const statusColor = funGetStatusColor(task.status);
+        const urgencyBadge = funGetUrgencyBadge(task.priority);
+        
+        html += `
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+            <div class="flex-1 cursor-pointer" onclick="funOpenTaskDetail('${task.id}')">
+              <div class="flex items-center gap-3">
+                <i data-lucide="${task.taskIcon || 'calendar'}" class="w-5 h-5 ${statusColor}"></i>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="font-medium text-gray-900 truncate">${task.taskName}</span>
+                    ${urgencyBadge}
+                  </div>
+                  <div class="flex items-center gap-4 text-sm text-gray-600">
+                    <span class="flex items-center gap-1">
+                      <i data-lucide="calendar" class="w-3 h-3"></i>
+                      ${funFormatDueDate(task.dueDate, task.status)}
+                    </span>
+                    ${task.recommendedQuantity ? `
+                      <span class="flex items-center gap-1">
+                        <i data-lucide="package" class="w-3 h-3"></i>
+                        ${task.recommendedQuantity} ${task.unitSymbol || ''}
+                      </span>
+                    ` : ''}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 ml-4">
+              <button 
+                onclick="funMarkTaskDone('${task.id}')" 
+                class="flex items-center gap-1 px-3 py-1 bg-primary text-white text-sm rounded hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                title="Mark as done"
+              >
+                <i data-lucide="check" class="w-3 h-3"></i>
+                Done
+              </button>
+              <button 
+                onclick="funSkipTask('${task.id}')" 
+                class="flex items-center gap-1 px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+                title="Skip task"
+              >
+                <i data-lucide="skip-forward" class="w-3 h-3"></i>
+                Skip
+              </button>
+              <button 
+                onclick="funSnoozeTask('${task.id}')" 
+                class="p-1 text-gray-400 hover:text-gray-600 focus:text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+                title="Snooze task"
+              >
+                <i data-lucide="clock" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      });
+      
+      html += `
+          </div>
+        </div>
+      `;
+    });
+    
+    html += `
+        </div>
+      </div>
+    `;
+  });
+  
+  tasksList.innerHTML = html;
+  lucide.createIcons();
+}
+
+// Get status color class
+function funGetStatusColor(status) {
+  switch (status) {
+    case 'overdue': return 'text-red-500';
+    case 'due': return 'text-blue-500';
+    case 'planned': return 'text-green-500';
+    default: return 'text-gray-500';
+  }
+}
+
+// Get urgency badge
+function funGetUrgencyBadge(priority) {
+  if (priority >= 5) {
+    return '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">High</span>';
+  } else if (priority >= 4) {
+    return '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">Medium</span>';
+  }
+  return '';
+}
+
+// Format due date
+function funFormatDueDate(dueDate, status) {
+  const today = new Date();
+  const due = new Date(dueDate);
+  
+  if (status === 'overdue') return 'Overdue';
+  
+  const diffTime = due - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Tomorrow';
+  if (diffDays > 0 && diffDays <= 7) return `In ${diffDays} days`;
+  
+  return due.toLocaleDateString('en-IN', { 
+    day: '2-digit', 
+    month: '2-digit', 
+    year: 'numeric' 
+  });
+}
+
+// Mark task as done (with optional quantity/photo)
+async function funMarkTaskDone(taskId) {
+  try {
+    const task = currentTasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    // If task requires quantity or is harvest type, open quick log modal
+    if (task.requiresQuantity || task.taskType === 'harvest') {
+      funOpenQuickLogModal(task);
+    } else {
+      // Mark as complete directly
+      await markTaskComplete(taskId, {
+        quantity: null,
+        unitId: null,
+        notes: '',
+        photoIds: []
+      });
+      
+      funShowToast('✅ Task marked as done', 'success');
+      await funLoadTasks();
+    }
+    
+  } catch (error) {
+    console.error('Failed to mark task as done:', error);
+    funShowToast('❌ Failed to complete task', 'error');
+  }
+}
+
+// Skip task
+async function funSkipTask(taskId) {
+  try {
+    const task = currentTasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    // For now, skip with default reason - could be enhanced with reason selection
+    await skipTask(taskId, 'reason-other', 'User skipped task');
+    
+    funShowToast('⏭️ Task skipped', 'success');
+    await funLoadTasks();
+    
+  } catch (error) {
+    console.error('Failed to skip task:', error);
+    funShowToast('❌ Failed to skip task', 'error');
+  }
+}
+
+// Snooze task
+async function funSnoozeTask(taskId) {
+  try {
+    const task = currentTasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    // Snooze until tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    await snoozeTask(taskId, tomorrow.toISOString());
+    
+    funShowToast('⏰ Task snoozed until tomorrow', 'success');
+    await funLoadTasks();
+    
+  } catch (error) {
+    console.error('Failed to snooze task:', error);
+    funShowToast('❌ Failed to snooze task', 'error');
+  }
+}
+
+// Open quick log modal
+function funOpenQuickLogModal(task) {
+  const modal = document.getElementById('quickLogModal');
+  const content = document.getElementById('quickLogContent');
+  
+  content.innerHTML = `
+    <div class="space-y-4">
+      <div class="p-3 bg-gray-50 rounded-lg">
+        <div class="font-medium text-gray-900">${task.taskName}</div>
+        <div class="text-sm text-gray-600">${task.cropName} • ${task.areaName}</div>
+        ${task.recommendedQuantity ? `<div class="text-sm text-gray-500">Recommended: ${task.recommendedQuantity} ${task.unitSymbol || ''}</div>` : ''}
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Quantity ${task.requiresQuantity ? '*' : '(optional)'}</label>
+        <div class="flex gap-2">
+          <input 
+            type="number" 
+            id="taskQuantity" 
+            placeholder="Enter quantity"
+            min="0" 
+            step="0.1"
+            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+            ${task.recommendedQuantity ? `value="${task.recommendedQuantity}"` : ''}
+          >
+          <select id="taskUnit" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none">
+            <option value="${task.unitId || 'u-kg'}">${task.unitSymbol || 'kg'}</option>
+          </select>
+        </div>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Notes (optional)</label>
+        <textarea 
+          id="taskNotes"
+          rows="3"
+          placeholder="Add any notes about this task..."
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none"
+        ></textarea>
+      </div>
+      
+      <div>
+        <button 
+          id="addPhotoBtn" 
+          onclick="funOpenPhotoCapture()"
+          class="flex items-center gap-2 px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-colors"
+        >
+          <i data-lucide="camera" class="w-4 h-4"></i>
+          Add Photo
+        </button>
+        <div id="photoPreviewContainer" class="hidden mt-2">
+          <img id="logPhotoPreview" class="w-20 h-20 object-cover rounded-lg">
+        </div>
+      </div>
+      
+      <div class="flex gap-3 pt-4 border-t">
+        <button 
+          onclick="funSubmitQuickLog('${task.id}')"
+          class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+        >
+          Complete Task
+        </button>
+        <button 
+          onclick="funCloseQuickLogModal()"
+          class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 focus:bg-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  `;
+  
+  modal.classList.remove('hidden');
+  document.getElementById('taskQuantity').focus();
+}
+
+// Submit quick log
+async function funSubmitQuickLog(taskId) {
+  try {
+    const task = currentTasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    const quantity = document.getElementById('taskQuantity').value;
+    const unitId = document.getElementById('taskUnit').value;
+    const notes = document.getElementById('taskNotes').value;
+    
+    // Validate required fields
+    if (task.requiresQuantity && (!quantity || quantity <= 0)) {
+      funShowToast('❌ Quantity is required and must be positive', 'error');
+      return;
+    }
+    
+    // Save photo if selected
+    let photoIds = [];
+    if (selectedPhotoBlob) {
+      const photoId = await savePhoto(selectedPhotoBlob, 'pp-default-1280');
+      photoIds = [photoId];
+    }
+    
+    // Mark task as complete with log data
+    await markTaskComplete(taskId, {
+      quantity: quantity ? parseFloat(quantity) : null,
+      unitId: unitId,
+      notes: notes,
+      photoIds: photoIds
+    });
+    
+    funCloseQuickLogModal();
+    funShowToast('✅ Task completed and logged', 'success');
+    await funLoadTasks();
+    
+  } catch (error) {
+    console.error('Failed to submit quick log:', error);
+    funShowToast('❌ Failed to complete task', 'error');
+  }
+}
+
+// Close quick log modal
+function funCloseQuickLogModal() {
+  document.getElementById('quickLogModal').classList.add('hidden');
+  selectedPhotoBlob = null;
+}
+
+// Open photo capture modal
+function funOpenPhotoCapture() {
+  document.getElementById('photoCaptureModal').classList.remove('hidden');
+}
+
+// Close photo capture modal
+function funClosePhotoCaptureModal() {
+  document.getElementById('photoCaptureModal').classList.add('hidden');
+  document.getElementById('photoPreview').classList.add('hidden');
+  document.getElementById('photoActions').classList.add('hidden');
+}
+
+// Handle photo capture/selection
+async function funHandlePhotoCapture(isCamera = true) {
+  const input = document.getElementById('photoInput');
+  
+  if (isCamera) {
+    input.setAttribute('capture', 'camera');
+  } else {
+    input.removeAttribute('capture');
+  }
+  
+  input.click();
+}
+
+// Open task detail
+function funOpenTaskDetail(taskId) {
+  window.location.hash = `#/page=task_detail&taskOccurrenceId=${taskId}`;
+}
+
+// Show batch actions
+function funShowBatchActions(areaId) {
+  window.location.hash = `#/page=area_detail&areaId=${areaId}`;
+}
+
+// Toggle language
+async function funToggleLanguage() {
+  try {
+    const newLang = userSettings.language === 'EN' ? 'TA' : 'EN';
+    
+    // Update user settings would go here
+    // For now, just update the display
+    document.getElementById('currentLanguage').textContent = newLang;
+    funShowToast(`🌐 Language changed to ${newLang}`, 'success');
+    
+  } catch (error) {
+    console.error('Failed to toggle language:', error);
+    funShowToast('❌ Failed to change language', 'error');
+  }
+}
+
+// Update offline status
+function funUpdateOfflineStatus() {
+  const badge = document.getElementById('offlineBadge');
+  
+  if (navigator.onLine) {
+    badge.classList.add('hidden');
+  } else {
+    badge.classList.remove('hidden');
+  }
+}
+
+// Show toast notification
+function funShowToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  
+  const bgColor = type === 'success' ? 'bg-green-500' : 
+                  type === 'error' ? 'bg-red-500' : 
+                  type === 'warning' ? 'bg-orange-500' : 'bg-blue-500';
+  
+  toast.className = `${bgColor} text-white px-4 py-2 rounded-lg shadow-lg text-sm transform transition-transform duration-300 translate-x-full`;
+  toast.textContent = message;
+  
+  container.appendChild(toast);
+  
+  // Slide in
+  setTimeout(() => {
+    toast.classList.remove('translate-x-full');
+  }, 100);
+  
+  // Auto remove
+  setTimeout(() => {
+    toast.classList.add('translate-x-full');
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300);
+  }, 4000);
+}
+
+// Setup event listeners
+function funSetupEventListeners() {
+  // Search input
+  document.getElementById('searchInput').addEventListener('input', funApplyFilters);
+  
+  // Filter selects
+  document.getElementById('statusFilter').addEventListener('change', funApplyFilters);
+  document.getElementById('areaFilter').addEventListener('change', funApplyFilters);
+  
+  // Language toggle
+  document.getElementById('languageToggle').addEventListener('click', funToggleLanguage);
+  
+  // Quick add note
+  document.getElementById('quickAddNote').addEventListener('click', () => {
+    window.location.hash = '#/page=quick_note';
+  });
+  
+  // Modal close buttons
+  document.getElementById('closeQuickLog').addEventListener('click', funCloseQuickLogModal);
+  document.getElementById('closePhotoCapture').addEventListener('click', funClosePhotoCaptureModal);
+  
+  // Photo capture buttons
+  document.getElementById('capturePhoto').addEventListener('click', () => funHandlePhotoCapture(true));
+  document.getElementById('selectPhoto').addEventListener('click', () => funHandlePhotoCapture(false));
+  document.getElementById('retakePhoto').addEventListener('click', funClosePhotoCaptureModal);
+  document.getElementById('confirmPhoto').addEventListener('click', () => {
+    const preview = document.getElementById('logPhotoPreview');
+    const source = document.getElementById('previewImage');
+    
+    preview.src = source.src;
+    document.getElementById('photoPreviewContainer').classList.remove('hidden');
+    
+    funClosePhotoCaptureModal();
+  });
+  
+  // Photo input change
+  document.getElementById('photoInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    selectedPhotoBlob = file;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.getElementById('previewImage').src = e.target.result;
+      document.getElementById('photoPreview').classList.remove('hidden');
+      document.getElementById('photoActions').classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+  });
+  
+  // Online/offline status
+  window.addEventListener('online', funUpdateOfflineStatus);
+  window.addEventListener('offline', funUpdateOfflineStatus);
+  
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (!document.getElementById('quickLogModal').classList.contains('hidden')) {
+        funCloseQuickLogModal();
+      } else if (!document.getElementById('photoCaptureModal').classList.contains('hidden')) {
+        funClosePhotoCaptureModal();
+      }
+    }
+  });
+}
+
+// Make functions globally available for onclick handlers
+window.funMarkTaskDone = funMarkTaskDone;
+window.funSkipTask = funSkipTask;
+window.funSnoozeTask = funSnoozeTask;
+window.funOpenTaskDetail = funOpenTaskDetail;
+window.funShowBatchActions = funShowBatchActions;
+window.funOpenPhotoCapture = funOpenPhotoCapture;
+window.funSubmitQuickLog = funSubmitQuickLog;
+window.funCloseQuickLogModal = funCloseQuickLogModal;
+
+// Initialize page when loaded
+funInitializePage();
+
+// Handle page refresh parameter
+window.PageInit = {
+  onParams(params) {
+    if (params.refresh === 'true') {
+      funLoadTasks();
+    }
+  }
+};
+</script>
+
+</body>
+
+</html>

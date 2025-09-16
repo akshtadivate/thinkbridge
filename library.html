@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Farm Planning Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #047857;
+            --color-secondary: #8C5E3C;
+            --color-accent: #B38600;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --border-radius-sm: 8px;
+            --border-radius-md: 16px;
+            --border-radius-lg: 24px;
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+    <a href="#pageContent" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-white px-3 py-1 rounded shadow-lg z-50">Skip to main content</a>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover"
+        class="absolute top-16 right-6 bg-white border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar"
+                class="w-8 h-8 bg-primary text-white rounded-xl flex items-center justify-center text-sm font-medium">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-medium text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton"
+                class="w-full flex items-center text-sm gap-2 px-3 py-2 text-left text-error hover:bg-red-50 focus:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-error rounded-md transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Mobile sidebar overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 hidden md:hidden"></div>
+
+        <!-- Sidebar -->
+        
+
+
+
+
+
+
+
+
+
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)] bg-background" id="pageContent" role="main">
+            
+<!-- Search and Filter Header -->
+<div class="mb-6">
+  <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+    <div class="flex-1">
+      <h1 class="text-[1.75rem] leading-[2.25rem] font-bold text-gray-900 mb-2">Crop Library</h1>
+      <p class="text-sm leading-[1.375rem] text-gray-600">Choose from our curated crop templates to quickly set up care schedules for your fields.</p>
+    </div>
+    <button id="addCustomCropBtn" 
+            class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-colors font-medium">
+      <i data-lucide="plus" class="w-4 h-4"></i>
+      Add Custom Crop
+    </button>
+  </div>
+</div>
+
+<!-- Search and Filter Controls -->
+<div class="bg-white rounded-lg border-2 p-4 mb-6">
+  <div class="flex flex-col sm:flex-row gap-4">
+    <!-- Search Input -->
+    <div class="flex-1">
+      <div class="relative">
+        <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+        <input type="text" 
+               id="searchInput" 
+               placeholder="Search crops by name..."
+               class="w-full pl-10 pr-4 py-2 border rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors">
+      </div>
+    </div>
+    
+    <!-- Category Filter -->
+    <div class="sm:w-48">
+      <select id="categoryFilter" 
+              class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors">
+        <option value="">All Categories</option>
+        <option value="tree">Tree</option>
+        <option value="vegetable">Vegetable</option>
+        <option value="fruit">Fruit</option>
+        <option value="grain">Grain</option>
+        <option value="flower">Flower</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Library Info Panel -->
+<div class="bg-accent/10 border border-accent/20 rounded-lg p-4 mb-6">
+  <div class="flex items-start gap-3">
+    <i data-lucide="info" class="w-5 h-5 text-accent mt-0.5 flex-shrink-0"></i>
+    <div class="text-sm">
+      <p class="text-gray-700 mb-1">
+        <strong>Library Version:</strong> <span id="libraryVersion">1.0</span> • 
+        <strong>Last Updated:</strong> <span id="lastUpdated">Loading...</span>
+      </p>
+      <p class="text-gray-600">Pick a crop to get preset care tasks. You can always edit before saving to your field.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Crops Grid -->
+<div id="cropsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+  <!-- Crop cards will be inserted here by JavaScript -->
+</div>
+
+<!-- Empty State -->
+<div id="emptyState" class="hidden flex flex-col items-center justify-center py-12 text-center">
+  <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mb-4">
+    <i data-lucide="seedling" class="w-8 h-8 text-gray-400"></i>
+  </div>
+  <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-2">No crops found</h3>
+  <p class="text-gray-600 mb-4 max-w-md">Try adjusting your search or filter criteria, or add a custom crop to get started.</p>
+  <button onclick="funOpenCustomCropDrawer()" 
+          class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+    <i data-lucide="plus" class="w-4 h-4"></i>
+    Add Custom Crop
+  </button>
+</div>
+
+<!-- Error State -->
+<div id="errorState" class="hidden flex flex-col items-center justify-center py-12 text-center">
+  <div class="w-16 h-16 bg-error/10 rounded-xl flex items-center justify-center mb-4">
+    <i data-lucide="alert-circle" class="w-8 h-8 text-error"></i>
+  </div>
+  <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-2">Library unavailable offline</h3>
+  <p class="text-gray-600 mb-4 max-w-md">The crop library couldn't be loaded. You can still create custom crops for your fields.</p>
+  <button onclick="funOpenCustomCropDrawer()" 
+          class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+    <i data-lucide="plus" class="w-4 h-4"></i>
+    Add Custom Crop
+  </button>
+</div>
+
+<!-- Add Custom Crop Drawer -->
+<div id="customCropDrawer" class="fixed inset-0 z-50 hidden">
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"></div>
+  
+  <!-- Drawer -->
+  <div class="absolute right-0 top-0 h-full w-full sm:w-96 bg-white shadow-lg transform translate-x-full transition-transform duration-300">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-6 border-b">
+      <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Add Custom Crop</h2>
+      <button id="closeCustomCropDrawer" 
+              class="p-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-colors"
+              aria-label="Close drawer">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    
+    <!-- Form -->
+    <div class="p-6 overflow-y-auto h-[calc(100vh-80px)]">
+      <form id="customCropForm" class="space-y-6">
+        <!-- English Name -->
+        <div>
+          <label for="cropNameEn" class="block text-sm font-medium text-gray-700 mb-2">
+            English Name <span class="text-error">*</span>
+          </label>
+          <input type="text" 
+                 id="cropNameEn" 
+                 name="nameEn"
+                 required
+                 placeholder="e.g., Tomato"
+                 class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors">
+          <div id="cropNameEnError" class="hidden text-sm text-error mt-1"></div>
+        </div>
+        
+        <!-- Tamil Name -->
+        <div>
+          <label for="cropNameTa" class="block text-sm font-medium text-gray-700 mb-2">
+            Tamil Name (Optional)
+          </label>
+          <input type="text" 
+                 id="cropNameTa" 
+                 name="nameTa"
+                 placeholder="e.g., தக்காளி"
+                 class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors">
+        </div>
+        
+        <!-- Category -->
+        <div>
+          <label for="cropCategory" class="block text-sm font-medium text-gray-700 mb-2">
+            Category <span class="text-error">*</span>
+          </label>
+          <select id="cropCategory" 
+                  name="category"
+                  required
+                  class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors">
+            <option value="">Select category</option>
+            <option value="tree">Tree</option>
+            <option value="vegetable">Vegetable</option>
+            <option value="fruit">Fruit</option>
+            <option value="grain">Grain</option>
+            <option value="flower">Flower</option>
+            <option value="other">Other</option>
+          </select>
+          <div id="cropCategoryError" class="hidden text-sm text-error mt-1"></div>
+        </div>
+        
+        <!-- Days to Maturity -->
+        <div>
+          <label for="daysToMaturity" class="block text-sm font-medium text-gray-700 mb-2">
+            Days to Maturity (Optional)
+          </label>
+          <input type="number" 
+                 id="daysToMaturity" 
+                 name="daysToMaturity"
+                 min="1"
+                 max="3650"
+                 placeholder="e.g., 90"
+                 class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors">
+          <p class="text-sm text-gray-500 mt-1">Leave empty for perennial crops like trees</p>
+        </div>
+        
+        <!-- Default Care Template -->
+        <div>
+          <label for="defaultTemplate" class="block text-sm font-medium text-gray-700 mb-2">
+            Default Care Template
+          </label>
+          <select id="defaultTemplate" 
+                  name="defaultCareTemplateId"
+                  class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors">
+            <option value="">Select existing template</option>
+            <!-- Templates will be populated by JavaScript -->
+          </select>
+          <p class="text-sm text-gray-500 mt-1">Choose a care template to apply default tasks</p>
+        </div>
+        
+        <!-- Buttons -->
+        <div class="flex gap-3 pt-4 border-t">
+          <button type="button" 
+                  id="cancelCustomCrop"
+                  class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+            Cancel
+          </button>
+          <button type="submit" 
+                  class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-colors font-medium">
+            Create Crop
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+            
+
+
+
+        </main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'localDB:';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            btn.addEventListener('click', () => {
+                const isOpen = !sidebar.classList.contains('hidden');
+                
+                if (isOpen) {
+                    // Close
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    // Open
+                    sidebar.classList.remove('hidden');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav link
+                    const firstLink = sidebar.querySelector('a');
+                    if (firstLink) firstLink.focus();
+                }
+            });
+            
+            // Close on overlay click
+            overlay.addEventListener('click', () => {
+                sidebar.classList.add('hidden');
+                overlay.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.focus();
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('hidden') && window.innerWidth < 768) {
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    // Default to first farmer user from dummy data
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-001');
+                    currentUserId = 'u-001';
+                }
+                
+                // Get user from users collection
+                try {
+                    const usersData = localStorage.getItem(APP_PREFIX + 'users');
+                    if (usersData) {
+                        const users = JSON.parse(usersData);
+                        const user = users.find(u => u.id === currentUserId);
+                        return user || null;
+                    }
+                } catch (e) {
+                    console.warn('Error loading user data:', e);
+                }
+                return null;
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName   = document.getElementById('userName');
+            const popoverAvatar = document.getElementById('popoverUserAvatar');
+            const popoverName = document.getElementById('popoverUserName');
+            const popoverEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverAvatar) popoverAvatar.textContent = initials;
+            if (popoverName) popoverName.textContent = displayName;
+            if (popoverEmail) popoverEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popover.classList.toggle('hidden');
+                popoverVisible = !popoverVisible;
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                
+                if (popoverVisible) {
+                    // Focus first focusable element in popover
+                    const firstFocusable = popover.querySelector('button');
+                    if (firstFocusable) firstFocusable.focus();
+                }
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) {
+                    UserUtils.signOut();
+                }
+            });
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX)) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `farm_assistant_data_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            // Show success toast
+            showToast('✅ App data exported successfully', 'success');
+        });
+        
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+        
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX)) {
+                            localStorage.setItem(key, value);
+                            importedCount++;
+                        }
+                    });
+                    
+                    if (importedCount > 0) {
+                        showToast(`✅ App data imported successfully (${importedCount} items). Please refresh the page.`, 'success');
+                    } else {
+                        showToast('⚠️ No valid app data found in file.', 'warning');
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    showToast('❌ Failed to import: Invalid JSON format.', 'error');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Simple toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-white text-sm max-w-sm transition-all duration-300 ${
+                type === 'success' ? 'bg-green-600' :
+                type === 'error' ? 'bg-red-600' :
+                type === 'warning' ? 'bg-orange-600' :
+                'bg-blue-600'
+            }`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        // Simple hash router (no entity IDs; UI-state params only)
+        const Router = (() => {
+            const pageContent = document.getElementById('pageContent');
+            const sideNav = document.getElementById('sideNav');
+
+            function parseHash(){
+                const h = location.hash || '';
+                const m = h.match(/page=([^&]+)/);
+                const page = m ? m[1] : null;
+                // Collect UI-state params only (view, tab, filter, mode, section)
+                const params = {};
+                (h.split('&').slice(1)).forEach(kv => {
+                    const [k,v] = kv.split('=');
+                    if (['view','tab','filter','mode','section'].includes(k)) {
+                        params[k] = decodeURIComponent(v||'');
+                    }
+                });
+                return { page, params };
+            }
+
+            async function loadPage(pageBase){
+                if (!pageBase) {
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+                            <div class="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="leaf" class="w-8 h-8 text-primary"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h2 class="text-display-md font-semibold text-gray-900">Welcome to Farm Assistant</h2>
+                                <p class="text-gray-600 max-w-md">Select a page from the sidebar to get started with managing your farming tasks and tracking your crops.</p>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+                
+                // Show loading state
+                pageContent.innerHTML = `
+                    <div class="flex items-center justify-center min-h-[200px]">
+                        <div class="flex items-center space-x-3 text-gray-600">
+                            <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                            <span>Loading...</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Ensure .html suffix
+                const url = pageBase.endsWith('.html') ? pageBase : `${pageBase}.html`;
+                
+                try {
+                    const res = await fetch(url, { cache: 'no-store' });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const html = await res.text();
+                    pageContent.innerHTML = html;
+                    lucide.createIcons();
+                    
+                    // Allow page to hook UI-state params if it exposes a global
+                    if (window.PageInit?.onParams) {
+                        window.PageInit.onParams(parseHash().params);
+                    }
+                } catch (e) {
+                    console.error('Failed to load page:', url, e);
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[200px] text-center space-y-4">
+                            <div class="w-12 h-12 bg-error/10 rounded-lg flex items-center justify-center">
+                                <i data-lucide="alert-circle" class="w-6 h-6 text-error"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h3 class="font-semibold text-gray-900">Failed to load page</h3>
+                                <p class="text-gray-600 text-sm">The page "${url}" could not be loaded.</p>
+                                <button onclick="Router.onRoute()" class="text-primary hover:text-primary/80 text-sm font-medium">Try again</button>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                }
+            }
+
+            function setActive(pageBase){
+                if (!sideNav) return;
+                
+                const links = sideNav.querySelectorAll('a[href]');
+                links.forEach(a => {
+                    const href = a.getAttribute('href') || '';
+                    const target = href.replace(/^#\/?page=/, '').replace(/\.html$/, '');
+                    const current = (pageBase || '').replace(/\.html$/, '');
+                    
+                    if (target && target === current) {
+                        a.classList.add('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.remove('text-gray-700');
+                    } else {
+                        a.classList.remove('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.add('text-gray-700');
+                    }
+                });
+            }
+
+            async function onRoute(){
+                const { page } = parseHash();
+                await loadPage(page);
+                setActive(page);
+            }
+
+            return { onRoute };
+        })();
+
+        // Make Router.onRoute globally accessible for error retry
+        window.Router = Router;
+
+        window.addEventListener('hashchange', Router.onRoute);
+        Router.onRoute();
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                try {
+                    window.AppActions[action](el);
+                } catch (err) {
+                    console.error('AppAction error:', action, err);
+                    showToast(`❌ Action "${action}" failed: ${err.message}`, 'error');
+                }
+            } else {
+                el.setAttribute('disabled', 'true');
+                el.setAttribute('title', 'Unavailable');
+                el.classList.add('opacity-50', 'cursor-not-allowed');
+                console.warn('AppAction not available:', action);
+            }
+        });
+
+        // Generate navigation items programmatically from page list
+        // Note: In a real implementation, this would be generated from the actual page list data
+        // For now, we have the single "Today's Work" page based on the provided page data
+    </script>
+
+    
+<script id="page-logic" type="module">
+// Import data handling methods from library-logic.js
+import { 
+  getLibraryCrops,           // Fetch all library crops with optional category filter
+  getTaskTemplates,          // Get available task templates for default care
+  addCustomLibraryCrop,      // Add new custom crop to library
+  getCurrentUserSettings     // Get current user settings for language preference
+} from './library-logic.js';
+
+// Global state
+let allCrops = [];
+let filteredCrops = [];
+let currentLanguage = 'EN';
+let availableTemplates = [];
+
+// Initialize page
+async function funInitializePage() {
+  try {
+    // Get current user settings for language preference
+    /* Expected return type from getCurrentUserSettings():
+     * {
+     *   language: string (EN|TA),
+     *   userId: string,
+     *   // other settings...
+     * }
+     * Collections used: settings, users
+     * What this method does: Retrieves current user settings to determine display language
+     */
+    const userSettings = await getCurrentUserSettings();
+    currentLanguage = userSettings?.language || 'EN';
+    
+    // Load library crops
+    /* Expected return type from getLibraryCrops():
+     * Array<{
+     *   id: string,
+     *   cropId: string,
+     *   nameEn: string,
+     *   nameTa: string,
+     *   category: string,
+     *   daysToMaturity: number|null,
+     *   spacingReference: string,
+     *   defaultCareTemplateId: string,
+     *   typicalPests: string,
+     *   typicalNutrients: string,
+     *   version: string,
+     *   createdAt: string,
+     *   updatedAt: string
+     * }>
+     * Collections used: libraryCrops
+     * What this method does: Fetches all library crop templates with localized names and care guidance
+     */
+    allCrops = await getLibraryCrops();
+    
+    // Load available templates for custom crop form
+    /* Expected return type from getTaskTemplates():
+     * Array<{
+     *   id: string,
+     *   name: string,
+     *   taskTypeId: string,
+     *   defaultUnitId: string,
+     *   requiresQuantity: boolean,
+     *   notes: string,
+     *   icon: string
+     * }>
+     * Collections used: taskTemplates
+     * What this method does: Fetches available task templates that can be assigned as default care for crops
+     */
+    availableTemplates = await getTaskTemplates();
+    
+    // Update library version info
+    funUpdateLibraryInfo();
+    
+    // Populate templates in custom crop form
+    funPopulateTemplateOptions();
+    
+    // Initial render
+    filteredCrops = [...allCrops];
+    funRenderCrops();
+    
+  } catch (error) {
+    console.error('Failed to initialize library page:', error);
+    funShowErrorState();
+  }
+}
+
+// Update library version information
+function funUpdateLibraryInfo() {
+  const versionEl = document.getElementById('libraryVersion');
+  const lastUpdatedEl = document.getElementById('lastUpdated');
+  
+  if (allCrops.length > 0) {
+    // Get the latest version and update date from crops
+    const versions = allCrops.map(crop => crop.version).filter(Boolean);
+    const latestVersion = versions.length > 0 ? Math.max(...versions.map(v => parseFloat(v) || 1.0)) : '1.0';
+    
+    const updateDates = allCrops.map(crop => new Date(crop.updatedAt)).filter(d => !isNaN(d));
+    const latestUpdate = updateDates.length > 0 ? new Date(Math.max(...updateDates)) : new Date();
+    
+    versionEl.textContent = latestVersion.toString();
+    lastUpdatedEl.textContent = latestUpdate.toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  } else {
+    versionEl.textContent = '1.0';
+    lastUpdatedEl.textContent = 'Not available';
+  }
+}
+
+// Populate template options in custom crop form
+function funPopulateTemplateOptions() {
+  const templateSelect = document.getElementById('defaultTemplate');
+  if (!templateSelect) return;
+  
+  // Clear existing options (except the first one)
+  const options = templateSelect.querySelectorAll('option:not(:first-child)');
+  options.forEach(option => option.remove());
+  
+  // Add template options
+  availableTemplates.forEach(template => {
+    const option = document.createElement('option');
+    option.value = template.id;
+    option.textContent = template.name;
+    templateSelect.appendChild(option);
+  });
+}
+
+// Render crops grid
+function funRenderCrops() {
+  const cropsGrid = document.getElementById('cropsGrid');
+  const emptyState = document.getElementById('emptyState');
+  const errorState = document.getElementById('errorState');
+  
+  // Hide states
+  emptyState.classList.add('hidden');
+  errorState.classList.add('hidden');
+  
+  if (filteredCrops.length === 0) {
+    cropsGrid.classList.add('hidden');
+    emptyState.classList.remove('hidden');
+    return;
+  }
+  
+  cropsGrid.classList.remove('hidden');
+  cropsGrid.innerHTML = filteredCrops.map(crop => funCreateCropCard(crop)).join('');
+  
+  // Re-initialize Lucide icons for new content
+  lucide.createIcons();
+}
+
+// Create individual crop card HTML
+function funCreateCropCard(crop) {
+  const displayName = currentLanguage === 'TA' && crop.nameTa ? crop.nameTa : crop.nameEn;
+  const secondaryName = currentLanguage === 'TA' && crop.nameTa ? crop.nameEn : (crop.nameTa || '');
+  
+  const maturityText = crop.daysToMaturity ? `${crop.daysToMaturity} days` : 'Perennial';
+  const categoryIcon = funGetCategoryIcon(crop.category);
+  
+  return `
+    <div class="bg-white rounded-lg border-2 hover:border-primary/20 transition-colors overflow-hidden">
+      <!-- Header -->
+      <div class="p-4 pb-3">
+        <div class="flex items-start justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+              <i data-lucide="${categoryIcon}" class="w-4 h-4 text-primary"></i>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-900 text-sm">${displayName}</h3>
+              ${secondaryName ? `<p class="text-xs text-gray-500">${secondaryName}</p>` : ''}
+            </div>
+          </div>
+          <span class="text-xs px-2 py-1 bg-accent/10 text-accent rounded-full font-medium capitalize">
+            ${crop.category}
+          </span>
+        </div>
+      </div>
+      
+      <!-- Quick Info -->
+      <div class="px-4 pb-3 space-y-2">
+        <div class="flex items-center gap-2 text-sm text-gray-600">
+          <i data-lucide="clock" class="w-3 h-3"></i>
+          <span>Maturity: ${maturityText}</span>
+        </div>
+        
+        ${crop.spacingReference ? `
+          <div class="flex items-start gap-2 text-sm text-gray-600">
+            <i data-lucide="move" class="w-3 h-3 mt-0.5 flex-shrink-0"></i>
+            <span class="line-clamp-1">${crop.spacingReference}</span>
+          </div>
+        ` : ''}
+        
+        ${crop.typicalPests ? `
+          <div class="flex items-start gap-2 text-sm text-gray-600">
+            <i data-lucide="bug" class="w-3 h-3 mt-0.5 flex-shrink-0"></i>
+            <span class="line-clamp-1">${crop.typicalPests}</span>
+          </div>
+        ` : ''}
+      </div>
+      
+      <!-- Action -->
+      <div class="p-4 pt-0">
+        <button onclick="funUseCrop('${crop.id}')" 
+                class="w-full px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors text-sm font-medium">
+          Use This Crop
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// Get category icon
+function funGetCategoryIcon(category) {
+  const icons = {
+    tree: 'tree-palm',
+    vegetable: 'carrot',
+    fruit: 'apple',
+    grain: 'wheat',
+    flower: 'flower-2',
+    other: 'seedling'
+  };
+  return icons[category] || 'seedling';
+}
+
+// Handle "Use This Crop" action
+function funUseCrop(cropId) {
+  // Navigate to area_detail page with openDrawer parameter
+  // This will open the crop form drawer with the selected library crop prefilled
+  window.location.href = `#/page=area_detail&openDrawer=crop_form_drawer&libraryCropId=${cropId}`;
+}
+
+// Search and filter functionality
+function funSetupSearchAndFilter() {
+  const searchInput = document.getElementById('searchInput');
+  const categoryFilter = document.getElementById('categoryFilter');
+  
+  if (searchInput) {
+    searchInput.addEventListener('input', funHandleSearchAndFilter);
+  }
+  
+  if (categoryFilter) {
+    categoryFilter.addEventListener('change', funHandleSearchAndFilter);
+  }
+}
+
+// Handle search and filter
+function funHandleSearchAndFilter() {
+  const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+  const categoryFilter = document.getElementById('categoryFilter')?.value || '';
+  
+  filteredCrops = allCrops.filter(crop => {
+    // Search filter
+    const matchesSearch = !searchTerm || 
+      crop.nameEn.toLowerCase().includes(searchTerm) ||
+      (crop.nameTa && crop.nameTa.toLowerCase().includes(searchTerm)) ||
+      crop.category.toLowerCase().includes(searchTerm);
+    
+    // Category filter
+    const matchesCategory = !categoryFilter || crop.category === categoryFilter;
+    
+    return matchesSearch && matchesCategory;
+  });
+  
+  funRenderCrops();
+}
+
+// Show error state
+function funShowErrorState() {
+  const cropsGrid = document.getElementById('cropsGrid');
+  const emptyState = document.getElementById('emptyState');
+  const errorState = document.getElementById('errorState');
+  
+  cropsGrid.classList.add('hidden');
+  emptyState.classList.add('hidden');
+  errorState.classList.remove('hidden');
+}
+
+// Custom crop drawer functionality
+function funSetupCustomCropDrawer() {
+  const addBtn = document.getElementById('addCustomCropBtn');
+  const drawer = document.getElementById('customCropDrawer');
+  const closeBtn = document.getElementById('closeCustomCropDrawer');
+  const cancelBtn = document.getElementById('cancelCustomCrop');
+  const form = document.getElementById('customCropForm');
+  
+  // Open drawer
+  if (addBtn) {
+    addBtn.addEventListener('click', funOpenCustomCropDrawer);
+  }
+  
+  // Close drawer
+  if (closeBtn) {
+    closeBtn.addEventListener('click', funCloseCustomCropDrawer);
+  }
+  
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', funCloseCustomCropDrawer);
+  }
+  
+  // Close on backdrop click
+  if (drawer) {
+    drawer.addEventListener('click', (e) => {
+      if (e.target === drawer) {
+        funCloseCustomCropDrawer();
+      }
+    });
+  }
+  
+  // Handle form submission
+  if (form) {
+    form.addEventListener('submit', funHandleCustomCropSubmit);
+  }
+  
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drawer && !drawer.classList.contains('hidden')) {
+      funCloseCustomCropDrawer();
+    }
+  });
+}
+
+// Open custom crop drawer
+function funOpenCustomCropDrawer() {
+  const drawer = document.getElementById('customCropDrawer');
+  const drawerContent = drawer?.querySelector('.absolute.right-0');
+  
+  if (drawer) {
+    drawer.classList.remove('hidden');
+    
+    // Trigger animation
+    setTimeout(() => {
+      if (drawerContent) {
+        drawerContent.classList.remove('translate-x-full');
+      }
+    }, 10);
+    
+    // Focus first input
+    const firstInput = drawer.querySelector('input, select');
+    if (firstInput) {
+      setTimeout(() => firstInput.focus(), 300);
+    }
+  }
+}
+
+// Close custom crop drawer
+function funCloseCustomCropDrawer() {
+  const drawer = document.getElementById('customCropDrawer');
+  const drawerContent = drawer?.querySelector('.absolute.right-0');
+  const form = document.getElementById('customCropForm');
+  
+  if (drawerContent) {
+    drawerContent.classList.add('translate-x-full');
+  }
+  
+  setTimeout(() => {
+    if (drawer) {
+      drawer.classList.add('hidden');
+    }
+    // Reset form
+    if (form) {
+      form.reset();
+      funClearFormErrors();
+    }
+  }, 300);
+}
+
+// Handle custom crop form submission
+async function funHandleCustomCropSubmit(e) {
+  e.preventDefault();
+  
+  const formData = new FormData(e.target);
+  const cropData = {
+    nameEn: formData.get('nameEn')?.trim(),
+    nameTa: formData.get('nameTa')?.trim() || '',
+    category: formData.get('category'),
+    daysToMaturity: formData.get('daysToMaturity') ? parseInt(formData.get('daysToMaturity')) : null,
+    defaultCareTemplateId: formData.get('defaultCareTemplateId') || null
+  };
+  
+  // Validate required fields
+  if (!funValidateCustomCropForm(cropData)) {
+    return;
+  }
+  
+  try {
+    // Show loading state
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Creating...';
+    submitBtn.disabled = true;
+    
+    // Add custom crop to library
+    /* Expected parameters for addCustomLibraryCrop():
+     * {
+     *   nameEn: string,
+     *   nameTa: string,
+     *   category: string,
+     *   daysToMaturity: number|null,
+     *   defaultCareTemplateId: string|null,
+     *   custom: true,
+     *   spacingReference: string,
+     *   typicalPests: string,
+     *   typicalNutrients: string
+     * }
+     * Collections used: libraryCrops
+     * What this method does: Creates a new custom crop entry in the library with user-defined properties
+     * Returns: { id: string, success: boolean }
+     */
+    const result = await addCustomLibraryCrop(cropData);
+    
+    if (result.success) {
+      // Refresh crops list
+      allCrops = await getLibraryCrops();
+      funHandleSearchAndFilter(); // Re-apply current filters
+      
+      // Close drawer
+      funCloseCustomCropDrawer();
+      
+      // Show success message
+      funShowToast('✅ Custom crop created successfully!', 'success');
+    } else {
+      throw new Error('Failed to create custom crop');
+    }
+    
+  } catch (error) {
+    console.error('Error creating custom crop:', error);
+    funShowToast('❌ Failed to create custom crop. Please try again.', 'error');
+  } finally {
+    // Reset button state
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.textContent = 'Create Crop';
+    submitBtn.disabled = false;
+  }
+}
+
+// Validate custom crop form
+function funValidateCustomCropForm(data) {
+  let isValid = true;
+  funClearFormErrors();
+  
+  // Validate English name
+  if (!data.nameEn) {
+    funShowFieldError('cropNameEn', 'English name is required');
+    isValid = false;
+  }
+  
+  // Validate category
+  if (!data.category) {
+    funShowFieldError('cropCategory', 'Category is required');
+    isValid = false;
+  }
+  
+  return isValid;
+}
+
+// Show field error
+function funShowFieldError(fieldId, message) {
+  const field = document.getElementById(fieldId);
+  const errorDiv = document.getElementById(fieldId + 'Error');
+  
+  if (field) {
+    field.classList.add('border-error');
+  }
+  
+  if (errorDiv) {
+    errorDiv.textContent = message;
+    errorDiv.classList.remove('hidden');
+  }
+}
+
+// Clear form errors
+function funClearFormErrors() {
+  const errorDivs = document.querySelectorAll('[id$="Error"]');
+  const fields = document.querySelectorAll('input.border-error, select.border-error');
+  
+  errorDivs.forEach(div => {
+    div.classList.add('hidden');
+    div.textContent = '';
+  });
+  
+  fields.forEach(field => {
+    field.classList.remove('border-error');
+  });
+}
+
+// Show toast notification
+function funShowToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-white text-sm max-w-sm transition-all duration-300 ${
+    type === 'success' ? 'bg-green-600' :
+    type === 'error' ? 'bg-red-600' :
+    type === 'warning' ? 'bg-orange-600' :
+    'bg-blue-600'
+  }`;
+  toast.textContent = message;
+  
+  document.body.appendChild(toast);
+  
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100%)';
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300);
+  }, 5000);
+}
+
+// Handle URL parameters
+function funHandleUrlParams() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const filterCategory = urlParams.get('filterCategory');
+  
+  if (filterCategory) {
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (categoryFilter) {
+      categoryFilter.value = filterCategory;
+      funHandleSearchAndFilter();
+    }
+  }
+}
+
+// Initialize page when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  funInitializePage();
+  funSetupSearchAndFilter();
+  funSetupCustomCropDrawer();
+  funHandleUrlParams();
+});
+
+// Make functions globally available
+window.funOpenCustomCropDrawer = funOpenCustomCropDrawer;
+window.funUseCrop = funUseCrop;
+</script>
+
+</body>
+
+</html>

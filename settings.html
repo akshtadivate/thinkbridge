@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Farm Planning Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #047857;
+            --color-secondary: #8C5E3C;
+            --color-accent: #B38600;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --border-radius-sm: 8px;
+            --border-radius-md: 16px;
+            --border-radius-lg: 24px;
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <a href="#pageContent" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-white px-3 py-1 rounded shadow-lg z-50">Skip to main content</a>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover"
+        class="absolute top-16 right-6 bg-white border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar"
+                class="w-8 h-8 bg-primary text-white rounded-xl flex items-center justify-center text-sm font-medium">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-medium text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton"
+                class="w-full flex items-center text-sm gap-2 px-3 py-2 text-left text-error hover:bg-red-50 focus:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-error rounded-md transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Mobile sidebar overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 hidden md:hidden"></div>
+
+        <!-- Sidebar -->
+       
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)] bg-background" id="pageContent" role="main">
+            
+<section class="max-w-4xl mx-auto space-y-6">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between">
+    <div class="space-y-1">
+      <h1 class="text-[1.75rem] leading-[2.25rem] font-bold text-gray-900">Settings</h1>
+      <p class="text-sm leading-[1.375rem] font-normal text-gray-600">Configure your preferences and app settings</p>
+    </div>
+  </div>
+
+  <!-- Settings Sections -->
+  <div class="grid gap-6 md:grid-cols-2">
+    
+    <!-- Language Settings -->
+    <div class="bg-surface rounded-lg border-2 p-6 space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+          <i data-lucide="globe" class="w-4 h-4 text-primary"></i>
+        </div>
+        <div>
+          <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Language</h2>
+          <p class="text-sm text-gray-600">Choose your preferred language</p>
+        </div>
+      </div>
+      
+      <div class="space-y-3">
+        <label class="flex items-center gap-3 p-3 rounded cursor-pointer hover:bg-gray-50 focus-within:bg-gray-50">
+          <input type="radio" name="language" value="EN" class="w-4 h-4 text-primary border-gray-300 focus:ring-2 focus:ring-primary focus:ring-offset-0" />
+          <div class="flex-1">
+            <div class="font-medium text-gray-900">English</div>
+            <div class="text-sm text-gray-500">English interface</div>
+          </div>
+        </label>
+        
+        <label class="flex items-center gap-3 p-3 rounded cursor-pointer hover:bg-gray-50 focus-within:bg-gray-50">
+          <input type="radio" name="language" value="TA" class="w-4 h-4 text-primary border-gray-300 focus:ring-2 focus:ring-primary focus:ring-offset-0" />
+          <div class="flex-1">
+            <div class="font-medium text-gray-900">தமிழ் (Tamil)</div>
+            <div class="text-sm text-gray-500">Tamil interface / தமிழ் இடைமுகம்</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Notifications Settings -->
+    <div class="bg-surface rounded-lg border-2 p-6 space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
+          <i data-lucide="bell" class="w-4 h-4 text-accent"></i>
+        </div>
+        <div>
+          <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Notifications</h2>
+          <p class="text-sm text-gray-600">Manage notification preferences</p>
+        </div>
+      </div>
+      
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="font-medium text-gray-900">Push Notifications</div>
+            <div class="text-sm text-gray-500">Get reminders for tasks and alerts</div>
+          </div>
+          <button type="button" id="notificationToggle" class="relative inline-flex h-6 w-11 items-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 bg-gray-200">
+            <span class="sr-only">Enable notifications</span>
+            <span id="notificationThumb" class="inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition-transform translate-x-0"></span>
+          </button>
+        </div>
+        
+        <div id="notificationStatus" class="p-3 rounded-lg bg-gray-50 border">
+          <div class="flex items-start gap-2">
+            <i data-lucide="info" class="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0"></i>
+            <div class="text-sm text-gray-600">
+              <div class="font-medium">Permission Status: <span id="permissionStatusText">Checking...</span></div>
+              <div class="mt-1 text-xs text-gray-500">Enable notifications to receive task reminders</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Backup Settings -->
+    <div class="bg-surface rounded-lg border-2 p-6 space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-secondary/10 rounded-lg flex items-center justify-center">
+          <i data-lucide="cloud-upload" class="w-4 h-4 text-secondary"></i>
+        </div>
+        <div>
+          <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Data Backup</h2>
+          <p class="text-sm text-gray-600">Automatic backup to secure storage</p>
+        </div>
+      </div>
+      
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="font-medium text-gray-900">Enable Backup</div>
+            <div class="text-sm text-gray-500">Automatically sync your farm data</div>
+          </div>
+          <button type="button" id="backupToggle" class="relative inline-flex h-6 w-11 items-center rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 bg-gray-200">
+            <span class="sr-only">Enable backup</span>
+            <span id="backupThumb" class="inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition-transform translate-x-0"></span>
+          </button>
+        </div>
+        
+        <div id="backupStatus" class="p-3 rounded-lg bg-gray-50 border">
+          <div class="flex items-start gap-2">
+            <i data-lucide="cloud" class="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0"></i>
+            <div class="text-sm text-gray-600">
+              <div class="font-medium">Last Sync: <span id="lastSyncText">Never</span></div>
+              <div class="mt-1 text-xs text-gray-500">Photos remain stored locally unless backup is enabled</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week Start Settings -->
+    <div class="bg-surface rounded-lg border-2 p-6 space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+          <i data-lucide="calendar" class="w-4 h-4 text-primary"></i>
+        </div>
+        <div>
+          <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Calendar</h2>
+          <p class="text-sm text-gray-600">Configure calendar preferences</p>
+        </div>
+      </div>
+      
+      <div class="space-y-3">
+        <label class="flex items-center gap-3 p-3 rounded cursor-pointer hover:bg-gray-50 focus-within:bg-gray-50">
+          <input type="radio" name="weekStart" value="MON" class="w-4 h-4 text-primary border-gray-300 focus:ring-2 focus:ring-primary focus:ring-offset-0" />
+          <div class="flex-1">
+            <div class="font-medium text-gray-900">Monday</div>
+            <div class="text-sm text-gray-500">Week starts on Monday</div>
+          </div>
+        </label>
+        
+        <label class="flex items-center gap-3 p-3 rounded cursor-pointer hover:bg-gray-50 focus-within:bg-gray-50">
+          <input type="radio" name="weekStart" value="SUN" class="w-4 h-4 text-primary border-gray-300 focus:ring-2 focus:ring-primary focus:ring-offset-0" />
+          <div class="flex-1">
+            <div class="font-medium text-gray-900">Sunday</div>
+            <div class="text-sm text-gray-500">Week starts on Sunday</div>
+          </div>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Information -->
+  <div class="bg-surface rounded-lg border-2 p-6">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
+        <i data-lucide="info" class="w-4 h-4 text-accent"></i>
+      </div>
+      <div>
+        <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">App Information</h2>
+        <p class="text-sm text-gray-600">Version and support details</p>
+      </div>
+    </div>
+    
+    <div class="grid gap-4 sm:grid-cols-2 text-sm">
+      <div class="space-y-1">
+        <div class="font-medium text-gray-900">Version</div>
+        <div class="text-gray-600">1.0.0</div>
+      </div>
+      <div class="space-y-1">
+        <div class="font-medium text-gray-900">Last Updated</div>
+        <div class="text-gray-600" id="appLastUpdated">Loading...</div>
+      </div>
+    </div>
+    
+    <div class="mt-4 pt-4 border-t border-gray-100">
+      <div class="text-xs text-gray-500 leading-relaxed">
+        <p>Farm Assistant helps you manage your farming tasks efficiently. For support or feedback, please contact your system administrator.</p>
+        <p class="mt-2">தோட்ட உதவியாளர் உங்கள் விவசாய பணிகளை திறம்பட நிர்வகிக்க உதவுகிறது.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Backup Confirmation Modal -->
+<div id="backupConfirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-gray-900 bg-opacity-50">
+  <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4 p-6">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-8 h-8 bg-secondary/10 rounded-lg flex items-center justify-center">
+        <i data-lucide="cloud-upload" class="w-4 h-4 text-secondary"></i>
+      </div>
+      <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Enable Data Backup</h3>
+    </div>
+    
+    <div class="space-y-3 mb-6">
+      <p class="text-sm text-gray-600">When you enable backup, your farm data will be automatically synchronized to secure cloud storage.</p>
+      
+      <div class="bg-gray-50 rounded-lg p-3">
+        <h4 class="font-medium text-gray-900 text-sm mb-2">Privacy & Data:</h4>
+        <ul class="text-xs text-gray-600 space-y-1">
+          <li>• Photos remain stored locally on your device</li>
+          <li>• Only farm records and task data are backed up</li>
+          <li>• Data is encrypted during transmission</li>
+          <li>• You can disable backup anytime</li>
+        </ul>
+      </div>
+      
+      <p class="text-xs text-gray-500">
+        गोपनीयता: फोटो स्थानीय रूप से संग्रहीत रहते हैं<br>
+        தனியுரிமை: புகைப்படங்கள் உங்கள் சாதனத்தில் உள்ளூரில் சேமிக்கப்படும்
+      </p>
+    </div>
+    
+    <div class="flex gap-3">
+      <button type="button" id="cancelBackupBtn" class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+        Cancel
+      </button>
+      <button type="button" id="enableBackupBtn" class="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+        Enable Backup
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+            
+
+
+
+
+
+
+        </main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'localDB:';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            btn.addEventListener('click', () => {
+                const isOpen = !sidebar.classList.contains('hidden');
+                
+                if (isOpen) {
+                    // Close
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    // Open
+                    sidebar.classList.remove('hidden');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav link
+                    const firstLink = sidebar.querySelector('a');
+                    if (firstLink) firstLink.focus();
+                }
+            });
+            
+            // Close on overlay click
+            overlay.addEventListener('click', () => {
+                sidebar.classList.add('hidden');
+                overlay.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.focus();
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('hidden') && window.innerWidth < 768) {
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    // Default to first farmer user from dummy data
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-001');
+                    currentUserId = 'u-001';
+                }
+                
+                // Get user from users collection
+                try {
+                    const usersData = localStorage.getItem(APP_PREFIX + 'users');
+                    if (usersData) {
+                        const users = JSON.parse(usersData);
+                        const user = users.find(u => u.id === currentUserId);
+                        return user || null;
+                    }
+                } catch (e) {
+                    console.warn('Error loading user data:', e);
+                }
+                return null;
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName   = document.getElementById('userName');
+            const popoverAvatar = document.getElementById('popoverUserAvatar');
+            const popoverName = document.getElementById('popoverUserName');
+            const popoverEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverAvatar) popoverAvatar.textContent = initials;
+            if (popoverName) popoverName.textContent = displayName;
+            if (popoverEmail) popoverEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popover.classList.toggle('hidden');
+                popoverVisible = !popoverVisible;
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                
+                if (popoverVisible) {
+                    // Focus first focusable element in popover
+                    const firstFocusable = popover.querySelector('button');
+                    if (firstFocusable) firstFocusable.focus();
+                }
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) {
+                    UserUtils.signOut();
+                }
+            });
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX)) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `farm_assistant_data_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            // Show success toast
+            showToast('✅ App data exported successfully', 'success');
+        });
+        
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+        
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX)) {
+                            localStorage.setItem(key, value);
+                            importedCount++;
+                        }
+                    });
+                    
+                    if (importedCount > 0) {
+                        showToast(`✅ App data imported successfully (${importedCount} items). Please refresh the page.`, 'success');
+                    } else {
+                        showToast('⚠️ No valid app data found in file.', 'warning');
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    showToast('❌ Failed to import: Invalid JSON format.', 'error');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Simple toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-white text-sm max-w-sm transition-all duration-300 ${
+                type === 'success' ? 'bg-green-600' :
+                type === 'error' ? 'bg-red-600' :
+                type === 'warning' ? 'bg-orange-600' :
+                'bg-blue-600'
+            }`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        // Simple hash router (no entity IDs; UI-state params only)
+        const Router = (() => {
+            const pageContent = document.getElementById('pageContent');
+            const sideNav = document.getElementById('sideNav');
+
+            function parseHash(){
+                const h = location.hash || '';
+                const m = h.match(/page=([^&]+)/);
+                const page = m ? m[1] : null;
+                // Collect UI-state params only (view, tab, filter, mode, section)
+                const params = {};
+                (h.split('&').slice(1)).forEach(kv => {
+                    const [k,v] = kv.split('=');
+                    if (['view','tab','filter','mode','section'].includes(k)) {
+                        params[k] = decodeURIComponent(v||'');
+                    }
+                });
+                return { page, params };
+            }
+
+            async function loadPage(pageBase){
+                if (!pageBase) {
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+                            <div class="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="leaf" class="w-8 h-8 text-primary"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h2 class="text-display-md font-semibold text-gray-900">Welcome to Farm Assistant</h2>
+                                <p class="text-gray-600 max-w-md">Select a page from the sidebar to get started with managing your farming tasks and tracking your crops.</p>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+                
+                // Show loading state
+                pageContent.innerHTML = `
+                    <div class="flex items-center justify-center min-h-[200px]">
+                        <div class="flex items-center space-x-3 text-gray-600">
+                            <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                            <span>Loading...</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Ensure .html suffix
+                const url = pageBase.endsWith('.html') ? pageBase : `${pageBase}.html`;
+                
+                try {
+                    const res = await fetch(url, { cache: 'no-store' });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const html = await res.text();
+                    pageContent.innerHTML = html;
+                    lucide.createIcons();
+                    
+                    // Allow page to hook UI-state params if it exposes a global
+                    if (window.PageInit?.onParams) {
+                        window.PageInit.onParams(parseHash().params);
+                    }
+                } catch (e) {
+                    console.error('Failed to load page:', url, e);
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[200px] text-center space-y-4">
+                            <div class="w-12 h-12 bg-error/10 rounded-lg flex items-center justify-center">
+                                <i data-lucide="alert-circle" class="w-6 h-6 text-error"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h3 class="font-semibold text-gray-900">Failed to load page</h3>
+                                <p class="text-gray-600 text-sm">The page "${url}" could not be loaded.</p>
+                                <button onclick="Router.onRoute()" class="text-primary hover:text-primary/80 text-sm font-medium">Try again</button>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                }
+            }
+
+            function setActive(pageBase){
+                if (!sideNav) return;
+                
+                const links = sideNav.querySelectorAll('a[href]');
+                links.forEach(a => {
+                    const href = a.getAttribute('href') || '';
+                    const target = href.replace(/^#\/?page=/, '').replace(/\.html$/, '');
+                    const current = (pageBase || '').replace(/\.html$/, '');
+                    
+                    if (target && target === current) {
+                        a.classList.add('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.remove('text-gray-700');
+                    } else {
+                        a.classList.remove('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.add('text-gray-700');
+                    }
+                });
+            }
+
+            async function onRoute(){
+                const { page } = parseHash();
+                await loadPage(page);
+                setActive(page);
+            }
+
+            return { onRoute };
+        })();
+
+        // Make Router.onRoute globally accessible for error retry
+        window.Router = Router;
+
+        window.addEventListener('hashchange', Router.onRoute);
+        Router.onRoute();
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                try {
+                    window.AppActions[action](el);
+                } catch (err) {
+                    console.error('AppAction error:', action, err);
+                    showToast(`❌ Action "${action}" failed: ${err.message}`, 'error');
+                }
+            } else {
+                el.setAttribute('disabled', 'true');
+                el.setAttribute('title', 'Unavailable');
+                el.classList.add('opacity-50', 'cursor-not-allowed');
+                console.warn('AppAction not available:', action);
+            }
+        });
+
+        // Generate navigation items programmatically from page list
+        // Note: In a real implementation, this would be generated from the actual page list data
+        // For now, we have the single "Today's Work" page based on the provided page data
+    </script>
+
+    
+<script id="page-logic" type="module">
+import { 
+  getCurrentUserSettings, 
+  updateUserSettings,
+  requestNotificationPermission,
+  getNotificationPermissionStatus,
+  formatLastSyncDate,
+  enableBackupService,
+  disableBackupService
+} from './settings-logic.js';
+
+// Page initialization
+document.addEventListener('DOMContentLoaded', funInitializeSettingsPage);
+
+async function funInitializeSettingsPage() {
+  try {
+    // Load current user settings
+    // Expected return: { language, notificationsEnabled, backupEnabled, weekStart, lastSync, notificationPermission }
+    // Data source: settings collection joined with current user
+    const userSettings = await getCurrentUserSettings();
+    
+    // Update UI with current settings
+    funPopulateCurrentSettings(userSettings);
+    
+    // Set up event listeners
+    funSetupEventListeners();
+    
+    // Update app info
+    funUpdateAppInfo();
+    
+    // Check notification permission status
+    funUpdateNotificationStatus();
+    
+  } catch (error) {
+    console.error('Failed to initialize settings page:', error);
+    funShowToast('Failed to load settings. Please refresh the page.', 'error');
+  }
+}
+
+function funPopulateCurrentSettings(settings) {
+  // Set language radio button
+  const languageRadio = document.querySelector(`input[name="language"][value="${settings.language}"]`);
+  if (languageRadio) {
+    languageRadio.checked = true;
+  }
+  
+  // Set week start radio button
+  const weekStartRadio = document.querySelector(`input[name="weekStart"][value="${settings.weekStart}"]`);
+  if (weekStartRadio) {
+    weekStartRadio.checked = true;
+  }
+  
+  // Update notification toggle
+  const notificationToggle = document.getElementById('notificationToggle');
+  const notificationThumb = document.getElementById('notificationThumb');
+  if (settings.notificationsEnabled) {
+    notificationToggle.classList.remove('bg-gray-200');
+    notificationToggle.classList.add('bg-primary');
+    notificationThumb.classList.add('translate-x-5');
+  }
+  
+  // Update backup toggle
+  const backupToggle = document.getElementById('backupToggle');
+  const backupThumb = document.getElementById('backupThumb');
+  if (settings.backupEnabled) {
+    backupToggle.classList.remove('bg-gray-200');
+    backupToggle.classList.add('bg-secondary');
+    backupThumb.classList.add('translate-x-5');
+  }
+  
+  // Update last sync display
+  const lastSyncText = document.getElementById('lastSyncText');
+  if (settings.lastSync) {
+    lastSyncText.textContent = formatLastSyncDate(settings.lastSync);
+  } else {
+    lastSyncText.textContent = 'Never';
+  }
+}
+
+function funSetupEventListeners() {
+  // Language change handler
+  const languageRadios = document.querySelectorAll('input[name="language"]');
+  languageRadios.forEach(radio => {
+    radio.addEventListener('change', funHandleLanguageChange);
+  });
+  
+  // Week start change handler
+  const weekStartRadios = document.querySelectorAll('input[name="weekStart"]');
+  weekStartRadios.forEach(radio => {
+    radio.addEventListener('change', funHandleWeekStartChange);
+  });
+  
+  // Notification toggle handler
+  const notificationToggle = document.getElementById('notificationToggle');
+  notificationToggle.addEventListener('click', funHandleNotificationToggle);
+  
+  // Backup toggle handler
+  const backupToggle = document.getElementById('backupToggle');
+  backupToggle.addEventListener('click', funHandleBackupToggle);
+  
+  // Modal handlers
+  const cancelBackupBtn = document.getElementById('cancelBackupBtn');
+  const enableBackupBtn = document.getElementById('enableBackupBtn');
+  const backupConfirmModal = document.getElementById('backupConfirmModal');
+  
+  cancelBackupBtn.addEventListener('click', () => {
+    backupConfirmModal.classList.add('hidden');
+    backupConfirmModal.classList.remove('flex');
+  });
+  
+  enableBackupBtn.addEventListener('click', funConfirmEnableBackup);
+  
+  // Close modal on backdrop click
+  backupConfirmModal.addEventListener('click', (e) => {
+    if (e.target === backupConfirmModal) {
+      backupConfirmModal.classList.add('hidden');
+      backupConfirmModal.classList.remove('flex');
+    }
+  });
+}
+
+async function funHandleLanguageChange(event) {
+  const newLanguage = event.target.value;
+  
+  try {
+    // Update user settings with new language
+    // This method updates the settings collection for current user
+    // Expected params: { language: 'EN' | 'TA' }
+    await updateUserSettings({ language: newLanguage });
+    
+    funShowToast('Language updated successfully', 'success');
+    
+    // Small delay to show the toast before reload
+    setTimeout(() => {
+      // Reload to apply language changes throughout the app
+      window.location.hash = '#page=todays_work&refresh=true';
+      window.location.reload();
+    }, 1000);
+    
+  } catch (error) {
+    console.error('Failed to update language:', error);
+    funShowToast('Failed to update language setting', 'error');
+    // Revert radio selection
+    const currentSettings = await getCurrentUserSettings();
+    const correctRadio = document.querySelector(`input[name="language"][value="${currentSettings.language}"]`);
+    if (correctRadio) {
+      correctRadio.checked = true;
+    }
+  }
+}
+
+async function funHandleWeekStartChange(event) {
+  const newWeekStart = event.target.value;
+  
+  try {
+    // Update user settings with new week start preference
+    // This method updates the settings collection for current user
+    // Expected params: { weekStart: 'MON' | 'SUN' }
+    await updateUserSettings({ weekStart: newWeekStart });
+    
+    funShowToast('Week start preference updated', 'success');
+    
+  } catch (error) {
+    console.error('Failed to update week start:', error);
+    funShowToast('Failed to update week start setting', 'error');
+    // Revert radio selection
+    const currentSettings = await getCurrentUserSettings();
+    const correctRadio = document.querySelector(`input[name="weekStart"][value="${currentSettings.weekStart}"]`);
+    if (correctRadio) {
+      correctRadio.checked = true;
+    }
+  }
+}
+
+async function funHandleNotificationToggle() {
+  const toggle = document.getElementById('notificationToggle');
+  const thumb = document.getElementById('notificationThumb');
+  const isCurrentlyEnabled = toggle.classList.contains('bg-primary');
+  
+  try {
+    if (!isCurrentlyEnabled) {
+      // Request permission from browser
+      // This method handles browser notification permission request
+      // Expected return: 'granted' | 'denied' | 'default'
+      const permissionResult = await requestNotificationPermission();
+      
+      if (permissionResult === 'granted') {
+        // Update settings to enable notifications
+        await updateUserSettings({ 
+          notificationsEnabled: true,
+          notificationPermission: 'granted'
+        });
+        
+        // Update UI
+        toggle.classList.remove('bg-gray-200');
+        toggle.classList.add('bg-primary');
+        thumb.classList.add('translate-x-5');
+        
+        funShowToast('Notifications enabled successfully', 'success');
+      } else {
+        funShowToast('Notification permission denied. Please enable in browser settings.', 'warning');
+      }
+    } else {
+      // Disable notifications
+      await updateUserSettings({ notificationsEnabled: false });
+      
+      // Update UI
+      toggle.classList.add('bg-gray-200');
+      toggle.classList.remove('bg-primary');
+      thumb.classList.remove('translate-x-5');
+      
+      funShowToast('Notifications disabled', 'success');
+    }
+    
+    // Update permission status display
+    funUpdateNotificationStatus();
+    
+  } catch (error) {
+    console.error('Failed to toggle notifications:', error);
+    funShowToast('Failed to update notification setting', 'error');
+  }
+}
+
+async function funHandleBackupToggle() {
+  const toggle = document.getElementById('backupToggle');
+  const isCurrentlyEnabled = toggle.classList.contains('bg-secondary');
+  
+  if (!isCurrentlyEnabled) {
+    // Show confirmation modal for enabling backup
+    const modal = document.getElementById('backupConfirmModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  } else {
+    // Directly disable backup
+    try {
+      // Disable backup service
+      // This method updates settings and stops background sync
+      // Data source: settings collection, syncQueue collection
+      await disableBackupService();
+      
+      // Update UI
+      const thumb = document.getElementById('backupThumb');
+      toggle.classList.add('bg-gray-200');
+      toggle.classList.remove('bg-secondary');
+      thumb.classList.remove('translate-x-5');
+      
+      // Update last sync display
+      const lastSyncText = document.getElementById('lastSyncText');
+      lastSyncText.textContent = 'Disabled';
+      
+      funShowToast('Data backup disabled', 'success');
+      
+    } catch (error) {
+      console.error('Failed to disable backup:', error);
+      funShowToast('Failed to disable backup', 'error');
+    }
+  }
+}
+
+async function funConfirmEnableBackup() {
+  const modal = document.getElementById('backupConfirmModal');
+  const toggle = document.getElementById('backupToggle');
+  const thumb = document.getElementById('backupThumb');
+  
+  try {
+    // Enable backup service
+    // This method updates settings, enables background sync, and schedules initial backup
+    // Data source: settings collection, syncQueue collection
+    // Expected return: { enabled: boolean, lastSync: string }
+    const backupResult = await enableBackupService();
+    
+    if (backupResult.enabled) {
+      // Update UI
+      toggle.classList.remove('bg-gray-200');
+      toggle.classList.add('bg-secondary');
+      thumb.classList.add('translate-x-5');
+      
+      // Update last sync display
+      const lastSyncText = document.getElementById('lastSyncText');
+      lastSyncText.textContent = backupResult.lastSync ? formatLastSyncDate(backupResult.lastSync) : 'Initializing...';
+      
+      funShowToast('Data backup enabled successfully', 'success');
+    } else {
+      funShowToast('Failed to enable backup - connectivity issue. Will retry when online.', 'warning');
+    }
+    
+  } catch (error) {
+    console.error('Failed to enable backup:', error);
+    funShowToast('Failed to enable backup service', 'error');
+  } finally {
+    // Close modal
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+}
+
+async function funUpdateNotificationStatus() {
+  try {
+    // Get current notification permission status from browser
+    // This method checks browser permission and updates UI accordingly
+    // Expected return: { permission: 'granted' | 'denied' | 'default', supported: boolean }
+    const permissionStatus = await getNotificationPermissionStatus();
+    
+    const statusText = document.getElementById('permissionStatusText');
+    const statusContainer = document.getElementById('notificationStatus');
+    
+    // Update status text and styling based on permission
+    if (permissionStatus.permission === 'granted') {
+      statusText.textContent = 'Granted';
+      statusContainer.className = 'p-3 rounded-lg bg-green-50 border border-green-200';
+    } else if (permissionStatus.permission === 'denied') {
+      statusText.textContent = 'Denied';
+      statusContainer.className = 'p-3 rounded-lg bg-red-50 border border-red-200';
+    } else {
+      statusText.textContent = 'Not Requested';
+      statusContainer.className = 'p-3 rounded-lg bg-gray-50 border';
+    }
+    
+  } catch (error) {
+    console.error('Failed to update notification status:', error);
+    const statusText = document.getElementById('permissionStatusText');
+    statusText.textContent = 'Unknown';
+  }
+}
+
+function funUpdateAppInfo() {
+  // Update app last updated date
+  const lastUpdatedElement = document.getElementById('appLastUpdated');
+  const appDataVersion = localStorage.getItem('appDataVersion') || '2025-09-15-v0';
+  lastUpdatedElement.textContent = appDataVersion;
+}
+
+function funShowToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  
+  const bgColor = {
+    'success': 'bg-green-600',
+    'error': 'bg-red-600',
+    'warning': 'bg-orange-600',
+    'info': 'bg-blue-600'
+  }[type] || 'bg-blue-600';
+  
+  toast.className = `px-4 py-3 rounded-lg shadow-lg text-white text-sm max-w-sm ${bgColor} transform translate-x-full transition-transform duration-300`;
+  toast.textContent = message;
+  
+  container.appendChild(toast);
+  
+  // Trigger animation
+  setTimeout(() => {
+    toast.classList.remove('translate-x-full');
+  }, 10);
+  
+  // Auto remove after 4 seconds
+  setTimeout(() => {
+    toast.classList.add('translate-x-full');
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300);
+  }, 4000);
+}
+
+// Handle page parameters (e.g., openSection)
+window.PageInit = {
+  onParams(params) {
+    if (params.openSection) {
+      // Scroll to or highlight specific section if needed
+      // This could be expanded to handle deep linking to specific settings
+      console.log('Opening section:', params.openSection);
+    }
+  }
+};
+</script>
+
+</body>
+
+</html>

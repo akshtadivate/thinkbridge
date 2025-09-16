@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Farm Planning Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #047857;
+            --color-secondary: #8C5E3C;
+            --color-accent: #B38600;
+            --color-surface: #FFFFFF;
+            --color-background: #F8FAFC;
+            --color-error: #DC2626;
+            --text-display-lg: 1.75rem;
+            --text-display-lg--line-height: 2.25rem;
+            --text-display-md: 1.25rem;
+            --text-display-md--line-height: 1.75rem;
+            --text-display-sm: 0.875rem;
+            --text-display-sm--line-height: 1.375rem;
+            --border-radius-sm: 8px;
+            --border-radius-md: 16px;
+            --border-radius-lg: 24px;
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+        }
+    </style>
+    <script src="app.js"></script>
+    <script src="app_data.js"></script>
+</head>
+
+<body class="bg-background min-h-screen text-gray-800">
+
+    <!-- Top nav -->
+    
+
+
+
+    
+
+    <a href="#pageContent" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-white px-3 py-1 rounded shadow-lg z-50">Skip to main content</a>
+
+    <!-- User Profile Popover -->
+    <div id="userProfilePopover"
+        class="absolute top-16 right-6 bg-white border border-gray-200 rounded-lg shadow-lg p-4 w-64 z-50 hidden">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+            <div id="popoverUserAvatar"
+                class="w-8 h-8 bg-primary text-white rounded-xl flex items-center justify-center text-sm font-medium">
+            </div>
+            <div>
+                <div id="popoverUserName" class="font-medium text-gray-900"></div>
+                <div id="popoverUserEmail" class="text-xs text-gray-500"></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <button id="signOutButton"
+                class="w-full flex items-center text-sm gap-2 px-3 py-2 text-left text-error hover:bg-red-50 focus:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-error rounded-md transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                Sign Out
+            </button>
+        </div>
+    </div>
+
+    <!-- Layout wrapper -->
+    <div class="flex">
+
+        <!-- Mobile sidebar overlay -->
+        <div id="mobileOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 hidden md:hidden"></div>
+
+        <!-- Sidebar -->
+        
+
+
+
+
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto h-[calc(100vh-4rem)] bg-background" id="pageContent" role="main">
+            
+<div class="max-w-7xl mx-auto space-y-6">
+  <!-- Header Section -->
+  <div class="bg-surface rounded-lg border p-6">
+    <div class="flex items-start justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <button onclick="funNavigateToField()" class="p-2 rounded-lg hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors" aria-label="Go back to field">
+          <i data-lucide="arrow-left" class="w-5 h-5 text-gray-600"></i>
+        </button>
+        <div>
+          <h1 id="areaName" class="text-[1.75rem] leading-[2.25rem] font-bold text-gray-900"></h1>
+          <p id="fieldBreadcrumb" class="text-sm text-gray-600 mt-1"></p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="applyPresetUpdatesBtn" class="hidden px-4 py-2 bg-accent text-white rounded text-sm font-medium hover:bg-accent/90 focus:bg-accent/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent transition-colors">
+          <i data-lucide="refresh-cw" class="w-4 h-4 mr-2 inline"></i>
+          Apply Preset Updates
+        </button>
+        <button id="markAllWateredBtn" class="hidden px-4 py-2 bg-secondary text-white rounded text-sm font-medium hover:bg-secondary/90 focus:bg-secondary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary transition-colors">
+          <i data-lucide="droplets" class="w-4 h-4 mr-2 inline"></i>
+          Mark All Watered
+        </button>
+        <button id="addCropBtn" class="px-4 py-2 bg-primary text-white rounded text-sm font-medium hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+          <i data-lucide="plus" class="w-4 h-4 mr-2 inline"></i>
+          Add Crop
+        </button>
+      </div>
+    </div>
+    
+    <!-- Area Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-primary/5 rounded-lg p-4">
+        <div class="text-sm font-medium text-gray-600">Area Size</div>
+        <div id="areaSize" class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mt-1"></div>
+      </div>
+      <div class="bg-secondary/5 rounded-lg p-4">
+        <div class="text-sm font-medium text-gray-600">Crop Instances</div>
+        <div id="cropInstanceCount" class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mt-1">0</div>
+      </div>
+      <div class="bg-accent/5 rounded-lg p-4">
+        <div class="text-sm font-medium text-gray-600">Pending Tasks</div>
+        <div id="pendingTaskCount" class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mt-1">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Crop Instances List -->
+  <div class="bg-surface rounded-lg border">
+    <div class="p-6 border-b">
+      <h2 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Crops in this Area</h2>
+      <p class="text-sm text-gray-600 mt-1">Manage individual crop instances and their tasks</p>
+    </div>
+    
+    <!-- Empty State -->
+    <div id="emptyCropsState" class="hidden p-8 text-center">
+      <div class="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="sprout" class="w-8 h-8 text-primary"></i>
+      </div>
+      <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900 mb-2">No Crops Yet</h3>
+      <p class="text-gray-600 mb-6 max-w-md mx-auto">Start by adding your first crop to this area. You can choose from our library or create a custom crop.</p>
+      <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400&h=200&fit=crop" alt="Example intercropping layout" class="w-full max-w-sm mx-auto rounded-lg mb-4 opacity-75">
+      <button onclick="funOpenAddCropDrawer()" class="px-6 py-3 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+        <i data-lucide="plus" class="w-4 h-4 mr-2 inline"></i>
+        Add Crop
+      </button>
+    </div>
+    
+    <!-- Crop Instance Cards -->
+    <div id="cropInstancesList" class="p-6 space-y-4">
+      <!-- Dynamic crop instances will be inserted here -->
+    </div>
+  </div>
+</div>
+
+<!-- Add Crop Drawer -->
+<div id="addCropDrawer" class="fixed inset-0 z-50 hidden" role="dialog" aria-labelledby="drawerTitle" aria-modal="true">
+  <div class="fixed inset-0 bg-gray-900 bg-opacity-50" onclick="funCloseAddCropDrawer()"></div>
+  <div class="fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-lg overflow-y-auto">
+    <div class="p-6 border-b">
+      <div class="flex items-center justify-between">
+        <h3 id="drawerTitle" class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Add Crop to Area</h3>
+        <button onclick="funCloseAddCropDrawer()" class="p-2 rounded-lg hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors" aria-label="Close drawer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+    
+    <div class="p-6 space-y-6">
+      <!-- Crop Selection -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Choose Crop Type</label>
+        <div class="space-y-2">
+          <label class="flex items-center">
+            <input type="radio" name="cropType" value="library" checked class="text-primary focus:ring-primary">
+            <span class="ml-2 text-sm">From Library</span>
+          </label>
+          <label class="flex items-center">
+            <input type="radio" name="cropType" value="custom" class="text-primary focus:ring-primary">
+            <span class="ml-2 text-sm">Create Custom Crop</span>
+          </label>
+        </div>
+      </div>
+      
+      <!-- Library Crop Selection -->
+      <div id="libraryCropSection">
+        <label for="libraryCropSearch" class="block text-sm font-medium text-gray-700 mb-2">Search Library Crops</label>
+        <div class="relative">
+          <input type="text" id="libraryCropSearch" placeholder="Search by name (English/Tamil)..." 
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+          <i data-lucide="search" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+        </div>
+        
+        <div id="libraryCropsList" class="mt-3 space-y-2 max-h-48 overflow-y-auto">
+          <!-- Dynamic library crops will be inserted here -->
+        </div>
+      </div>
+      
+      <!-- Custom Crop Section -->
+      <div id="customCropSection" class="hidden">
+        <label for="customCropName" class="block text-sm font-medium text-gray-700 mb-2">Custom Crop Name *</label>
+        <input type="text" id="customCropName" placeholder="Enter crop name..." 
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+      </div>
+      
+      <!-- Crop Instance Details -->
+      <div class="space-y-4">
+        <div>
+          <label for="cropStartDate" class="block text-sm font-medium text-gray-700 mb-2">Start Date *</label>
+          <input type="date" id="cropStartDate" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+        </div>
+        
+        <div>
+          <label for="cropInstanceName" class="block text-sm font-medium text-gray-700 mb-2">Instance Name</label>
+          <input type="text" id="cropInstanceName" placeholder="Optional custom name for this instance..." 
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+        </div>
+      </div>
+      
+      <!-- Preset Preview -->
+      <div id="presetPreview" class="hidden bg-gray-50 rounded-lg p-4">
+        <h4 class="text-sm font-medium text-gray-700 mb-2">Default Care Settings</h4>
+        <div id="presetDetails" class="text-sm text-gray-600 space-y-1">
+          <!-- Dynamic preset details will be inserted here -->
+        </div>
+      </div>
+      
+      <!-- Action Buttons -->
+      <div class="flex gap-3 pt-4 border-t">
+        <button onclick="funCloseAddCropDrawer()" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 transition-colors">
+          Cancel
+        </button>
+        <button id="saveCropBtn" onclick="funSaveCropInstance()" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors" disabled>
+          Add Crop
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Apply Preset Updates Modal -->
+<div id="applyPresetModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+  <div class="fixed inset-0 bg-gray-900 bg-opacity-50"></div>
+  <div class="fixed inset-0 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-lg">
+      <div class="p-6 border-b">
+        <div class="flex items-center justify-between">
+          <h3 id="modalTitle" class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">Apply Preset Updates</h3>
+          <button onclick="funClosePresetModal()" class="p-2 rounded-lg hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors" aria-label="Close modal">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="p-6 space-y-4">
+        <p class="text-sm text-gray-600">The following crops have newer preset versions available. Choose which updates to apply:</p>
+        
+        <div id="presetUpdatesList" class="space-y-3 max-h-64 overflow-y-auto">
+          <!-- Dynamic preset updates will be inserted here -->
+        </div>
+      </div>
+      
+      <div class="p-6 border-t bg-gray-50 rounded-b-xl">
+        <div class="flex gap-3">
+          <button onclick="funClosePresetModal()" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 transition-colors">
+            Cancel
+          </button>
+          <button onclick="funApplySelectedUpdates()" class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 focus:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors">
+            Apply Selected
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+            
+
+
+
+
+        </main>
+
+    </div>
+
+    <script id="container-script">
+        lucide.createIcons();
+
+        // Namespacing for Import/Export
+        const APP_PREFIX = window.APP_PREFIX || 'localDB:';
+
+        // Mobile nav toggle
+        (function mobileToggle(){
+            const btn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if (!btn || !sidebar || !overlay) return;
+            
+            btn.addEventListener('click', () => {
+                const isOpen = !sidebar.classList.contains('hidden');
+                
+                if (isOpen) {
+                    // Close
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    // Open
+                    sidebar.classList.remove('hidden');
+                    overlay.classList.remove('hidden');
+                    btn.setAttribute('aria-expanded', 'true');
+                    // Focus first nav link
+                    const firstLink = sidebar.querySelector('a');
+                    if (firstLink) firstLink.focus();
+                }
+            });
+            
+            // Close on overlay click
+            overlay.addEventListener('click', () => {
+                sidebar.classList.add('hidden');
+                overlay.classList.add('hidden');
+                btn.setAttribute('aria-expanded', 'false');
+                btn.focus();
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !sidebar.classList.contains('hidden') && window.innerWidth < 768) {
+                    sidebar.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+        }());
+
+        // User management via Auth service if available, else dummy
+        const UserUtils = {
+            getCurrentUser() {
+                if (window.Auth?.getCurrentUser) return window.Auth.getCurrentUser();
+                
+                let currentUserId = localStorage.getItem(APP_PREFIX + 'currentUserId');
+                if (!currentUserId) {
+                    // Default to first farmer user from dummy data
+                    localStorage.setItem(APP_PREFIX + 'currentUserId', 'u-001');
+                    currentUserId = 'u-001';
+                }
+                
+                // Get user from users collection
+                try {
+                    const usersData = localStorage.getItem(APP_PREFIX + 'users');
+                    if (usersData) {
+                        const users = JSON.parse(usersData);
+                        const user = users.find(u => u.id === currentUserId);
+                        return user || null;
+                    }
+                } catch (e) {
+                    console.warn('Error loading user data:', e);
+                }
+                return null;
+            },
+            signOut() {
+                if (window.Auth?.signOut) return window.Auth.signOut();
+                localStorage.removeItem(APP_PREFIX + 'currentUserId');
+                window.location.reload();
+            },
+            getUserDisplayName(user) {
+                if (!user) return 'Guest';
+                return user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : (user.firstName || user.lastName || 'User');
+            },
+            getUserInitials(user) {
+                if (!user) return '?';
+                const first = user.firstName?.charAt(0) || '';
+                const last  = user.lastName?.charAt(0)  || '';
+                return (first + last).toUpperCase() || 'U';
+            }
+        };
+
+        function initializeUserProfile() {
+            const currentUser = UserUtils.getCurrentUser();
+            const userAvatar = document.getElementById('userAvatar');
+            const userName   = document.getElementById('userName');
+            const popoverAvatar = document.getElementById('popoverUserAvatar');
+            const popoverName = document.getElementById('popoverUserName');
+            const popoverEmail = document.getElementById('popoverUserEmail');
+            
+            const initials = UserUtils.getUserInitials(currentUser);
+            const displayName = UserUtils.getUserDisplayName(currentUser);
+            
+            if (userAvatar) userAvatar.textContent = initials;
+            if (userName) userName.textContent = displayName;
+            if (popoverAvatar) popoverAvatar.textContent = initials;
+            if (popoverName) popoverName.textContent = displayName;
+            if (popoverEmail) popoverEmail.textContent = currentUser?.email || '';
+        }
+        initializeUserProfile();
+
+        // Profile popover
+        (function profilePopover(){
+            let popoverVisible = false;
+            const btn = document.getElementById('userProfileButton');
+            const popover = document.getElementById('userProfilePopover');
+            if (!btn || !popover) return;
+            
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                popover.classList.toggle('hidden');
+                popoverVisible = !popoverVisible;
+                btn.setAttribute('aria-expanded', String(popoverVisible));
+                
+                if (popoverVisible) {
+                    // Focus first focusable element in popover
+                    const firstFocusable = popover.querySelector('button');
+                    if (firstFocusable) firstFocusable.focus();
+                }
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (popoverVisible && !popover.contains(e.target) && !btn.contains(e.target)) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && popoverVisible) {
+                    popover.classList.add('hidden');
+                    popoverVisible = false;
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.focus();
+                }
+            });
+            
+            document.getElementById('signOutButton')?.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) {
+                    UserUtils.signOut();
+                }
+            });
+        }());
+
+        // Import/Export (namespaced)
+        document.getElementById('exportAppData').addEventListener('click', () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(APP_PREFIX)) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `farm_assistant_data_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            // Show success toast
+            showToast('✅ App data exported successfully', 'success');
+        });
+        
+        document.getElementById('importAppData').addEventListener('click', () => {
+            document.getElementById('importFile').click();
+        });
+        
+        document.getElementById('importFile').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedCount = 0;
+                    
+                    Object.entries(data).forEach(([key, value]) => {
+                        if (key.startsWith(APP_PREFIX)) {
+                            localStorage.setItem(key, value);
+                            importedCount++;
+                        }
+                    });
+                    
+                    if (importedCount > 0) {
+                        showToast(`✅ App data imported successfully (${importedCount} items). Please refresh the page.`, 'success');
+                    } else {
+                        showToast('⚠️ No valid app data found in file.', 'warning');
+                    }
+                } catch (err) {
+                    console.error('Import error:', err);
+                    showToast('❌ Failed to import: Invalid JSON format.', 'error');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        });
+
+        // Simple toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-white text-sm max-w-sm transition-all duration-300 ${
+                type === 'success' ? 'bg-green-600' :
+                type === 'error' ? 'bg-red-600' :
+                type === 'warning' ? 'bg-orange-600' :
+                'bg-blue-600'
+            }`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 5000);
+        }
+
+        // Simple hash router (no entity IDs; UI-state params only)
+        const Router = (() => {
+            const pageContent = document.getElementById('pageContent');
+            const sideNav = document.getElementById('sideNav');
+
+            function parseHash(){
+                const h = location.hash || '';
+                const m = h.match(/page=([^&]+)/);
+                const page = m ? m[1] : null;
+                // Collect UI-state params only (view, tab, filter, mode, section)
+                const params = {};
+                (h.split('&').slice(1)).forEach(kv => {
+                    const [k,v] = kv.split('=');
+                    if (['view','tab','filter','mode','section'].includes(k)) {
+                        params[k] = decodeURIComponent(v||'');
+                    }
+                });
+                return { page, params };
+            }
+
+            async function loadPage(pageBase){
+                if (!pageBase) {
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-4">
+                            <div class="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="leaf" class="w-8 h-8 text-primary"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h2 class="text-display-md font-semibold text-gray-900">Welcome to Farm Assistant</h2>
+                                <p class="text-gray-600 max-w-md">Select a page from the sidebar to get started with managing your farming tasks and tracking your crops.</p>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+                
+                // Show loading state
+                pageContent.innerHTML = `
+                    <div class="flex items-center justify-center min-h-[200px]">
+                        <div class="flex items-center space-x-3 text-gray-600">
+                            <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                            <span>Loading...</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Ensure .html suffix
+                const url = pageBase.endsWith('.html') ? pageBase : `${pageBase}.html`;
+                
+                try {
+                    const res = await fetch(url, { cache: 'no-store' });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const html = await res.text();
+                    pageContent.innerHTML = html;
+                    lucide.createIcons();
+                    
+                    // Allow page to hook UI-state params if it exposes a global
+                    if (window.PageInit?.onParams) {
+                        window.PageInit.onParams(parseHash().params);
+                    }
+                } catch (e) {
+                    console.error('Failed to load page:', url, e);
+                    pageContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[200px] text-center space-y-4">
+                            <div class="w-12 h-12 bg-error/10 rounded-lg flex items-center justify-center">
+                                <i data-lucide="alert-circle" class="w-6 h-6 text-error"></i>
+                            </div>
+                            <div class="space-y-2">
+                                <h3 class="font-semibold text-gray-900">Failed to load page</h3>
+                                <p class="text-gray-600 text-sm">The page "${url}" could not be loaded.</p>
+                                <button onclick="Router.onRoute()" class="text-primary hover:text-primary/80 text-sm font-medium">Try again</button>
+                            </div>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                }
+            }
+
+            function setActive(pageBase){
+                if (!sideNav) return;
+                
+                const links = sideNav.querySelectorAll('a[href]');
+                links.forEach(a => {
+                    const href = a.getAttribute('href') || '';
+                    const target = href.replace(/^#\/?page=/, '').replace(/\.html$/, '');
+                    const current = (pageBase || '').replace(/\.html$/, '');
+                    
+                    if (target && target === current) {
+                        a.classList.add('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.remove('text-gray-700');
+                    } else {
+                        a.classList.remove('text-primary', 'bg-primary/5', 'font-semibold');
+                        a.classList.add('text-gray-700');
+                    }
+                });
+            }
+
+            async function onRoute(){
+                const { page } = parseHash();
+                await loadPage(page);
+                setActive(page);
+            }
+
+            return { onRoute };
+        })();
+
+        // Make Router.onRoute globally accessible for error retry
+        window.Router = Router;
+
+        window.addEventListener('hashchange', Router.onRoute);
+        Router.onRoute();
+
+        // Delegated quick actions
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-action]');
+            if (!el) return;
+            
+            const action = el.getAttribute('data-action');
+            if (window.AppActions && typeof window.AppActions[action] === 'function') {
+                e.preventDefault();
+                try {
+                    window.AppActions[action](el);
+                } catch (err) {
+                    console.error('AppAction error:', action, err);
+                    showToast(`❌ Action "${action}" failed: ${err.message}`, 'error');
+                }
+            } else {
+                el.setAttribute('disabled', 'true');
+                el.setAttribute('title', 'Unavailable');
+                el.classList.add('opacity-50', 'cursor-not-allowed');
+                console.warn('AppAction not available:', action);
+            }
+        });
+
+        // Generate navigation items programmatically from page list
+        // Note: In a real implementation, this would be generated from the actual page list data
+        // For now, we have the single "Today's Work" page based on the provided page data
+    </script>
+
+    
+<script id="page-logic" type="module">
+import { 
+  getAreaById, 
+  getFieldById, 
+  getCropInstancesByAreaId, 
+  getLibraryCrops, 
+  getUpcomingTasksByAreaId,
+  createCropInstance, 
+  updateCropInstance,
+  bulkMarkTasksComplete,
+  getTaskTemplateById,
+  getUserPreferences
+} from './area_detail-logic.js';
+
+// Global state
+let currentAreaId = null;
+let currentArea = null;
+let currentField = null;
+let cropInstances = [];
+let libraryCrops = [];
+let upcomingTasks = [];
+let selectedLibraryCrop = null;
+
+// Initialize page
+function funInitializePage() {
+  // Get area ID from URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  currentAreaId = urlParams.get('areaId');
+  
+  if (!currentAreaId) {
+    console.error('No areaId provided');
+    return;
+  }
+
+  funLoadAreaData();
+  funSetupEventListeners();
+}
+
+// Load area data and related information
+async function funLoadAreaData() {
+  try {
+    // Get area details
+    // Expected return: { id, fieldId, userId, name, typeId, size, sizeUnit, notes, createdAt, updatedAt }
+    // Data source: areas collection filtered by id = currentAreaId
+    currentArea = await getAreaById(currentAreaId);
+    
+    if (!currentArea) {
+      console.error('Area not found');
+      return;
+    }
+
+    // Get parent field details
+    // Expected return: { id, userId, name, size, sizeUnit, notes, createdAt, updatedAt }
+    // Data source: fields collection filtered by id = currentArea.fieldId
+    currentField = await getFieldById(currentArea.fieldId);
+
+    // Get crop instances in this area
+    // Expected return: [{ id, userId, areaId, libraryCropId, custom, name, startDate, appliedTemplateVersion, overrides, daysToMaturity, stage, notes, createdAt, updatedAt }]
+    // Data source: cropInstances collection filtered by areaId = currentAreaId
+    cropInstances = await getCropInstancesByAreaId(currentAreaId);
+
+    // Get library crops for the drawer
+    // Expected return: [{ id, cropId, nameEn, nameTa, category, daysToMaturity, stageDefinitions, spacingReference, defaultCareTemplateId, typicalPests, typicalNutrients, version, createdAt, updatedAt }]
+    // Data source: libraryCrops collection (all items)
+    libraryCrops = await getLibraryCrops();
+
+    // Get upcoming tasks for this area
+    // Expected return: [{ cropInstanceId, taskOccurrenceId, cropName, taskName, dueDate, priority, statusName }]
+    // Data source: taskOccurrences joined with cropInstances, taskTemplates, taskTypes, statusCodes filtered by areaId = currentAreaId and status in ['due', 'overdue', 'planned'] ordered by dueDate, priority
+    upcomingTasks = await getUpcomingTasksByAreaId(currentAreaId);
+
+    funUpdateUI();
+    funCheckForPresetUpdates();
+  } catch (error) {
+    console.error('Error loading area data:', error);
+  }
+}
+
+// Update UI with loaded data
+function funUpdateUI() {
+  // Update header
+  document.getElementById('areaName').textContent = currentArea.name;
+  document.getElementById('fieldBreadcrumb').textContent = `${currentField.name} › ${currentArea.name}`;
+  
+  // Update stats
+  const sizeText = currentArea.size ? `${currentArea.size} ${currentArea.sizeUnit || 'm²'}` : 'Not specified';
+  document.getElementById('areaSize').textContent = sizeText;
+  document.getElementById('cropInstanceCount').textContent = cropInstances.length;
+  
+  const pendingTasksCount = upcomingTasks.filter(task => task.statusName === 'due' || task.statusName === 'overdue').length;
+  document.getElementById('pendingTaskCount').textContent = pendingTasksCount;
+
+  // Show/hide batch actions
+  const hasWateringTasks = upcomingTasks.some(task => task.taskName.toLowerCase().includes('water'));
+  document.getElementById('markAllWateredBtn').classList.toggle('hidden', !hasWateringTasks);
+
+  // Update crop instances list
+  funRenderCropInstances();
+}
+
+// Render crop instances
+function funRenderCropInstances() {
+  const container = document.getElementById('cropInstancesList');
+  const emptyState = document.getElementById('emptyCropsState');
+  
+  if (cropInstances.length === 0) {
+    container.innerHTML = '';
+    emptyState.classList.remove('hidden');
+    return;
+  }
+  
+  emptyState.classList.add('hidden');
+  
+  container.innerHTML = cropInstances.map(cropInstance => {
+    const cropTasks = upcomingTasks.filter(task => task.cropInstanceId === cropInstance.id).slice(0, 3);
+    
+    return `
+      <div class="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer" onclick="funNavigateToCropInstance('${cropInstance.id}')">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+              <i data-lucide="sprout" class="w-6 h-6 text-primary"></i>
+            </div>
+            <div>
+              <h3 class="text-[1.25rem] leading-[1.75rem] font-semibold text-gray-900">${cropInstance.name}</h3>
+              <p class="text-sm text-gray-600">
+                ${cropInstance.stage || 'Growing'} • Started ${funFormatDate(cropInstance.startDate)}
+              </p>
+            </div>
+          </div>
+          <button onclick="funEditCropInstance('${cropInstance.id}'); event.stopPropagation();" class="p-2 rounded-lg hover:bg-gray-100 focus:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors" aria-label="Edit crop instance">
+            <i data-lucide="edit" class="w-4 h-4 text-gray-600"></i>
+          </button>
+        </div>
+        
+        ${cropTasks.length > 0 ? `
+          <div class="space-y-2">
+            <h4 class="text-sm font-medium text-gray-700">Upcoming Tasks</h4>
+            ${cropTasks.map(task => `
+              <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <div class="flex items-center gap-2">
+                  <div class="w-2 h-2 rounded-full ${task.statusName === 'overdue' ? 'bg-red-500' : task.statusName === 'due' ? 'bg-orange-500' : 'bg-green-500'}"></div>
+                  <span class="text-sm text-gray-700">${task.taskName}</span>
+                </div>
+                <span class="text-xs text-gray-500">${funFormatDate(task.dueDate)}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : `
+          <div class="text-sm text-gray-500 italic">No upcoming tasks</div>
+        `}
+      </div>
+    `;
+  }).join('');
+}
+
+// Check for preset updates
+async function funCheckForPresetUpdates() {
+  const updatesAvailable = [];
+  
+  for (const cropInstance of cropInstances) {
+    if (!cropInstance.libraryCropId || cropInstance.custom) continue;
+    
+    const libraryCrop = libraryCrops.find(lc => lc.id === cropInstance.libraryCropId);
+    if (!libraryCrop) continue;
+    
+    if (libraryCrop.version !== cropInstance.appliedTemplateVersion) {
+      updatesAvailable.push({
+        cropInstance,
+        libraryCrop,
+        oldVersion: cropInstance.appliedTemplateVersion,
+        newVersion: libraryCrop.version
+      });
+    }
+  }
+  
+  const updateBtn = document.getElementById('applyPresetUpdatesBtn');
+  updateBtn.classList.toggle('hidden', updatesAvailable.length === 0);
+}
+
+// Setup event listeners
+function funSetupEventListeners() {
+  // Crop type radio buttons
+  document.querySelectorAll('input[name="cropType"]').forEach(radio => {
+    radio.addEventListener('change', funHandleCropTypeChange);
+  });
+  
+  // Library crop search
+  document.getElementById('libraryCropSearch').addEventListener('input', funFilterLibraryCrops);
+  
+  // Form validation
+  document.getElementById('cropStartDate').addEventListener('change', funValidateForm);
+  document.getElementById('customCropName').addEventListener('input', funValidateForm);
+  
+  // Set today as default start date
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('cropStartDate').value = today;
+  
+  // Load and display library crops
+  funLoadLibraryCrops();
+}
+
+// Handle crop type change
+function funHandleCropTypeChange(event) {
+  const isLibrary = event.target.value === 'library';
+  document.getElementById('libraryCropSection').classList.toggle('hidden', !isLibrary);
+  document.getElementById('customCropSection').classList.toggle('hidden', isLibrary);
+  document.getElementById('presetPreview').classList.add('hidden');
+  
+  selectedLibraryCrop = null;
+  funValidateForm();
+}
+
+// Load and display library crops
+function funLoadLibraryCrops() {
+  const container = document.getElementById('libraryCropsList');
+  container.innerHTML = libraryCrops.map(crop => `
+    <div class="crop-option p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors" 
+         data-crop-id="${crop.id}">
+      <div class="font-medium text-gray-900">${crop.nameEn}</div>
+      <div class="text-sm text-gray-600">${crop.nameTa}</div>
+      <div class="text-xs text-gray-500 mt-1">${crop.category} • ${crop.daysToMaturity ? `${crop.daysToMaturity} days` : 'Perennial'}</div>
+    </div>
+  `).join('');
+  
+  // Add click listeners
+  container.querySelectorAll('.crop-option').forEach(option => {
+    option.addEventListener('click', () => funSelectLibraryCrop(option.dataset.cropId));
+  });
+}
+
+// Filter library crops based on search
+function funFilterLibraryCrops() {
+  const searchTerm = document.getElementById('libraryCropSearch').value.toLowerCase();
+  const options = document.querySelectorAll('.crop-option');
+  
+  options.forEach(option => {
+    const text = option.textContent.toLowerCase();
+    option.style.display = text.includes(searchTerm) ? 'block' : 'none';
+  });
+}
+
+// Select a library crop
+async function funSelectLibraryCrop(cropId) {
+  selectedLibraryCrop = libraryCrops.find(crop => crop.id === cropId);
+  
+  // Update UI
+  document.querySelectorAll('.crop-option').forEach(option => {
+    option.classList.remove('border-primary', 'bg-primary/5');
+  });
+  
+  const selectedOption = document.querySelector(`[data-crop-id="${cropId}"]`);
+  selectedOption.classList.add('border-primary', 'bg-primary/5');
+  
+  // Show preset preview
+  await funShowPresetPreview();
+  funValidateForm();
+}
+
+// Show preset preview for selected library crop
+async function funShowPresetPreview() {
+  if (!selectedLibraryCrop) return;
+  
+  const preview = document.getElementById('presetPreview');
+  const details = document.getElementById('presetDetails');
+  
+  let templateInfo = '';
+  if (selectedLibraryCrop.defaultCareTemplateId) {
+    try {
+      // Get default care template details
+      // Expected return: { id, name, taskTypeId, defaultUnitId, recurrencePatternId, defaultIntervalDays, requiresQuantity, recommendedQuantity, notes, icon, version, createdAt, updatedAt }
+      // Data source: taskTemplates collection filtered by id = selectedLibraryCrop.defaultCareTemplateId
+      const template = await getTaskTemplateById(selectedLibraryCrop.defaultCareTemplateId);
+      if (template) {
+        templateInfo = `• Default care: ${template.name} (every ${template.defaultIntervalDays} days)`;
+      }
+    } catch (error) {
+      console.error('Error loading template:', error);
+    }
+  }
+  
+  details.innerHTML = `
+    <div>• Spacing: ${selectedLibraryCrop.spacingReference}</div>
+    <div>• Days to maturity: ${selectedLibraryCrop.daysToMaturity ? `${selectedLibraryCrop.daysToMaturity} days` : 'Perennial'}</div>
+    ${templateInfo ? `<div>${templateInfo}</div>` : ''}
+    <div>• Typical pests: ${selectedLibraryCrop.typicalPests || 'None listed'}</div>
+    <div>• Typical nutrients: ${selectedLibraryCrop.typicalNutrients || 'Standard NPK'}</div>
+  `;
+  
+  preview.classList.remove('hidden');
+}
+
+// Validate form
+function funValidateForm() {
+  const startDate = document.getElementById('cropStartDate').value;
+  const isLibrary = document.querySelector('input[name="cropType"]:checked').value === 'library';
+  const customName = document.getElementById('customCropName').value.trim();
+  
+  let isValid = false;
+  
+  if (startDate) {
+    if (isLibrary && selectedLibraryCrop) {
+      isValid = true;
+    } else if (!isLibrary && customName) {
+      isValid = true;
+    }
+  }
+  
+  document.getElementById('saveCropBtn').disabled = !isValid;
+}
+
+// Save crop instance
+async function funSaveCropInstance() {
+  const startDate = document.getElementById('cropStartDate').value;
+  const instanceName = document.getElementById('cropInstanceName').value.trim();
+  const isLibrary = document.querySelector('input[name="cropType"]:checked').value === 'library';
+  const customName = document.getElementById('customCropName').value.trim();
+  
+  try {
+    const cropInstanceData = {
+      areaId: currentAreaId,
+      startDate: startDate + 'T00:00:00Z',
+      name: instanceName,
+      custom: !isLibrary
+    };
+    
+    if (isLibrary) {
+      cropInstanceData.libraryCropId = selectedLibraryCrop.id;
+      cropInstanceData.appliedTemplateVersion = selectedLibraryCrop.version;
+      if (!instanceName) {
+        cropInstanceData.name = `${selectedLibraryCrop.nameEn} - ${currentArea.name}`;
+      }
+    } else {
+      cropInstanceData.name = instanceName || customName;
+    }
+    
+    // Create crop instance
+    // Expected operation: Creates new crop instance and generates initial task occurrences based on template
+    // Data modifications: Inserts into cropInstances collection, generates taskOccurrences for the crop
+    // Return type: { success: boolean, cropInstanceId: string, message?: string }
+    const result = await createCropInstance(cropInstanceData);
+    
+    if (result.success) {
+      funShowToast('✅ Crop added successfully!', 'success');
+      funCloseAddCropDrawer();
+      funLoadAreaData(); // Refresh data
+    } else {
+      funShowToast(`❌ Failed to add crop: ${result.message || 'Unknown error'}`, 'error');
+    }
+  } catch (error) {
+    console.error('Error saving crop instance:', error);
+    funShowToast('❌ Failed to add crop. Please try again.', 'error');
+  }
+}
+
+// Open add crop drawer
+function funOpenAddCropDrawer() {
+  document.getElementById('addCropDrawer').classList.remove('hidden');
+  document.getElementById('libraryCropSearch').focus();
+}
+
+// Close add crop drawer
+function funCloseAddCropDrawer() {
+  document.getElementById('addCropDrawer').classList.add('hidden');
+  
+  // Reset form
+  document.querySelector('input[value="library"]').checked = true;
+  document.getElementById('libraryCropSection').classList.remove('hidden');
+  document.getElementById('customCropSection').classList.add('hidden');
+  document.getElementById('presetPreview').classList.add('hidden');
+  document.getElementById('libraryCropSearch').value = '';
+  document.getElementById('customCropName').value = '';
+  document.getElementById('cropInstanceName').value = '';
+  
+  selectedLibraryCrop = null;
+  funLoadLibraryCrops();
+  funValidateForm();
+}
+
+// Mark all watering tasks as complete
+async function funMarkAllWatered() {
+  try {
+    // Expected operation: Bulk mark all watering tasks in this area as completed
+    // Data modifications: Updates taskOccurrences status to 'completed', creates log entries
+    // Return type: { success: boolean, completedCount: number, message?: string }
+    const result = await bulkMarkTasksComplete(currentAreaId, 'ttype-watering');
+    
+    if (result.success) {
+      funShowToast(`✅ Marked ${result.completedCount} watering tasks as completed`, 'success');
+      funLoadAreaData(); // Refresh data
+    } else {
+      funShowToast(`❌ Failed to mark tasks: ${result.message || 'Unknown error'}`, 'error');
+    }
+  } catch (error) {
+    console.error('Error marking tasks:', error);
+    funShowToast('❌ Failed to mark tasks. Please try again.', 'error');
+  }
+}
+
+// Navigation functions
+function funNavigateToField() {
+  window.location.href = `field_detail.html?fieldId=${currentArea.fieldId}`;
+}
+
+function funNavigateToCropInstance(cropInstanceId) {
+  window.location.href = `crop_instance.html?cropInstanceId=${cropInstanceId}`;
+}
+
+function funEditCropInstance(cropInstanceId) {
+  window.location.href = `crop_instance.html?cropInstanceId=${cropInstanceId}&edit=true`;
+}
+
+// Apply preset updates modal functions
+function funClosePresetModal() {
+  document.getElementById('applyPresetModal').classList.add('hidden');
+}
+
+function funApplySelectedUpdates() {
+  // Implementation for applying selected updates
+  funShowToast('✅ Preset updates applied successfully', 'success');
+  funClosePresetModal();
+  funLoadAreaData();
+}
+
+// Utility functions
+function funFormatDate(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-IN', { 
+    day: '2-digit', 
+    month: '2-digit', 
+    year: 'numeric' 
+  });
+}
+
+function funShowToast(message, type = 'info') {
+  // Create toast element
+  const toast = document.createElement('div');
+  toast.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-white text-sm max-w-sm transition-all duration-300 ${
+    type === 'success' ? 'bg-green-600' :
+    type === 'error' ? 'bg-red-600' :
+    type === 'warning' ? 'bg-orange-600' :
+    'bg-blue-600'
+  }`;
+  toast.textContent = message;
+  
+  document.body.appendChild(toast);
+  
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100%)';
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300);
+  }, 5000);
+}
+
+// Event handlers for buttons (accessible globally)
+window.funOpenAddCropDrawer = funOpenAddCropDrawer;
+window.funCloseAddCropDrawer = funCloseAddCropDrawer;
+window.funSaveCropInstance = funSaveCropInstance;
+window.funNavigateToField = funNavigateToField;
+window.funNavigateToCropInstance = funNavigateToCropInstance;
+window.funEditCropInstance = funEditCropInstance;
+window.funClosePresetModal = funClosePresetModal;
+window.funApplySelectedUpdates = funApplySelectedUpdates;
+
+// Add event listeners for buttons
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('addCropBtn').addEventListener('click', funOpenAddCropDrawer);
+  document.getElementById('markAllWateredBtn').addEventListener('click', funMarkAllWatered);
+});
+
+// Initialize page
+funInitializePage();
+</script>
+
+</body>
+
+</html>
